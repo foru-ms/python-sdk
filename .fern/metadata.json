@@ -1,0 +1,11 @@
+{
+  "cliVersion": "3.32.0",
+  "generatorName": "fernapi/fern-python-sdk",
+  "generatorVersion": "4.46.13",
+  "generatorConfig": {
+    "package_name": "foru_ms_sdk",
+    "client_class_name": "ForumClient",
+    "environment_class_name": "ForumEnvironment"
+  },
+  "sdkVersion": "0.0.23"
+}
