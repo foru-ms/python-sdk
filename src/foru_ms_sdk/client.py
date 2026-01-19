@@ -14,8 +14,10 @@ if typing.TYPE_CHECKING:
     from .notifications.client import AsyncNotificationsClient, NotificationsClient
     from .posts.client import AsyncPostsClient, PostsClient
     from .private_messages.client import AsyncPrivateMessagesClient, PrivateMessagesClient
+    from .provisioning.client import AsyncProvisioningClient, ProvisioningClient
     from .reports.client import AsyncReportsClient, ReportsClient
     from .roles.client import AsyncRolesClient, RolesClient
+    from .search.client import AsyncSearchClient, SearchClient
     from .ss_os.client import AsyncSsOsClient, SsOsClient
     from .tags.client import AsyncTagsClient, TagsClient
     from .threads.client import AsyncThreadsClient, ThreadsClient
@@ -89,6 +91,7 @@ class ForumClient:
             timeout=_defaulted_timeout,
         )
         self._auth: typing.Optional[AuthClient] = None
+        self._search: typing.Optional[SearchClient] = None
         self._tags: typing.Optional[TagsClient] = None
         self._threads: typing.Optional[ThreadsClient] = None
         self._posts: typing.Optional[PostsClient] = None
@@ -100,6 +103,7 @@ class ForumClient:
         self._webhooks: typing.Optional[WebhooksClient] = None
         self._integrations: typing.Optional[IntegrationsClient] = None
         self._ss_os: typing.Optional[SsOsClient] = None
+        self._provisioning: typing.Optional[ProvisioningClient] = None
 
     @property
     def auth(self):
@@ -108,6 +112,14 @@ class ForumClient:
 
             self._auth = AuthClient(client_wrapper=self._client_wrapper)
         return self._auth
+
+    @property
+    def search(self):
+        if self._search is None:
+            from .search.client import SearchClient  # noqa: E402
+
+            self._search = SearchClient(client_wrapper=self._client_wrapper)
+        return self._search
 
     @property
     def tags(self):
@@ -197,6 +209,14 @@ class ForumClient:
             self._ss_os = SsOsClient(client_wrapper=self._client_wrapper)
         return self._ss_os
 
+    @property
+    def provisioning(self):
+        if self._provisioning is None:
+            from .provisioning.client import ProvisioningClient  # noqa: E402
+
+            self._provisioning = ProvisioningClient(client_wrapper=self._client_wrapper)
+        return self._provisioning
+
 
 class AsyncForumClient:
     """
@@ -264,6 +284,7 @@ class AsyncForumClient:
             timeout=_defaulted_timeout,
         )
         self._auth: typing.Optional[AsyncAuthClient] = None
+        self._search: typing.Optional[AsyncSearchClient] = None
         self._tags: typing.Optional[AsyncTagsClient] = None
         self._threads: typing.Optional[AsyncThreadsClient] = None
         self._posts: typing.Optional[AsyncPostsClient] = None
@@ -275,6 +296,7 @@ class AsyncForumClient:
         self._webhooks: typing.Optional[AsyncWebhooksClient] = None
         self._integrations: typing.Optional[AsyncIntegrationsClient] = None
         self._ss_os: typing.Optional[AsyncSsOsClient] = None
+        self._provisioning: typing.Optional[AsyncProvisioningClient] = None
 
     @property
     def auth(self):
@@ -283,6 +305,14 @@ class AsyncForumClient:
 
             self._auth = AsyncAuthClient(client_wrapper=self._client_wrapper)
         return self._auth
+
+    @property
+    def search(self):
+        if self._search is None:
+            from .search.client import AsyncSearchClient  # noqa: E402
+
+            self._search = AsyncSearchClient(client_wrapper=self._client_wrapper)
+        return self._search
 
     @property
     def tags(self):
@@ -371,6 +401,14 @@ class AsyncForumClient:
 
             self._ss_os = AsyncSsOsClient(client_wrapper=self._client_wrapper)
         return self._ss_os
+
+    @property
+    def provisioning(self):
+        if self._provisioning is None:
+            from .provisioning.client import AsyncProvisioningClient  # noqa: E402
+
+            self._provisioning = AsyncProvisioningClient(client_wrapper=self._client_wrapper)
+        return self._provisioning
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: ForumEnvironment) -> str:

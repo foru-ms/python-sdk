@@ -16,11 +16,10 @@ from ..errors.payment_required_error import PaymentRequiredError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error_response import ErrorResponse
-from .types.delete_integrations_id_response import DeleteIntegrationsIdResponse
-from .types.get_integrations_id_response import GetIntegrationsIdResponse
-from .types.get_integrations_response import GetIntegrationsResponse
-from .types.patch_integrations_id_response import PatchIntegrationsIdResponse
-from .types.post_integrations_response import PostIntegrationsResponse
+from ..types.integration_list_response import IntegrationListResponse
+from ..types.integration_response import IntegrationResponse
+from ..types.success_response import SuccessResponse
+from .types.update_integrations_response import UpdateIntegrationsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -30,47 +29,49 @@ class RawIntegrationsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_all_integrations(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetIntegrationsResponse]:
+    ) -> HttpResponse[IntegrationListResponse]:
         """
+        Retrieve a paginated list of integrations. Use cursor for pagination.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetIntegrationsResponse]
+        HttpResponse[IntegrationListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             "integrations",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetIntegrationsResponse,
+                    IntegrationListResponse,
                     parse_obj_as(
-                        type_=GetIntegrationsResponse,  # type: ignore
+                        type_=IntegrationListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -124,31 +125,44 @@ class RawIntegrationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_an_integration(
+    def create(
         self,
         *,
         type: str,
+        name: str,
         config: typing.Dict[str, typing.Any],
-        enabled: typing.Optional[bool] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostIntegrationsResponse]:
+    ) -> HttpResponse[IntegrationResponse]:
         """
+        Create an new integration.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         type : str
-            Integration type (e.g. slack, discord)
+            Integration type (e.g. SLACK, DISCORD)
+
+        name : str
+            Integration name
 
         config : typing.Dict[str, typing.Any]
             JSON configuration
 
-        enabled : typing.Optional[bool]
+        active : typing.Optional[bool]
+            Whether integration is active
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[PostIntegrationsResponse]
+        HttpResponse[IntegrationResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -156,8 +170,10 @@ class RawIntegrationsClient:
             method="POST",
             json={
                 "type": type,
+                "name": name,
                 "config": config,
-                "enabled": enabled,
+                "active": active,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -168,9 +184,9 @@ class RawIntegrationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostIntegrationsResponse,
+                    IntegrationResponse,
                     parse_obj_as(
-                        type_=PostIntegrationsResponse,  # type: ignore
+                        type_=IntegrationResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -235,20 +251,25 @@ class RawIntegrationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_an_integration(
+    def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetIntegrationsIdResponse]:
+    ) -> HttpResponse[IntegrationResponse]:
         """
+        Retrieve an integration by ID or slug (if supported).
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetIntegrationsIdResponse]
+        HttpResponse[IntegrationResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -259,9 +280,9 @@ class RawIntegrationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetIntegrationsIdResponse,
+                    IntegrationResponse,
                     parse_obj_as(
-                        type_=GetIntegrationsIdResponse,  # type: ignore
+                        type_=IntegrationResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -326,20 +347,25 @@ class RawIntegrationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_an_integration(
+    def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteIntegrationsIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
+        Permanently delete an integration.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeleteIntegrationsIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -350,9 +376,9 @@ class RawIntegrationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteIntegrationsIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteIntegrationsIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -417,19 +443,25 @@ class RawIntegrationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_an_integration(
+    def update(
         self,
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
         config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PatchIntegrationsIdResponse]:
+    ) -> HttpResponse[UpdateIntegrationsResponse]:
         """
+        Update an existing integration. Only provided fields will be modified.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         name : typing.Optional[str]
             Integration name
@@ -440,12 +472,15 @@ class RawIntegrationsClient:
         active : typing.Optional[bool]
             Enable/disable integration
 
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[PatchIntegrationsIdResponse]
+        HttpResponse[UpdateIntegrationsResponse]
             Updated
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -455,6 +490,7 @@ class RawIntegrationsClient:
                 "name": name,
                 "config": config,
                 "active": active,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -465,9 +501,9 @@ class RawIntegrationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchIntegrationsIdResponse,
+                    UpdateIntegrationsResponse,
                     parse_obj_as(
-                        type_=PatchIntegrationsIdResponse,  # type: ignore
+                        type_=UpdateIntegrationsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -548,47 +584,49 @@ class AsyncRawIntegrationsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_all_integrations(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetIntegrationsResponse]:
+    ) -> AsyncHttpResponse[IntegrationListResponse]:
         """
+        Retrieve a paginated list of integrations. Use cursor for pagination.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetIntegrationsResponse]
+        AsyncHttpResponse[IntegrationListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             "integrations",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetIntegrationsResponse,
+                    IntegrationListResponse,
                     parse_obj_as(
-                        type_=GetIntegrationsResponse,  # type: ignore
+                        type_=IntegrationListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -642,31 +680,44 @@ class AsyncRawIntegrationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_an_integration(
+    async def create(
         self,
         *,
         type: str,
+        name: str,
         config: typing.Dict[str, typing.Any],
-        enabled: typing.Optional[bool] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostIntegrationsResponse]:
+    ) -> AsyncHttpResponse[IntegrationResponse]:
         """
+        Create an new integration.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         type : str
-            Integration type (e.g. slack, discord)
+            Integration type (e.g. SLACK, DISCORD)
+
+        name : str
+            Integration name
 
         config : typing.Dict[str, typing.Any]
             JSON configuration
 
-        enabled : typing.Optional[bool]
+        active : typing.Optional[bool]
+            Whether integration is active
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[PostIntegrationsResponse]
+        AsyncHttpResponse[IntegrationResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -674,8 +725,10 @@ class AsyncRawIntegrationsClient:
             method="POST",
             json={
                 "type": type,
+                "name": name,
                 "config": config,
-                "enabled": enabled,
+                "active": active,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -686,9 +739,9 @@ class AsyncRawIntegrationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostIntegrationsResponse,
+                    IntegrationResponse,
                     parse_obj_as(
-                        type_=PostIntegrationsResponse,  # type: ignore
+                        type_=IntegrationResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -753,20 +806,25 @@ class AsyncRawIntegrationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_an_integration(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetIntegrationsIdResponse]:
+    ) -> AsyncHttpResponse[IntegrationResponse]:
         """
+        Retrieve an integration by ID or slug (if supported).
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetIntegrationsIdResponse]
+        AsyncHttpResponse[IntegrationResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -777,9 +835,9 @@ class AsyncRawIntegrationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetIntegrationsIdResponse,
+                    IntegrationResponse,
                     parse_obj_as(
-                        type_=GetIntegrationsIdResponse,  # type: ignore
+                        type_=IntegrationResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -844,20 +902,25 @@ class AsyncRawIntegrationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_an_integration(
+    async def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteIntegrationsIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
+        Permanently delete an integration.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeleteIntegrationsIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -868,9 +931,9 @@ class AsyncRawIntegrationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteIntegrationsIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteIntegrationsIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -935,19 +998,25 @@ class AsyncRawIntegrationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_an_integration(
+    async def update(
         self,
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
         config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PatchIntegrationsIdResponse]:
+    ) -> AsyncHttpResponse[UpdateIntegrationsResponse]:
         """
+        Update an existing integration. Only provided fields will be modified.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         name : typing.Optional[str]
             Integration name
@@ -958,12 +1027,15 @@ class AsyncRawIntegrationsClient:
         active : typing.Optional[bool]
             Enable/disable integration
 
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[PatchIntegrationsIdResponse]
+        AsyncHttpResponse[UpdateIntegrationsResponse]
             Updated
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -973,6 +1045,7 @@ class AsyncRawIntegrationsClient:
                 "name": name,
                 "config": config,
                 "active": active,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -983,9 +1056,9 @@ class AsyncRawIntegrationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchIntegrationsIdResponse,
+                    UpdateIntegrationsResponse,
                     parse_obj_as(
-                        type_=PatchIntegrationsIdResponse,  # type: ignore
+                        type_=UpdateIntegrationsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

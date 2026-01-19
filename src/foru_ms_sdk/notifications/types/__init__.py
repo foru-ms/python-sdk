@@ -6,31 +6,17 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .delete_notifications_id_response import DeleteNotificationsIdResponse
-    from .get_notifications_id_response import GetNotificationsIdResponse
-    from .get_notifications_id_response_data import GetNotificationsIdResponseData
-    from .get_notifications_response import GetNotificationsResponse
-    from .get_notifications_response_data_item import GetNotificationsResponseDataItem
-    from .get_notifications_response_meta import GetNotificationsResponseMeta
-    from .patch_notifications_id_request_status import PatchNotificationsIdRequestStatus
-    from .patch_notifications_id_response import PatchNotificationsIdResponse
-    from .patch_notifications_id_response_data import PatchNotificationsIdResponseData
-    from .post_notifications_request_status import PostNotificationsRequestStatus
-    from .post_notifications_response import PostNotificationsResponse
-    from .post_notifications_response_data import PostNotificationsResponseData
+    from .create_notifications_request_status import CreateNotificationsRequestStatus
+    from .list_notifications_request_status import ListNotificationsRequestStatus
+    from .update_notifications_request_status import UpdateNotificationsRequestStatus
+    from .update_notifications_response import UpdateNotificationsResponse
+    from .update_notifications_response_data import UpdateNotificationsResponseData
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteNotificationsIdResponse": ".delete_notifications_id_response",
-    "GetNotificationsIdResponse": ".get_notifications_id_response",
-    "GetNotificationsIdResponseData": ".get_notifications_id_response_data",
-    "GetNotificationsResponse": ".get_notifications_response",
-    "GetNotificationsResponseDataItem": ".get_notifications_response_data_item",
-    "GetNotificationsResponseMeta": ".get_notifications_response_meta",
-    "PatchNotificationsIdRequestStatus": ".patch_notifications_id_request_status",
-    "PatchNotificationsIdResponse": ".patch_notifications_id_response",
-    "PatchNotificationsIdResponseData": ".patch_notifications_id_response_data",
-    "PostNotificationsRequestStatus": ".post_notifications_request_status",
-    "PostNotificationsResponse": ".post_notifications_response",
-    "PostNotificationsResponseData": ".post_notifications_response_data",
+    "CreateNotificationsRequestStatus": ".create_notifications_request_status",
+    "ListNotificationsRequestStatus": ".list_notifications_request_status",
+    "UpdateNotificationsRequestStatus": ".update_notifications_request_status",
+    "UpdateNotificationsResponse": ".update_notifications_response",
+    "UpdateNotificationsResponseData": ".update_notifications_response_data",
 }
 
 
@@ -56,16 +42,9 @@ def __dir__():
 
 
 __all__ = [
-    "DeleteNotificationsIdResponse",
-    "GetNotificationsIdResponse",
-    "GetNotificationsIdResponseData",
-    "GetNotificationsResponse",
-    "GetNotificationsResponseDataItem",
-    "GetNotificationsResponseMeta",
-    "PatchNotificationsIdRequestStatus",
-    "PatchNotificationsIdResponse",
-    "PatchNotificationsIdResponseData",
-    "PostNotificationsRequestStatus",
-    "PostNotificationsResponse",
-    "PostNotificationsResponseData",
+    "CreateNotificationsRequestStatus",
+    "ListNotificationsRequestStatus",
+    "UpdateNotificationsRequestStatus",
+    "UpdateNotificationsResponse",
+    "UpdateNotificationsResponseData",
 ]

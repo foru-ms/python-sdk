@@ -5,29 +5,26 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.success_response import SuccessResponse
+from ..types.thread_list_response import ThreadListResponse
+from ..types.thread_poll_response import ThreadPollResponse
+from ..types.thread_post_list_response import ThreadPostListResponse
+from ..types.thread_reaction_list_response import ThreadReactionListResponse
+from ..types.thread_reaction_response import ThreadReactionResponse
+from ..types.thread_response import ThreadResponse
+from ..types.thread_subscriber_list_response import ThreadSubscriberListResponse
 from .raw_client import AsyncRawThreadsClient, RawThreadsClient
-from .types.delete_threads_id_posts_sub_id_response import DeleteThreadsIdPostsSubIdResponse
-from .types.delete_threads_id_reactions_response import DeleteThreadsIdReactionsResponse
-from .types.delete_threads_id_reactions_sub_id_response import DeleteThreadsIdReactionsSubIdResponse
-from .types.delete_threads_id_response import DeleteThreadsIdResponse
-from .types.delete_threads_id_subscribers_sub_id_response import DeleteThreadsIdSubscribersSubIdResponse
-from .types.get_threads_id_poll_response import GetThreadsIdPollResponse
-from .types.get_threads_id_posts_response import GetThreadsIdPostsResponse
-from .types.get_threads_id_posts_sub_id_response import GetThreadsIdPostsSubIdResponse
-from .types.get_threads_id_reactions_response import GetThreadsIdReactionsResponse
-from .types.get_threads_id_reactions_sub_id_response import GetThreadsIdReactionsSubIdResponse
-from .types.get_threads_id_response import GetThreadsIdResponse
-from .types.get_threads_id_subscribers_response import GetThreadsIdSubscribersResponse
-from .types.get_threads_id_subscribers_sub_id_response import GetThreadsIdSubscribersSubIdResponse
-from .types.get_threads_response import GetThreadsResponse
-from .types.patch_threads_id_poll_response import PatchThreadsIdPollResponse
-from .types.patch_threads_id_response import PatchThreadsIdResponse
-from .types.post_threads_id_poll_request_options_item import PostThreadsIdPollRequestOptionsItem
-from .types.post_threads_id_poll_response import PostThreadsIdPollResponse
-from .types.post_threads_id_reactions_request_type import PostThreadsIdReactionsRequestType
-from .types.post_threads_id_reactions_response import PostThreadsIdReactionsResponse
-from .types.post_threads_request_poll import PostThreadsRequestPoll
-from .types.post_threads_response import PostThreadsResponse
+from .types.create_poll_threads_request_options_item import CreatePollThreadsRequestOptionsItem
+from .types.create_reaction_threads_request_type import CreateReactionThreadsRequestType
+from .types.create_threads_request_poll import CreateThreadsRequestPoll
+from .types.list_posts_threads_request_sort import ListPostsThreadsRequestSort
+from .types.list_posts_threads_request_type import ListPostsThreadsRequestType
+from .types.list_reactions_threads_request_type import ListReactionsThreadsRequestType
+from .types.list_threads_request_sort import ListThreadsRequestSort
+from .types.retrieve_post_threads_response import RetrievePostThreadsResponse
+from .types.retrieve_reaction_threads_response import RetrieveReactionThreadsResponse
+from .types.retrieve_subscriber_threads_response import RetrieveSubscriberThreadsResponse
+from .types.update_threads_response import UpdateThreadsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -48,29 +45,46 @@ class ThreadsClient:
         """
         return self._raw_client
 
-    def list_all_threads(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        tag_id: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListThreadsRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetThreadsResponse:
+    ) -> ThreadListResponse:
         """
+        Retrieve a paginated list of threads. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search term for title
+
+        tag_id : typing.Optional[str]
+            Filter by tag ID
+
+        user_id : typing.Optional[str]
+            Filter by author ID
+
+        sort : typing.Optional[ListThreadsRequestSort]
+            Sort criteria
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetThreadsResponse
+        ThreadListResponse
             Success
 
         Examples
@@ -80,24 +94,35 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.list_all_threads()
+        client.threads.list()
         """
-        _response = self._raw_client.list_all_threads(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = self._raw_client.list(
+            limit=limit,
+            cursor=cursor,
+            search=search,
+            tag_id=tag_id,
+            user_id=user_id,
+            sort=sort,
+            request_options=request_options,
         )
         return _response.data
 
-    def create_a_thread(
+    def create(
         self,
         *,
         title: str,
         body: str,
         user_id: typing.Optional[str] = OMIT,
         tags: typing.Optional[typing.Sequence[str]] = OMIT,
-        poll: typing.Optional[PostThreadsRequestPoll] = OMIT,
+        poll: typing.Optional[CreateThreadsRequestPoll] = OMIT,
+        locked: typing.Optional[bool] = OMIT,
+        pinned: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostThreadsResponse:
+    ) -> ThreadResponse:
         """
+        Create a new thread.
+
         Parameters
         ----------
         title : str
@@ -112,15 +137,24 @@ class ThreadsClient:
         tags : typing.Optional[typing.Sequence[str]]
             List of tag slugs, names, or IDs to attach
 
-        poll : typing.Optional[PostThreadsRequestPoll]
+        poll : typing.Optional[CreateThreadsRequestPoll]
             Poll data
+
+        locked : typing.Optional[bool]
+            Lock thread on creation
+
+        pinned : typing.Optional[bool]
+            Pin thread on creation
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PostThreadsResponse
+        ThreadResponse
             Created
 
         Examples
@@ -130,28 +164,39 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.create_a_thread(
+        client.threads.create(
             title="title",
             body="body",
         )
         """
-        _response = self._raw_client.create_a_thread(
-            title=title, body=body, user_id=user_id, tags=tags, poll=poll, request_options=request_options
+        _response = self._raw_client.create(
+            title=title,
+            body=body,
+            user_id=user_id,
+            tags=tags,
+            poll=poll,
+            locked=locked,
+            pinned=pinned,
+            extended_data=extended_data,
+            request_options=request_options,
         )
         return _response.data
 
-    def get_a_thread(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetThreadsIdResponse:
+    def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> ThreadResponse:
         """
+        Retrieve a thread by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetThreadsIdResponse
+        ThreadResponse
             Success
 
         Examples
@@ -161,27 +206,28 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.get_a_thread(
+        client.threads.retrieve(
             id="id",
         )
         """
-        _response = self._raw_client.get_a_thread(id, request_options=request_options)
+        _response = self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    def delete_a_thread(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteThreadsIdResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a thread.
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteThreadsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -191,14 +237,14 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.delete_a_thread(
+        client.threads.delete(
             id="id",
         )
         """
-        _response = self._raw_client.delete_a_thread(id, request_options=request_options)
+        _response = self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    def update_a_thread(
+    def update(
         self,
         id: str,
         *,
@@ -209,11 +255,14 @@ class ThreadsClient:
         tags: typing.Optional[typing.Sequence[str]] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchThreadsIdResponse:
+    ) -> UpdateThreadsResponse:
         """
+        Update an existing thread. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         title : typing.Optional[str]
             New title
@@ -238,7 +287,7 @@ class ThreadsClient:
 
         Returns
         -------
-        PatchThreadsIdResponse
+        UpdateThreadsResponse
             Updated
 
         Examples
@@ -248,11 +297,11 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.update_a_thread(
+        client.threads.update(
             id="id",
         )
         """
-        _response = self._raw_client.update_a_thread(
+        _response = self._raw_client.update(
             id,
             title=title,
             body=body,
@@ -264,32 +313,50 @@ class ThreadsClient:
         )
         return _response.data
 
-    def list_thread_posts(
+    def list_posts(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsThreadsRequestSort] = None,
+        search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsThreadsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetThreadsIdPostsResponse:
+    ) -> ThreadPostListResponse:
         """
+        Retrieve a paginated list of posts for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsThreadsRequestSort]
+            Sort posts by creation time
+
+        search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsThreadsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetThreadsIdPostsResponse
+        ThreadPostListResponse
             Success
 
         Examples
@@ -299,16 +366,25 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.list_thread_posts(
+        client.threads.list_posts(
             id="id",
         )
         """
-        _response = self._raw_client.list_thread_posts(id, cursor=cursor, limit=limit, request_options=request_options)
+        _response = self._raw_client.list_posts(
+            id,
+            limit=limit,
+            cursor=cursor,
+            user_id=user_id,
+            sort=sort,
+            search=search,
+            type=type,
+            request_options=request_options,
+        )
         return _response.data
 
-    def get_a_post_from_thread(
+    def retrieve_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetThreadsIdPostsSubIdResponse:
+    ) -> RetrievePostThreadsResponse:
         """
         Parameters
         ----------
@@ -323,7 +399,7 @@ class ThreadsClient:
 
         Returns
         -------
-        GetThreadsIdPostsSubIdResponse
+        RetrievePostThreadsResponse
             Success
 
         Examples
@@ -333,17 +409,17 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.get_a_post_from_thread(
+        client.threads.retrieve_post(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.get_a_post_from_thread(id, sub_id, request_options=request_options)
+        _response = self._raw_client.retrieve_post(id, sub_id, request_options=request_options)
         return _response.data
 
-    def delete_a_post_from_thread(
+    def delete_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteThreadsIdPostsSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -358,7 +434,7 @@ class ThreadsClient:
 
         Returns
         -------
-        DeleteThreadsIdPostsSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -368,40 +444,46 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.delete_a_post_from_thread(
+        client.threads.delete_post(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.delete_a_post_from_thread(id, sub_id, request_options=request_options)
+        _response = self._raw_client.delete_post(id, sub_id, request_options=request_options)
         return _response.data
 
-    def list_thread_reactions(
+    def list_reactions(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        type: typing.Optional[ListReactionsThreadsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetThreadsIdReactionsResponse:
+    ) -> ThreadReactionListResponse:
         """
+        Retrieve a paginated list of reactions for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        type : typing.Optional[ListReactionsThreadsRequestType]
+            Filter by reaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetThreadsIdReactionsResponse
+        ThreadReactionListResponse
             Success
 
         Examples
@@ -411,31 +493,33 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.list_thread_reactions(
+        client.threads.list_reactions(
             id="id",
         )
         """
-        _response = self._raw_client.list_thread_reactions(
-            id, cursor=cursor, limit=limit, request_options=request_options
+        _response = self._raw_client.list_reactions(
+            id, limit=limit, cursor=cursor, type=type, request_options=request_options
         )
         return _response.data
 
-    def create_a_reaction_in_thread(
+    def create_reaction(
         self,
         id: str,
         *,
-        type: PostThreadsIdReactionsRequestType,
+        type: CreateReactionThreadsRequestType,
         user_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostThreadsIdReactionsResponse:
+    ) -> ThreadReactionResponse:
         """
+        Create a Reaction in Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        type : PostThreadsIdReactionsRequestType
+        type : CreateReactionThreadsRequestType
             Type of reaction
 
         user_id : typing.Optional[str]
@@ -449,7 +533,7 @@ class ThreadsClient:
 
         Returns
         -------
-        PostThreadsIdReactionsResponse
+        ThreadReactionResponse
             Created
 
         Examples
@@ -459,52 +543,19 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.create_a_reaction_in_thread(
+        client.threads.create_reaction(
             id="id",
             type="LIKE",
         )
         """
-        _response = self._raw_client.create_a_reaction_in_thread(
+        _response = self._raw_client.create_reaction(
             id, type=type, user_id=user_id, extended_data=extended_data, request_options=request_options
         )
         return _response.data
 
-    def remove_your_reaction_from_thread(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteThreadsIdReactionsResponse:
-        """
-        Removes the authenticated user's reaction. No subId needed.
-
-        Parameters
-        ----------
-        id : str
-            Thread ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DeleteThreadsIdReactionsResponse
-            Deleted
-
-        Examples
-        --------
-        from foru_ms_sdk import ForumClient
-
-        client = ForumClient(
-            api_key="YOUR_API_KEY",
-        )
-        client.threads.remove_your_reaction_from_thread(
-            id="id",
-        )
-        """
-        _response = self._raw_client.remove_your_reaction_from_thread(id, request_options=request_options)
-        return _response.data
-
-    def get_a_reaction_from_thread(
+    def delete_reaction(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetThreadsIdReactionsSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -519,7 +570,42 @@ class ThreadsClient:
 
         Returns
         -------
-        GetThreadsIdReactionsSubIdResponse
+        SuccessResponse
+            Deleted
+
+        Examples
+        --------
+        from foru_ms_sdk import ForumClient
+
+        client = ForumClient(
+            api_key="YOUR_API_KEY",
+        )
+        client.threads.delete_reaction(
+            id="id",
+            sub_id="subId",
+        )
+        """
+        _response = self._raw_client.delete_reaction(id, sub_id, request_options=request_options)
+        return _response.data
+
+    def retrieve_reaction(
+        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> RetrieveReactionThreadsResponse:
+        """
+        Parameters
+        ----------
+        id : str
+            Thread ID
+
+        sub_id : str
+            Reaction ID
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        RetrieveReactionThreadsResponse
             Success
 
         Examples
@@ -529,75 +615,42 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.get_a_reaction_from_thread(
+        client.threads.retrieve_reaction(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.get_a_reaction_from_thread(id, sub_id, request_options=request_options)
+        _response = self._raw_client.retrieve_reaction(id, sub_id, request_options=request_options)
         return _response.data
 
-    def delete_a_reaction_from_thread(
-        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteThreadsIdReactionsSubIdResponse:
-        """
-        Parameters
-        ----------
-        id : str
-            Thread ID
-
-        sub_id : str
-            Reaction ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DeleteThreadsIdReactionsSubIdResponse
-            Deleted
-
-        Examples
-        --------
-        from foru_ms_sdk import ForumClient
-
-        client = ForumClient(
-            api_key="YOUR_API_KEY",
-        )
-        client.threads.delete_a_reaction_from_thread(
-            id="id",
-            sub_id="subId",
-        )
-        """
-        _response = self._raw_client.delete_a_reaction_from_thread(id, sub_id, request_options=request_options)
-        return _response.data
-
-    def list_thread_subscribers(
+    def list_subscribers(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetThreadsIdSubscribersResponse:
+    ) -> ThreadSubscriberListResponse:
         """
+        Retrieve a paginated list of subscribers for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetThreadsIdSubscribersResponse
+        ThreadSubscriberListResponse
             Success
 
         Examples
@@ -607,18 +660,16 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.list_thread_subscribers(
+        client.threads.list_subscribers(
             id="id",
         )
         """
-        _response = self._raw_client.list_thread_subscribers(
-            id, cursor=cursor, limit=limit, request_options=request_options
-        )
+        _response = self._raw_client.list_subscribers(id, limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
-    def get_a_subscriber_from_thread(
+    def retrieve_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetThreadsIdSubscribersSubIdResponse:
+    ) -> RetrieveSubscriberThreadsResponse:
         """
         Parameters
         ----------
@@ -633,7 +684,7 @@ class ThreadsClient:
 
         Returns
         -------
-        GetThreadsIdSubscribersSubIdResponse
+        RetrieveSubscriberThreadsResponse
             Success
 
         Examples
@@ -643,17 +694,17 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.get_a_subscriber_from_thread(
+        client.threads.retrieve_subscriber(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.get_a_subscriber_from_thread(id, sub_id, request_options=request_options)
+        _response = self._raw_client.retrieve_subscriber(id, sub_id, request_options=request_options)
         return _response.data
 
-    def delete_a_subscriber_from_thread(
+    def delete_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteThreadsIdSubscribersSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -668,7 +719,7 @@ class ThreadsClient:
 
         Returns
         -------
-        DeleteThreadsIdSubscribersSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -678,17 +729,15 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.delete_a_subscriber_from_thread(
+        client.threads.delete_subscriber(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.delete_a_subscriber_from_thread(id, sub_id, request_options=request_options)
+        _response = self._raw_client.delete_subscriber(id, sub_id, request_options=request_options)
         return _response.data
 
-    def get_thread_poll(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetThreadsIdPollResponse:
+    def retrieve_poll(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> ThreadPollResponse:
         """
         Parameters
         ----------
@@ -700,7 +749,7 @@ class ThreadsClient:
 
         Returns
         -------
-        GetThreadsIdPollResponse
+        ThreadPollResponse
             Success
 
         Examples
@@ -710,23 +759,23 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.get_thread_poll(
+        client.threads.retrieve_poll(
             id="id",
         )
         """
-        _response = self._raw_client.get_thread_poll(id, request_options=request_options)
+        _response = self._raw_client.retrieve_poll(id, request_options=request_options)
         return _response.data
 
-    def create_thread_poll(
+    def create_poll(
         self,
         id: str,
         *,
         title: str,
-        options: typing.Sequence[PostThreadsIdPollRequestOptionsItem],
+        options: typing.Sequence[CreatePollThreadsRequestOptionsItem],
         expires_at: typing.Optional[dt.datetime] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostThreadsIdPollResponse:
+    ) -> ThreadPollResponse:
         """
         Parameters
         ----------
@@ -736,7 +785,7 @@ class ThreadsClient:
         title : str
             Poll question/title
 
-        options : typing.Sequence[PostThreadsIdPollRequestOptionsItem]
+        options : typing.Sequence[CreatePollThreadsRequestOptionsItem]
             Poll options (2-20)
 
         expires_at : typing.Optional[dt.datetime]
@@ -750,28 +799,28 @@ class ThreadsClient:
 
         Returns
         -------
-        PostThreadsIdPollResponse
+        ThreadPollResponse
             Created
 
         Examples
         --------
         from foru_ms_sdk import ForumClient
-        from foru_ms_sdk.threads import PostThreadsIdPollRequestOptionsItem
+        from foru_ms_sdk.threads import CreatePollThreadsRequestOptionsItem
 
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.create_thread_poll(
+        client.threads.create_poll(
             id="id",
             title="title",
             options=[
-                PostThreadsIdPollRequestOptionsItem(
+                CreatePollThreadsRequestOptionsItem(
                     title="title",
                 )
             ],
         )
         """
-        _response = self._raw_client.create_thread_poll(
+        _response = self._raw_client.create_poll(
             id,
             title=title,
             options=options,
@@ -781,7 +830,7 @@ class ThreadsClient:
         )
         return _response.data
 
-    def update_thread_poll(
+    def update_poll(
         self,
         id: str,
         *,
@@ -790,7 +839,7 @@ class ThreadsClient:
         expires_at: typing.Optional[dt.datetime] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchThreadsIdPollResponse:
+    ) -> ThreadPollResponse:
         """
         Parameters
         ----------
@@ -814,7 +863,7 @@ class ThreadsClient:
 
         Returns
         -------
-        PatchThreadsIdPollResponse
+        ThreadPollResponse
             Updated
 
         Examples
@@ -824,11 +873,11 @@ class ThreadsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.threads.update_thread_poll(
+        client.threads.update_poll(
             id="id",
         )
         """
-        _response = self._raw_client.update_thread_poll(
+        _response = self._raw_client.update_poll(
             id,
             title=title,
             closed=closed,
@@ -854,29 +903,46 @@ class AsyncThreadsClient:
         """
         return self._raw_client
 
-    async def list_all_threads(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        tag_id: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListThreadsRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetThreadsResponse:
+    ) -> ThreadListResponse:
         """
+        Retrieve a paginated list of threads. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search term for title
+
+        tag_id : typing.Optional[str]
+            Filter by tag ID
+
+        user_id : typing.Optional[str]
+            Filter by author ID
+
+        sort : typing.Optional[ListThreadsRequestSort]
+            Sort criteria
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetThreadsResponse
+        ThreadListResponse
             Success
 
         Examples
@@ -891,27 +957,38 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.list_all_threads()
+            await client.threads.list()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_all_threads(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = await self._raw_client.list(
+            limit=limit,
+            cursor=cursor,
+            search=search,
+            tag_id=tag_id,
+            user_id=user_id,
+            sort=sort,
+            request_options=request_options,
         )
         return _response.data
 
-    async def create_a_thread(
+    async def create(
         self,
         *,
         title: str,
         body: str,
         user_id: typing.Optional[str] = OMIT,
         tags: typing.Optional[typing.Sequence[str]] = OMIT,
-        poll: typing.Optional[PostThreadsRequestPoll] = OMIT,
+        poll: typing.Optional[CreateThreadsRequestPoll] = OMIT,
+        locked: typing.Optional[bool] = OMIT,
+        pinned: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostThreadsResponse:
+    ) -> ThreadResponse:
         """
+        Create a new thread.
+
         Parameters
         ----------
         title : str
@@ -926,15 +1003,24 @@ class AsyncThreadsClient:
         tags : typing.Optional[typing.Sequence[str]]
             List of tag slugs, names, or IDs to attach
 
-        poll : typing.Optional[PostThreadsRequestPoll]
+        poll : typing.Optional[CreateThreadsRequestPoll]
             Poll data
+
+        locked : typing.Optional[bool]
+            Lock thread on creation
+
+        pinned : typing.Optional[bool]
+            Pin thread on creation
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PostThreadsResponse
+        ThreadResponse
             Created
 
         Examples
@@ -949,7 +1035,7 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.create_a_thread(
+            await client.threads.create(
                 title="title",
                 body="body",
             )
@@ -957,25 +1043,34 @@ class AsyncThreadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_thread(
-            title=title, body=body, user_id=user_id, tags=tags, poll=poll, request_options=request_options
+        _response = await self._raw_client.create(
+            title=title,
+            body=body,
+            user_id=user_id,
+            tags=tags,
+            poll=poll,
+            locked=locked,
+            pinned=pinned,
+            extended_data=extended_data,
+            request_options=request_options,
         )
         return _response.data
 
-    async def get_a_thread(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetThreadsIdResponse:
+    async def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> ThreadResponse:
         """
+        Retrieve a thread by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetThreadsIdResponse
+        ThreadResponse
             Success
 
         Examples
@@ -990,30 +1085,31 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.get_a_thread(
+            await client.threads.retrieve(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_thread(id, request_options=request_options)
+        _response = await self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    async def delete_a_thread(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteThreadsIdResponse:
+    async def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a thread.
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteThreadsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -1028,17 +1124,17 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.delete_a_thread(
+            await client.threads.delete(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_thread(id, request_options=request_options)
+        _response = await self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    async def update_a_thread(
+    async def update(
         self,
         id: str,
         *,
@@ -1049,11 +1145,14 @@ class AsyncThreadsClient:
         tags: typing.Optional[typing.Sequence[str]] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchThreadsIdResponse:
+    ) -> UpdateThreadsResponse:
         """
+        Update an existing thread. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         title : typing.Optional[str]
             New title
@@ -1078,7 +1177,7 @@ class AsyncThreadsClient:
 
         Returns
         -------
-        PatchThreadsIdResponse
+        UpdateThreadsResponse
             Updated
 
         Examples
@@ -1093,14 +1192,14 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.update_a_thread(
+            await client.threads.update(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_a_thread(
+        _response = await self._raw_client.update(
             id,
             title=title,
             body=body,
@@ -1112,32 +1211,50 @@ class AsyncThreadsClient:
         )
         return _response.data
 
-    async def list_thread_posts(
+    async def list_posts(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsThreadsRequestSort] = None,
+        search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsThreadsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetThreadsIdPostsResponse:
+    ) -> ThreadPostListResponse:
         """
+        Retrieve a paginated list of posts for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsThreadsRequestSort]
+            Sort posts by creation time
+
+        search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsThreadsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetThreadsIdPostsResponse
+        ThreadPostListResponse
             Success
 
         Examples
@@ -1152,21 +1269,28 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.list_thread_posts(
+            await client.threads.list_posts(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_thread_posts(
-            id, cursor=cursor, limit=limit, request_options=request_options
+        _response = await self._raw_client.list_posts(
+            id,
+            limit=limit,
+            cursor=cursor,
+            user_id=user_id,
+            sort=sort,
+            search=search,
+            type=type,
+            request_options=request_options,
         )
         return _response.data
 
-    async def get_a_post_from_thread(
+    async def retrieve_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetThreadsIdPostsSubIdResponse:
+    ) -> RetrievePostThreadsResponse:
         """
         Parameters
         ----------
@@ -1181,7 +1305,7 @@ class AsyncThreadsClient:
 
         Returns
         -------
-        GetThreadsIdPostsSubIdResponse
+        RetrievePostThreadsResponse
             Success
 
         Examples
@@ -1196,7 +1320,7 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.get_a_post_from_thread(
+            await client.threads.retrieve_post(
                 id="id",
                 sub_id="subId",
             )
@@ -1204,12 +1328,12 @@ class AsyncThreadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_post_from_thread(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.retrieve_post(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def delete_a_post_from_thread(
+    async def delete_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteThreadsIdPostsSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -1224,7 +1348,7 @@ class AsyncThreadsClient:
 
         Returns
         -------
-        DeleteThreadsIdPostsSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -1239,7 +1363,7 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.delete_a_post_from_thread(
+            await client.threads.delete_post(
                 id="id",
                 sub_id="subId",
             )
@@ -1247,35 +1371,41 @@ class AsyncThreadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_post_from_thread(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.delete_post(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def list_thread_reactions(
+    async def list_reactions(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        type: typing.Optional[ListReactionsThreadsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetThreadsIdReactionsResponse:
+    ) -> ThreadReactionListResponse:
         """
+        Retrieve a paginated list of reactions for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        type : typing.Optional[ListReactionsThreadsRequestType]
+            Filter by reaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetThreadsIdReactionsResponse
+        ThreadReactionListResponse
             Success
 
         Examples
@@ -1290,34 +1420,36 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.list_thread_reactions(
+            await client.threads.list_reactions(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_thread_reactions(
-            id, cursor=cursor, limit=limit, request_options=request_options
+        _response = await self._raw_client.list_reactions(
+            id, limit=limit, cursor=cursor, type=type, request_options=request_options
         )
         return _response.data
 
-    async def create_a_reaction_in_thread(
+    async def create_reaction(
         self,
         id: str,
         *,
-        type: PostThreadsIdReactionsRequestType,
+        type: CreateReactionThreadsRequestType,
         user_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostThreadsIdReactionsResponse:
+    ) -> ThreadReactionResponse:
         """
+        Create a Reaction in Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        type : PostThreadsIdReactionsRequestType
+        type : CreateReactionThreadsRequestType
             Type of reaction
 
         user_id : typing.Optional[str]
@@ -1331,7 +1463,7 @@ class AsyncThreadsClient:
 
         Returns
         -------
-        PostThreadsIdReactionsResponse
+        ThreadReactionResponse
             Created
 
         Examples
@@ -1346,7 +1478,7 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.create_a_reaction_in_thread(
+            await client.threads.create_reaction(
                 id="id",
                 type="LIKE",
             )
@@ -1354,55 +1486,14 @@ class AsyncThreadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_reaction_in_thread(
+        _response = await self._raw_client.create_reaction(
             id, type=type, user_id=user_id, extended_data=extended_data, request_options=request_options
         )
         return _response.data
 
-    async def remove_your_reaction_from_thread(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteThreadsIdReactionsResponse:
-        """
-        Removes the authenticated user's reaction. No subId needed.
-
-        Parameters
-        ----------
-        id : str
-            Thread ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DeleteThreadsIdReactionsResponse
-            Deleted
-
-        Examples
-        --------
-        import asyncio
-
-        from foru_ms_sdk import AsyncForumClient
-
-        client = AsyncForumClient(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.threads.remove_your_reaction_from_thread(
-                id="id",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.remove_your_reaction_from_thread(id, request_options=request_options)
-        return _response.data
-
-    async def get_a_reaction_from_thread(
+    async def delete_reaction(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetThreadsIdReactionsSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -1417,7 +1508,50 @@ class AsyncThreadsClient:
 
         Returns
         -------
-        GetThreadsIdReactionsSubIdResponse
+        SuccessResponse
+            Deleted
+
+        Examples
+        --------
+        import asyncio
+
+        from foru_ms_sdk import AsyncForumClient
+
+        client = AsyncForumClient(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.threads.delete_reaction(
+                id="id",
+                sub_id="subId",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.delete_reaction(id, sub_id, request_options=request_options)
+        return _response.data
+
+    async def retrieve_reaction(
+        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> RetrieveReactionThreadsResponse:
+        """
+        Parameters
+        ----------
+        id : str
+            Thread ID
+
+        sub_id : str
+            Reaction ID
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        RetrieveReactionThreadsResponse
             Success
 
         Examples
@@ -1432,7 +1566,7 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.get_a_reaction_from_thread(
+            await client.threads.retrieve_reaction(
                 id="id",
                 sub_id="subId",
             )
@@ -1440,78 +1574,37 @@ class AsyncThreadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_reaction_from_thread(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.retrieve_reaction(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def delete_a_reaction_from_thread(
-        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteThreadsIdReactionsSubIdResponse:
-        """
-        Parameters
-        ----------
-        id : str
-            Thread ID
-
-        sub_id : str
-            Reaction ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DeleteThreadsIdReactionsSubIdResponse
-            Deleted
-
-        Examples
-        --------
-        import asyncio
-
-        from foru_ms_sdk import AsyncForumClient
-
-        client = AsyncForumClient(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.threads.delete_a_reaction_from_thread(
-                id="id",
-                sub_id="subId",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.delete_a_reaction_from_thread(id, sub_id, request_options=request_options)
-        return _response.data
-
-    async def list_thread_subscribers(
+    async def list_subscribers(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetThreadsIdSubscribersResponse:
+    ) -> ThreadSubscriberListResponse:
         """
+        Retrieve a paginated list of subscribers for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetThreadsIdSubscribersResponse
+        ThreadSubscriberListResponse
             Success
 
         Examples
@@ -1526,21 +1619,21 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.list_thread_subscribers(
+            await client.threads.list_subscribers(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_thread_subscribers(
-            id, cursor=cursor, limit=limit, request_options=request_options
+        _response = await self._raw_client.list_subscribers(
+            id, limit=limit, cursor=cursor, request_options=request_options
         )
         return _response.data
 
-    async def get_a_subscriber_from_thread(
+    async def retrieve_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetThreadsIdSubscribersSubIdResponse:
+    ) -> RetrieveSubscriberThreadsResponse:
         """
         Parameters
         ----------
@@ -1555,7 +1648,7 @@ class AsyncThreadsClient:
 
         Returns
         -------
-        GetThreadsIdSubscribersSubIdResponse
+        RetrieveSubscriberThreadsResponse
             Success
 
         Examples
@@ -1570,7 +1663,7 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.get_a_subscriber_from_thread(
+            await client.threads.retrieve_subscriber(
                 id="id",
                 sub_id="subId",
             )
@@ -1578,12 +1671,12 @@ class AsyncThreadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_subscriber_from_thread(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.retrieve_subscriber(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def delete_a_subscriber_from_thread(
+    async def delete_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteThreadsIdSubscribersSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -1598,7 +1691,7 @@ class AsyncThreadsClient:
 
         Returns
         -------
-        DeleteThreadsIdSubscribersSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -1613,7 +1706,7 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.delete_a_subscriber_from_thread(
+            await client.threads.delete_subscriber(
                 id="id",
                 sub_id="subId",
             )
@@ -1621,12 +1714,12 @@ class AsyncThreadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_subscriber_from_thread(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.delete_subscriber(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def get_thread_poll(
+    async def retrieve_poll(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetThreadsIdPollResponse:
+    ) -> ThreadPollResponse:
         """
         Parameters
         ----------
@@ -1638,7 +1731,7 @@ class AsyncThreadsClient:
 
         Returns
         -------
-        GetThreadsIdPollResponse
+        ThreadPollResponse
             Success
 
         Examples
@@ -1653,26 +1746,26 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.get_thread_poll(
+            await client.threads.retrieve_poll(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_thread_poll(id, request_options=request_options)
+        _response = await self._raw_client.retrieve_poll(id, request_options=request_options)
         return _response.data
 
-    async def create_thread_poll(
+    async def create_poll(
         self,
         id: str,
         *,
         title: str,
-        options: typing.Sequence[PostThreadsIdPollRequestOptionsItem],
+        options: typing.Sequence[CreatePollThreadsRequestOptionsItem],
         expires_at: typing.Optional[dt.datetime] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostThreadsIdPollResponse:
+    ) -> ThreadPollResponse:
         """
         Parameters
         ----------
@@ -1682,7 +1775,7 @@ class AsyncThreadsClient:
         title : str
             Poll question/title
 
-        options : typing.Sequence[PostThreadsIdPollRequestOptionsItem]
+        options : typing.Sequence[CreatePollThreadsRequestOptionsItem]
             Poll options (2-20)
 
         expires_at : typing.Optional[dt.datetime]
@@ -1696,7 +1789,7 @@ class AsyncThreadsClient:
 
         Returns
         -------
-        PostThreadsIdPollResponse
+        ThreadPollResponse
             Created
 
         Examples
@@ -1704,7 +1797,7 @@ class AsyncThreadsClient:
         import asyncio
 
         from foru_ms_sdk import AsyncForumClient
-        from foru_ms_sdk.threads import PostThreadsIdPollRequestOptionsItem
+        from foru_ms_sdk.threads import CreatePollThreadsRequestOptionsItem
 
         client = AsyncForumClient(
             api_key="YOUR_API_KEY",
@@ -1712,11 +1805,11 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.create_thread_poll(
+            await client.threads.create_poll(
                 id="id",
                 title="title",
                 options=[
-                    PostThreadsIdPollRequestOptionsItem(
+                    CreatePollThreadsRequestOptionsItem(
                         title="title",
                     )
                 ],
@@ -1725,7 +1818,7 @@ class AsyncThreadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_thread_poll(
+        _response = await self._raw_client.create_poll(
             id,
             title=title,
             options=options,
@@ -1735,7 +1828,7 @@ class AsyncThreadsClient:
         )
         return _response.data
 
-    async def update_thread_poll(
+    async def update_poll(
         self,
         id: str,
         *,
@@ -1744,7 +1837,7 @@ class AsyncThreadsClient:
         expires_at: typing.Optional[dt.datetime] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchThreadsIdPollResponse:
+    ) -> ThreadPollResponse:
         """
         Parameters
         ----------
@@ -1768,7 +1861,7 @@ class AsyncThreadsClient:
 
         Returns
         -------
-        PatchThreadsIdPollResponse
+        ThreadPollResponse
             Updated
 
         Examples
@@ -1783,14 +1876,14 @@ class AsyncThreadsClient:
 
 
         async def main() -> None:
-            await client.threads.update_thread_poll(
+            await client.threads.update_poll(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_thread_poll(
+        _response = await self._raw_client.update_poll(
             id,
             title=title,
             closed=closed,

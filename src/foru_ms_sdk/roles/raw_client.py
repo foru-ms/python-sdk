@@ -16,11 +16,11 @@ from ..errors.payment_required_error import PaymentRequiredError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error_response import ErrorResponse
-from .types.delete_roles_id_response import DeleteRolesIdResponse
-from .types.get_roles_id_response import GetRolesIdResponse
-from .types.get_roles_response import GetRolesResponse
-from .types.patch_roles_id_response import PatchRolesIdResponse
-from .types.post_roles_response import PostRolesResponse
+from ..types.role_list_response import RoleListResponse
+from ..types.role_response import RoleResponse
+from ..types.success_response import SuccessResponse
+from .types.list_roles_request_sort import ListRolesRequestSort
+from .types.update_roles_response import UpdateRolesResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -30,47 +30,57 @@ class RawRolesClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_all_roles(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        sort: typing.Optional[ListRolesRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetRolesResponse]:
+    ) -> HttpResponse[RoleListResponse]:
         """
+        Retrieve a paginated list of roles. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search by name or slug
+
+        sort : typing.Optional[ListRolesRequestSort]
+            Sort order
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetRolesResponse]
+        HttpResponse[RoleListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             "roles",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
+                "cursor": cursor,
                 "search": search,
+                "sort": sort,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetRolesResponse,
+                    RoleListResponse,
                     parse_obj_as(
-                        type_=GetRolesResponse,  # type: ignore
+                        type_=RoleListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -124,7 +134,7 @@ class RawRolesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_role(
+    def create(
         self,
         *,
         name: str,
@@ -133,8 +143,10 @@ class RawRolesClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostRolesResponse]:
+    ) -> HttpResponse[RoleResponse]:
         """
+        Create a new role.
+
         Parameters
         ----------
         name : str
@@ -157,7 +169,7 @@ class RawRolesClient:
 
         Returns
         -------
-        HttpResponse[PostRolesResponse]
+        HttpResponse[RoleResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -179,9 +191,9 @@ class RawRolesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostRolesResponse,
+                    RoleResponse,
                     parse_obj_as(
-                        type_=PostRolesResponse,  # type: ignore
+                        type_=RoleResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -246,20 +258,23 @@ class RawRolesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_role(
+    def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetRolesIdResponse]:
+    ) -> HttpResponse[RoleResponse]:
         """
+        Retrieve a role by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Role ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetRolesIdResponse]
+        HttpResponse[RoleResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -270,9 +285,9 @@ class RawRolesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetRolesIdResponse,
+                    RoleResponse,
                     parse_obj_as(
-                        type_=GetRolesIdResponse,  # type: ignore
+                        type_=RoleResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -337,20 +352,23 @@ class RawRolesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_role(
+    def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteRolesIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
+        Permanently delete a role.
+
         Parameters
         ----------
         id : str
+            Role ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeleteRolesIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -361,9 +379,9 @@ class RawRolesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteRolesIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteRolesIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -428,7 +446,7 @@ class RawRolesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_a_role(
+    def update(
         self,
         id: str,
         *,
@@ -438,11 +456,14 @@ class RawRolesClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PatchRolesIdResponse]:
+    ) -> HttpResponse[UpdateRolesResponse]:
         """
+        Update an existing role. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Role ID
 
         name : typing.Optional[str]
             Role name
@@ -464,7 +485,7 @@ class RawRolesClient:
 
         Returns
         -------
-        HttpResponse[PatchRolesIdResponse]
+        HttpResponse[UpdateRolesResponse]
             Updated
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -486,9 +507,9 @@ class RawRolesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchRolesIdResponse,
+                    UpdateRolesResponse,
                     parse_obj_as(
-                        type_=PatchRolesIdResponse,  # type: ignore
+                        type_=UpdateRolesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -569,47 +590,57 @@ class AsyncRawRolesClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_all_roles(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        sort: typing.Optional[ListRolesRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetRolesResponse]:
+    ) -> AsyncHttpResponse[RoleListResponse]:
         """
+        Retrieve a paginated list of roles. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search by name or slug
+
+        sort : typing.Optional[ListRolesRequestSort]
+            Sort order
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetRolesResponse]
+        AsyncHttpResponse[RoleListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             "roles",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
+                "cursor": cursor,
                 "search": search,
+                "sort": sort,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetRolesResponse,
+                    RoleListResponse,
                     parse_obj_as(
-                        type_=GetRolesResponse,  # type: ignore
+                        type_=RoleListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -663,7 +694,7 @@ class AsyncRawRolesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_role(
+    async def create(
         self,
         *,
         name: str,
@@ -672,8 +703,10 @@ class AsyncRawRolesClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostRolesResponse]:
+    ) -> AsyncHttpResponse[RoleResponse]:
         """
+        Create a new role.
+
         Parameters
         ----------
         name : str
@@ -696,7 +729,7 @@ class AsyncRawRolesClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostRolesResponse]
+        AsyncHttpResponse[RoleResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -718,9 +751,9 @@ class AsyncRawRolesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostRolesResponse,
+                    RoleResponse,
                     parse_obj_as(
-                        type_=PostRolesResponse,  # type: ignore
+                        type_=RoleResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -785,20 +818,23 @@ class AsyncRawRolesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_role(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetRolesIdResponse]:
+    ) -> AsyncHttpResponse[RoleResponse]:
         """
+        Retrieve a role by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Role ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetRolesIdResponse]
+        AsyncHttpResponse[RoleResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -809,9 +845,9 @@ class AsyncRawRolesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetRolesIdResponse,
+                    RoleResponse,
                     parse_obj_as(
-                        type_=GetRolesIdResponse,  # type: ignore
+                        type_=RoleResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -876,20 +912,23 @@ class AsyncRawRolesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_role(
+    async def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteRolesIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
+        Permanently delete a role.
+
         Parameters
         ----------
         id : str
+            Role ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeleteRolesIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -900,9 +939,9 @@ class AsyncRawRolesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteRolesIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteRolesIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -967,7 +1006,7 @@ class AsyncRawRolesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_a_role(
+    async def update(
         self,
         id: str,
         *,
@@ -977,11 +1016,14 @@ class AsyncRawRolesClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PatchRolesIdResponse]:
+    ) -> AsyncHttpResponse[UpdateRolesResponse]:
         """
+        Update an existing role. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Role ID
 
         name : typing.Optional[str]
             Role name
@@ -1003,7 +1045,7 @@ class AsyncRawRolesClient:
 
         Returns
         -------
-        AsyncHttpResponse[PatchRolesIdResponse]
+        AsyncHttpResponse[UpdateRolesResponse]
             Updated
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1025,9 +1067,9 @@ class AsyncRawRolesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchRolesIdResponse,
+                    UpdateRolesResponse,
                     parse_obj_as(
-                        type_=PatchRolesIdResponse,  # type: ignore
+                        type_=UpdateRolesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

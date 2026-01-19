@@ -6,35 +6,15 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .delete_webhooks_id_deliveries_sub_id_response import DeleteWebhooksIdDeliveriesSubIdResponse
-    from .delete_webhooks_id_response import DeleteWebhooksIdResponse
-    from .get_webhooks_id_deliveries_response import GetWebhooksIdDeliveriesResponse
-    from .get_webhooks_id_deliveries_response_data import GetWebhooksIdDeliveriesResponseData
-    from .get_webhooks_id_deliveries_response_data_items_item import GetWebhooksIdDeliveriesResponseDataItemsItem
-    from .get_webhooks_id_deliveries_sub_id_response import GetWebhooksIdDeliveriesSubIdResponse
-    from .get_webhooks_id_deliveries_sub_id_response_data import GetWebhooksIdDeliveriesSubIdResponseData
-    from .get_webhooks_id_response import GetWebhooksIdResponse
-    from .get_webhooks_id_response_data import GetWebhooksIdResponseData
-    from .get_webhooks_response import GetWebhooksResponse
-    from .get_webhooks_response_data_item import GetWebhooksResponseDataItem
-    from .get_webhooks_response_meta import GetWebhooksResponseMeta
-    from .post_webhooks_response import PostWebhooksResponse
-    from .post_webhooks_response_data import PostWebhooksResponseData
+    from .retrieve_delivery_webhooks_response import RetrieveDeliveryWebhooksResponse
+    from .retrieve_delivery_webhooks_response_data import RetrieveDeliveryWebhooksResponseData
+    from .update_webhooks_response import UpdateWebhooksResponse
+    from .update_webhooks_response_data import UpdateWebhooksResponseData
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteWebhooksIdDeliveriesSubIdResponse": ".delete_webhooks_id_deliveries_sub_id_response",
-    "DeleteWebhooksIdResponse": ".delete_webhooks_id_response",
-    "GetWebhooksIdDeliveriesResponse": ".get_webhooks_id_deliveries_response",
-    "GetWebhooksIdDeliveriesResponseData": ".get_webhooks_id_deliveries_response_data",
-    "GetWebhooksIdDeliveriesResponseDataItemsItem": ".get_webhooks_id_deliveries_response_data_items_item",
-    "GetWebhooksIdDeliveriesSubIdResponse": ".get_webhooks_id_deliveries_sub_id_response",
-    "GetWebhooksIdDeliveriesSubIdResponseData": ".get_webhooks_id_deliveries_sub_id_response_data",
-    "GetWebhooksIdResponse": ".get_webhooks_id_response",
-    "GetWebhooksIdResponseData": ".get_webhooks_id_response_data",
-    "GetWebhooksResponse": ".get_webhooks_response",
-    "GetWebhooksResponseDataItem": ".get_webhooks_response_data_item",
-    "GetWebhooksResponseMeta": ".get_webhooks_response_meta",
-    "PostWebhooksResponse": ".post_webhooks_response",
-    "PostWebhooksResponseData": ".post_webhooks_response_data",
+    "RetrieveDeliveryWebhooksResponse": ".retrieve_delivery_webhooks_response",
+    "RetrieveDeliveryWebhooksResponseData": ".retrieve_delivery_webhooks_response_data",
+    "UpdateWebhooksResponse": ".update_webhooks_response",
+    "UpdateWebhooksResponseData": ".update_webhooks_response_data",
 }
 
 
@@ -60,18 +40,8 @@ def __dir__():
 
 
 __all__ = [
-    "DeleteWebhooksIdDeliveriesSubIdResponse",
-    "DeleteWebhooksIdResponse",
-    "GetWebhooksIdDeliveriesResponse",
-    "GetWebhooksIdDeliveriesResponseData",
-    "GetWebhooksIdDeliveriesResponseDataItemsItem",
-    "GetWebhooksIdDeliveriesSubIdResponse",
-    "GetWebhooksIdDeliveriesSubIdResponseData",
-    "GetWebhooksIdResponse",
-    "GetWebhooksIdResponseData",
-    "GetWebhooksResponse",
-    "GetWebhooksResponseDataItem",
-    "GetWebhooksResponseMeta",
-    "PostWebhooksResponse",
-    "PostWebhooksResponseData",
+    "RetrieveDeliveryWebhooksResponse",
+    "RetrieveDeliveryWebhooksResponseData",
+    "UpdateWebhooksResponse",
+    "UpdateWebhooksResponseData",
 ]

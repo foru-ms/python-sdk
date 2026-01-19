@@ -6,39 +6,17 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .delete_tags_id_response import DeleteTagsIdResponse
-    from .delete_tags_id_subscribers_sub_id_response import DeleteTagsIdSubscribersSubIdResponse
-    from .get_tags_id_response import GetTagsIdResponse
-    from .get_tags_id_response_data import GetTagsIdResponseData
-    from .get_tags_id_subscribers_response import GetTagsIdSubscribersResponse
-    from .get_tags_id_subscribers_response_data import GetTagsIdSubscribersResponseData
-    from .get_tags_id_subscribers_response_data_items_item import GetTagsIdSubscribersResponseDataItemsItem
-    from .get_tags_id_subscribers_sub_id_response import GetTagsIdSubscribersSubIdResponse
-    from .get_tags_id_subscribers_sub_id_response_data import GetTagsIdSubscribersSubIdResponseData
-    from .get_tags_response import GetTagsResponse
-    from .get_tags_response_data_item import GetTagsResponseDataItem
-    from .get_tags_response_meta import GetTagsResponseMeta
-    from .patch_tags_id_response import PatchTagsIdResponse
-    from .patch_tags_id_response_data import PatchTagsIdResponseData
-    from .post_tags_response import PostTagsResponse
-    from .post_tags_response_data import PostTagsResponseData
+    from .retrieve_subscriber_tags_response import RetrieveSubscriberTagsResponse
+    from .retrieve_subscriber_tags_response_data import RetrieveSubscriberTagsResponseData
+    from .retrieve_subscriber_tags_response_data_user import RetrieveSubscriberTagsResponseDataUser
+    from .update_tags_response import UpdateTagsResponse
+    from .update_tags_response_data import UpdateTagsResponseData
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteTagsIdResponse": ".delete_tags_id_response",
-    "DeleteTagsIdSubscribersSubIdResponse": ".delete_tags_id_subscribers_sub_id_response",
-    "GetTagsIdResponse": ".get_tags_id_response",
-    "GetTagsIdResponseData": ".get_tags_id_response_data",
-    "GetTagsIdSubscribersResponse": ".get_tags_id_subscribers_response",
-    "GetTagsIdSubscribersResponseData": ".get_tags_id_subscribers_response_data",
-    "GetTagsIdSubscribersResponseDataItemsItem": ".get_tags_id_subscribers_response_data_items_item",
-    "GetTagsIdSubscribersSubIdResponse": ".get_tags_id_subscribers_sub_id_response",
-    "GetTagsIdSubscribersSubIdResponseData": ".get_tags_id_subscribers_sub_id_response_data",
-    "GetTagsResponse": ".get_tags_response",
-    "GetTagsResponseDataItem": ".get_tags_response_data_item",
-    "GetTagsResponseMeta": ".get_tags_response_meta",
-    "PatchTagsIdResponse": ".patch_tags_id_response",
-    "PatchTagsIdResponseData": ".patch_tags_id_response_data",
-    "PostTagsResponse": ".post_tags_response",
-    "PostTagsResponseData": ".post_tags_response_data",
+    "RetrieveSubscriberTagsResponse": ".retrieve_subscriber_tags_response",
+    "RetrieveSubscriberTagsResponseData": ".retrieve_subscriber_tags_response_data",
+    "RetrieveSubscriberTagsResponseDataUser": ".retrieve_subscriber_tags_response_data_user",
+    "UpdateTagsResponse": ".update_tags_response",
+    "UpdateTagsResponseData": ".update_tags_response_data",
 }
 
 
@@ -64,20 +42,9 @@ def __dir__():
 
 
 __all__ = [
-    "DeleteTagsIdResponse",
-    "DeleteTagsIdSubscribersSubIdResponse",
-    "GetTagsIdResponse",
-    "GetTagsIdResponseData",
-    "GetTagsIdSubscribersResponse",
-    "GetTagsIdSubscribersResponseData",
-    "GetTagsIdSubscribersResponseDataItemsItem",
-    "GetTagsIdSubscribersSubIdResponse",
-    "GetTagsIdSubscribersSubIdResponseData",
-    "GetTagsResponse",
-    "GetTagsResponseDataItem",
-    "GetTagsResponseMeta",
-    "PatchTagsIdResponse",
-    "PatchTagsIdResponseData",
-    "PostTagsResponse",
-    "PostTagsResponseData",
+    "RetrieveSubscriberTagsResponse",
+    "RetrieveSubscriberTagsResponseData",
+    "RetrieveSubscriberTagsResponseDataUser",
+    "UpdateTagsResponse",
+    "UpdateTagsResponseData",
 ]

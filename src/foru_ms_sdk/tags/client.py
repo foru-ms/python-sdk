@@ -4,15 +4,13 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.success_response import SuccessResponse
+from ..types.tag_list_response import TagListResponse
+from ..types.tag_response import TagResponse
+from ..types.tag_subscriber_list_response import TagSubscriberListResponse
 from .raw_client import AsyncRawTagsClient, RawTagsClient
-from .types.delete_tags_id_response import DeleteTagsIdResponse
-from .types.delete_tags_id_subscribers_sub_id_response import DeleteTagsIdSubscribersSubIdResponse
-from .types.get_tags_id_response import GetTagsIdResponse
-from .types.get_tags_id_subscribers_response import GetTagsIdSubscribersResponse
-from .types.get_tags_id_subscribers_sub_id_response import GetTagsIdSubscribersSubIdResponse
-from .types.get_tags_response import GetTagsResponse
-from .types.patch_tags_id_response import PatchTagsIdResponse
-from .types.post_tags_response import PostTagsResponse
+from .types.retrieve_subscriber_tags_response import RetrieveSubscriberTagsResponse
+from .types.update_tags_response import UpdateTagsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -33,29 +31,34 @@ class TagsClient:
         """
         return self._raw_client
 
-    def list_all_tags(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetTagsResponse:
+    ) -> TagListResponse:
         """
+        Retrieve a paginated list of tags. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search tags by name or description
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetTagsResponse
+        TagListResponse
             Success
 
         Examples
@@ -65,14 +68,12 @@ class TagsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.tags.list_all_tags()
+        client.tags.list()
         """
-        _response = self._raw_client.list_all_tags(
-            page=page, limit=limit, search=search, request_options=request_options
-        )
+        _response = self._raw_client.list(limit=limit, cursor=cursor, search=search, request_options=request_options)
         return _response.data
 
-    def create_a_tag(
+    def create(
         self,
         *,
         name: str,
@@ -81,8 +82,10 @@ class TagsClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostTagsResponse:
+    ) -> TagResponse:
         """
+        Create a new tag.
+
         Parameters
         ----------
         name : str
@@ -105,7 +108,7 @@ class TagsClient:
 
         Returns
         -------
-        PostTagsResponse
+        TagResponse
             Created
 
         Examples
@@ -115,11 +118,11 @@ class TagsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.tags.create_a_tag(
+        client.tags.create(
             name="name",
         )
         """
-        _response = self._raw_client.create_a_tag(
+        _response = self._raw_client.create(
             name=name,
             slug=slug,
             description=description,
@@ -129,18 +132,21 @@ class TagsClient:
         )
         return _response.data
 
-    def get_a_tag(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetTagsIdResponse:
+    def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> TagResponse:
         """
+        Retrieve a tag by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Tag ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetTagsIdResponse
+        TagResponse
             Success
 
         Examples
@@ -150,25 +156,28 @@ class TagsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.tags.get_a_tag(
+        client.tags.retrieve(
             id="id",
         )
         """
-        _response = self._raw_client.get_a_tag(id, request_options=request_options)
+        _response = self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    def delete_a_tag(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> DeleteTagsIdResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a tag.
+
         Parameters
         ----------
         id : str
+            Tag ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteTagsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -178,14 +187,14 @@ class TagsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.tags.delete_a_tag(
+        client.tags.delete(
             id="id",
         )
         """
-        _response = self._raw_client.delete_a_tag(id, request_options=request_options)
+        _response = self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    def update_a_tag(
+    def update(
         self,
         id: str,
         *,
@@ -195,11 +204,14 @@ class TagsClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchTagsIdResponse:
+    ) -> UpdateTagsResponse:
         """
+        Update an existing tag. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Tag ID
 
         name : typing.Optional[str]
             Tag name
@@ -221,7 +233,7 @@ class TagsClient:
 
         Returns
         -------
-        PatchTagsIdResponse
+        UpdateTagsResponse
             Updated
 
         Examples
@@ -231,11 +243,11 @@ class TagsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.tags.update_a_tag(
+        client.tags.update(
             id="id",
         )
         """
-        _response = self._raw_client.update_a_tag(
+        _response = self._raw_client.update(
             id,
             name=name,
             slug=slug,
@@ -246,32 +258,34 @@ class TagsClient:
         )
         return _response.data
 
-    def list_tag_subscribers(
+    def list_subscribers(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetTagsIdSubscribersResponse:
+    ) -> TagSubscriberListResponse:
         """
+        Retrieve a paginated list of subscribers for Tag.
+
         Parameters
         ----------
         id : str
             Tag ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetTagsIdSubscribersResponse
+        TagSubscriberListResponse
             Success
 
         Examples
@@ -281,18 +295,16 @@ class TagsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.tags.list_tag_subscribers(
+        client.tags.list_subscribers(
             id="id",
         )
         """
-        _response = self._raw_client.list_tag_subscribers(
-            id, cursor=cursor, limit=limit, request_options=request_options
-        )
+        _response = self._raw_client.list_subscribers(id, limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
-    def get_a_subscriber_from_tag(
+    def retrieve_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetTagsIdSubscribersSubIdResponse:
+    ) -> RetrieveSubscriberTagsResponse:
         """
         Parameters
         ----------
@@ -307,7 +319,7 @@ class TagsClient:
 
         Returns
         -------
-        GetTagsIdSubscribersSubIdResponse
+        RetrieveSubscriberTagsResponse
             Success
 
         Examples
@@ -317,17 +329,17 @@ class TagsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.tags.get_a_subscriber_from_tag(
+        client.tags.retrieve_subscriber(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.get_a_subscriber_from_tag(id, sub_id, request_options=request_options)
+        _response = self._raw_client.retrieve_subscriber(id, sub_id, request_options=request_options)
         return _response.data
 
-    def delete_a_subscriber_from_tag(
+    def delete_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteTagsIdSubscribersSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -342,7 +354,7 @@ class TagsClient:
 
         Returns
         -------
-        DeleteTagsIdSubscribersSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -352,12 +364,12 @@ class TagsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.tags.delete_a_subscriber_from_tag(
+        client.tags.delete_subscriber(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.delete_a_subscriber_from_tag(id, sub_id, request_options=request_options)
+        _response = self._raw_client.delete_subscriber(id, sub_id, request_options=request_options)
         return _response.data
 
 
@@ -376,29 +388,34 @@ class AsyncTagsClient:
         """
         return self._raw_client
 
-    async def list_all_tags(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetTagsResponse:
+    ) -> TagListResponse:
         """
+        Retrieve a paginated list of tags. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search tags by name or description
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetTagsResponse
+        TagListResponse
             Success
 
         Examples
@@ -413,17 +430,17 @@ class AsyncTagsClient:
 
 
         async def main() -> None:
-            await client.tags.list_all_tags()
+            await client.tags.list()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_all_tags(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = await self._raw_client.list(
+            limit=limit, cursor=cursor, search=search, request_options=request_options
         )
         return _response.data
 
-    async def create_a_tag(
+    async def create(
         self,
         *,
         name: str,
@@ -432,8 +449,10 @@ class AsyncTagsClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostTagsResponse:
+    ) -> TagResponse:
         """
+        Create a new tag.
+
         Parameters
         ----------
         name : str
@@ -456,7 +475,7 @@ class AsyncTagsClient:
 
         Returns
         -------
-        PostTagsResponse
+        TagResponse
             Created
 
         Examples
@@ -471,14 +490,14 @@ class AsyncTagsClient:
 
 
         async def main() -> None:
-            await client.tags.create_a_tag(
+            await client.tags.create(
                 name="name",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_tag(
+        _response = await self._raw_client.create(
             name=name,
             slug=slug,
             description=description,
@@ -488,18 +507,21 @@ class AsyncTagsClient:
         )
         return _response.data
 
-    async def get_a_tag(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetTagsIdResponse:
+    async def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> TagResponse:
         """
+        Retrieve a tag by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Tag ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetTagsIdResponse
+        TagResponse
             Success
 
         Examples
@@ -514,30 +536,31 @@ class AsyncTagsClient:
 
 
         async def main() -> None:
-            await client.tags.get_a_tag(
+            await client.tags.retrieve(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_tag(id, request_options=request_options)
+        _response = await self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    async def delete_a_tag(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteTagsIdResponse:
+    async def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a tag.
+
         Parameters
         ----------
         id : str
+            Tag ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteTagsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -552,17 +575,17 @@ class AsyncTagsClient:
 
 
         async def main() -> None:
-            await client.tags.delete_a_tag(
+            await client.tags.delete(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_tag(id, request_options=request_options)
+        _response = await self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    async def update_a_tag(
+    async def update(
         self,
         id: str,
         *,
@@ -572,11 +595,14 @@ class AsyncTagsClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchTagsIdResponse:
+    ) -> UpdateTagsResponse:
         """
+        Update an existing tag. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Tag ID
 
         name : typing.Optional[str]
             Tag name
@@ -598,7 +624,7 @@ class AsyncTagsClient:
 
         Returns
         -------
-        PatchTagsIdResponse
+        UpdateTagsResponse
             Updated
 
         Examples
@@ -613,14 +639,14 @@ class AsyncTagsClient:
 
 
         async def main() -> None:
-            await client.tags.update_a_tag(
+            await client.tags.update(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_a_tag(
+        _response = await self._raw_client.update(
             id,
             name=name,
             slug=slug,
@@ -631,32 +657,34 @@ class AsyncTagsClient:
         )
         return _response.data
 
-    async def list_tag_subscribers(
+    async def list_subscribers(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetTagsIdSubscribersResponse:
+    ) -> TagSubscriberListResponse:
         """
+        Retrieve a paginated list of subscribers for Tag.
+
         Parameters
         ----------
         id : str
             Tag ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetTagsIdSubscribersResponse
+        TagSubscriberListResponse
             Success
 
         Examples
@@ -671,21 +699,21 @@ class AsyncTagsClient:
 
 
         async def main() -> None:
-            await client.tags.list_tag_subscribers(
+            await client.tags.list_subscribers(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_tag_subscribers(
-            id, cursor=cursor, limit=limit, request_options=request_options
+        _response = await self._raw_client.list_subscribers(
+            id, limit=limit, cursor=cursor, request_options=request_options
         )
         return _response.data
 
-    async def get_a_subscriber_from_tag(
+    async def retrieve_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetTagsIdSubscribersSubIdResponse:
+    ) -> RetrieveSubscriberTagsResponse:
         """
         Parameters
         ----------
@@ -700,7 +728,7 @@ class AsyncTagsClient:
 
         Returns
         -------
-        GetTagsIdSubscribersSubIdResponse
+        RetrieveSubscriberTagsResponse
             Success
 
         Examples
@@ -715,7 +743,7 @@ class AsyncTagsClient:
 
 
         async def main() -> None:
-            await client.tags.get_a_subscriber_from_tag(
+            await client.tags.retrieve_subscriber(
                 id="id",
                 sub_id="subId",
             )
@@ -723,12 +751,12 @@ class AsyncTagsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_subscriber_from_tag(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.retrieve_subscriber(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def delete_a_subscriber_from_tag(
+    async def delete_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteTagsIdSubscribersSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -743,7 +771,7 @@ class AsyncTagsClient:
 
         Returns
         -------
-        DeleteTagsIdSubscribersSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -758,7 +786,7 @@ class AsyncTagsClient:
 
 
         async def main() -> None:
-            await client.tags.delete_a_subscriber_from_tag(
+            await client.tags.delete_subscriber(
                 id="id",
                 sub_id="subId",
             )
@@ -766,5 +794,5 @@ class AsyncTagsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_subscriber_from_tag(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.delete_subscriber(id, sub_id, request_options=request_options)
         return _response.data

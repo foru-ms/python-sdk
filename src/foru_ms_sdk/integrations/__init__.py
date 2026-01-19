@@ -6,37 +6,11 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .types import (
-        DeleteIntegrationsIdResponse,
-        GetIntegrationsIdResponse,
-        GetIntegrationsIdResponseData,
-        GetIntegrationsIdResponseDataType,
-        GetIntegrationsResponse,
-        GetIntegrationsResponseDataItem,
-        GetIntegrationsResponseDataItemType,
-        GetIntegrationsResponseMeta,
-        PatchIntegrationsIdResponse,
-        PatchIntegrationsIdResponseData,
-        PatchIntegrationsIdResponseDataType,
-        PostIntegrationsResponse,
-        PostIntegrationsResponseData,
-        PostIntegrationsResponseDataType,
-    )
+    from .types import UpdateIntegrationsResponse, UpdateIntegrationsResponseData, UpdateIntegrationsResponseDataType
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteIntegrationsIdResponse": ".types",
-    "GetIntegrationsIdResponse": ".types",
-    "GetIntegrationsIdResponseData": ".types",
-    "GetIntegrationsIdResponseDataType": ".types",
-    "GetIntegrationsResponse": ".types",
-    "GetIntegrationsResponseDataItem": ".types",
-    "GetIntegrationsResponseDataItemType": ".types",
-    "GetIntegrationsResponseMeta": ".types",
-    "PatchIntegrationsIdResponse": ".types",
-    "PatchIntegrationsIdResponseData": ".types",
-    "PatchIntegrationsIdResponseDataType": ".types",
-    "PostIntegrationsResponse": ".types",
-    "PostIntegrationsResponseData": ".types",
-    "PostIntegrationsResponseDataType": ".types",
+    "UpdateIntegrationsResponse": ".types",
+    "UpdateIntegrationsResponseData": ".types",
+    "UpdateIntegrationsResponseDataType": ".types",
 }
 
 
@@ -61,19 +35,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = [
-    "DeleteIntegrationsIdResponse",
-    "GetIntegrationsIdResponse",
-    "GetIntegrationsIdResponseData",
-    "GetIntegrationsIdResponseDataType",
-    "GetIntegrationsResponse",
-    "GetIntegrationsResponseDataItem",
-    "GetIntegrationsResponseDataItemType",
-    "GetIntegrationsResponseMeta",
-    "PatchIntegrationsIdResponse",
-    "PatchIntegrationsIdResponseData",
-    "PatchIntegrationsIdResponseDataType",
-    "PostIntegrationsResponse",
-    "PostIntegrationsResponseData",
-    "PostIntegrationsResponseDataType",
-]
+__all__ = ["UpdateIntegrationsResponse", "UpdateIntegrationsResponseData", "UpdateIntegrationsResponseDataType"]

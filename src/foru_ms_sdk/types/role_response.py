@@ -3,49 +3,12 @@
 import typing
 
 import pydantic
-import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from ..core.serialization import FieldMetadata
+from .role_response_data import RoleResponseData
 
 
 class RoleResponse(UniversalBaseModel):
-    name: str = pydantic.Field()
-    """
-    Role name
-    """
-
-    slug: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Role slug (unique identifier)
-    """
-
-    description: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Role description
-    """
-
-    color: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Role color hex
-    """
-
-    extended_data: typing_extensions.Annotated[
-        typing.Optional[typing.Dict[str, typing.Any]], FieldMetadata(alias="extendedData")
-    ] = pydantic.Field(alias="extendedData", default=None)
-    """
-    Extended data
-    """
-
-    id: str
-    created_at: typing_extensions.Annotated[str, FieldMetadata(alias="createdAt")] = pydantic.Field(alias="createdAt")
-    """
-    Role creation timestamp
-    """
-
-    updated_at: typing_extensions.Annotated[str, FieldMetadata(alias="updatedAt")] = pydantic.Field(alias="updatedAt")
-    """
-    Role last update timestamp
-    """
+    data: typing.Optional[RoleResponseData] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

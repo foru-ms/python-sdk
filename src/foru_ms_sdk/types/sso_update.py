@@ -6,16 +6,13 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .sso_update_provider import SsoUpdateProvider
 
 
 class SsoUpdate(UniversalBaseModel):
+    provider: typing.Optional[SsoUpdateProvider] = pydantic.Field(default=None)
     """
-    Partial OIDC provider update
-    """
-
-    name: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Provider name
+    SSO provider type
     """
 
     domain: typing.Optional[str] = pydantic.Field(default=None)
@@ -23,25 +20,21 @@ class SsoUpdate(UniversalBaseModel):
     Email domain to match
     """
 
-    client_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="clientId")] = pydantic.Field(
-        alias="clientId", default=None
-    )
-    client_secret: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="clientSecret")] = (
-        pydantic.Field(alias="clientSecret", default=None)
-    )
-    issuer: typing.Optional[str] = None
-    authorization_endpoint: typing_extensions.Annotated[
-        typing.Optional[str], FieldMetadata(alias="authorizationEndpoint")
-    ] = pydantic.Field(alias="authorizationEndpoint", default=None)
-    token_endpoint: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="tokenEndpoint")] = (
-        pydantic.Field(alias="tokenEndpoint", default=None)
-    )
-    user_info_endpoint: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="userInfoEndpoint")] = (
-        pydantic.Field(alias="userInfoEndpoint", default=None)
-    )
+    config: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
+    """
+    Provider configuration
+    """
+
     active: typing.Optional[bool] = pydantic.Field(default=None)
     """
     Enable/disable provider
+    """
+
+    extended_data: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Any]], FieldMetadata(alias="extendedData")
+    ] = pydantic.Field(alias="extendedData", default=None)
+    """
+    Custom extended data
     """
 
     if IS_PYDANTIC_V2:

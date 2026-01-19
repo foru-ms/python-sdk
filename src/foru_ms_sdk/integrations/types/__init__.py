@@ -6,35 +6,13 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .delete_integrations_id_response import DeleteIntegrationsIdResponse
-    from .get_integrations_id_response import GetIntegrationsIdResponse
-    from .get_integrations_id_response_data import GetIntegrationsIdResponseData
-    from .get_integrations_id_response_data_type import GetIntegrationsIdResponseDataType
-    from .get_integrations_response import GetIntegrationsResponse
-    from .get_integrations_response_data_item import GetIntegrationsResponseDataItem
-    from .get_integrations_response_data_item_type import GetIntegrationsResponseDataItemType
-    from .get_integrations_response_meta import GetIntegrationsResponseMeta
-    from .patch_integrations_id_response import PatchIntegrationsIdResponse
-    from .patch_integrations_id_response_data import PatchIntegrationsIdResponseData
-    from .patch_integrations_id_response_data_type import PatchIntegrationsIdResponseDataType
-    from .post_integrations_response import PostIntegrationsResponse
-    from .post_integrations_response_data import PostIntegrationsResponseData
-    from .post_integrations_response_data_type import PostIntegrationsResponseDataType
+    from .update_integrations_response import UpdateIntegrationsResponse
+    from .update_integrations_response_data import UpdateIntegrationsResponseData
+    from .update_integrations_response_data_type import UpdateIntegrationsResponseDataType
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteIntegrationsIdResponse": ".delete_integrations_id_response",
-    "GetIntegrationsIdResponse": ".get_integrations_id_response",
-    "GetIntegrationsIdResponseData": ".get_integrations_id_response_data",
-    "GetIntegrationsIdResponseDataType": ".get_integrations_id_response_data_type",
-    "GetIntegrationsResponse": ".get_integrations_response",
-    "GetIntegrationsResponseDataItem": ".get_integrations_response_data_item",
-    "GetIntegrationsResponseDataItemType": ".get_integrations_response_data_item_type",
-    "GetIntegrationsResponseMeta": ".get_integrations_response_meta",
-    "PatchIntegrationsIdResponse": ".patch_integrations_id_response",
-    "PatchIntegrationsIdResponseData": ".patch_integrations_id_response_data",
-    "PatchIntegrationsIdResponseDataType": ".patch_integrations_id_response_data_type",
-    "PostIntegrationsResponse": ".post_integrations_response",
-    "PostIntegrationsResponseData": ".post_integrations_response_data",
-    "PostIntegrationsResponseDataType": ".post_integrations_response_data_type",
+    "UpdateIntegrationsResponse": ".update_integrations_response",
+    "UpdateIntegrationsResponseData": ".update_integrations_response_data",
+    "UpdateIntegrationsResponseDataType": ".update_integrations_response_data_type",
 }
 
 
@@ -59,19 +37,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = [
-    "DeleteIntegrationsIdResponse",
-    "GetIntegrationsIdResponse",
-    "GetIntegrationsIdResponseData",
-    "GetIntegrationsIdResponseDataType",
-    "GetIntegrationsResponse",
-    "GetIntegrationsResponseDataItem",
-    "GetIntegrationsResponseDataItemType",
-    "GetIntegrationsResponseMeta",
-    "PatchIntegrationsIdResponse",
-    "PatchIntegrationsIdResponseData",
-    "PatchIntegrationsIdResponseDataType",
-    "PostIntegrationsResponse",
-    "PostIntegrationsResponseData",
-    "PostIntegrationsResponseDataType",
-]
+__all__ = ["UpdateIntegrationsResponse", "UpdateIntegrationsResponseData", "UpdateIntegrationsResponseDataType"]

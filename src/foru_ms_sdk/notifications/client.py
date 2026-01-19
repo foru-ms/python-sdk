@@ -4,14 +4,14 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.notification_list_response import NotificationListResponse
+from ..types.notification_response import NotificationResponse
+from ..types.success_response import SuccessResponse
 from .raw_client import AsyncRawNotificationsClient, RawNotificationsClient
-from .types.delete_notifications_id_response import DeleteNotificationsIdResponse
-from .types.get_notifications_id_response import GetNotificationsIdResponse
-from .types.get_notifications_response import GetNotificationsResponse
-from .types.patch_notifications_id_request_status import PatchNotificationsIdRequestStatus
-from .types.patch_notifications_id_response import PatchNotificationsIdResponse
-from .types.post_notifications_request_status import PostNotificationsRequestStatus
-from .types.post_notifications_response import PostNotificationsResponse
+from .types.create_notifications_request_status import CreateNotificationsRequestStatus
+from .types.list_notifications_request_status import ListNotificationsRequestStatus
+from .types.update_notifications_request_status import UpdateNotificationsRequestStatus
+from .types.update_notifications_response import UpdateNotificationsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -32,29 +32,38 @@ class NotificationsClient:
         """
         return self._raw_client
 
-    def list_all_notifications(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        status: typing.Optional[ListNotificationsRequestStatus] = None,
+        user_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetNotificationsResponse:
+    ) -> NotificationListResponse:
         """
+        Retrieve a paginated list of notifications. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        status : typing.Optional[ListNotificationsRequestStatus]
+            Filter by notification status
+
+        user_id : typing.Optional[str]
+            Filter by recipient user ID (admin only)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetNotificationsResponse
+        NotificationListResponse
             Success
 
         Examples
@@ -64,14 +73,14 @@ class NotificationsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.notifications.list_all_notifications()
+        client.notifications.list()
         """
-        _response = self._raw_client.list_all_notifications(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = self._raw_client.list(
+            limit=limit, cursor=cursor, status=status, user_id=user_id, request_options=request_options
         )
         return _response.data
 
-    def create_a_notification(
+    def create(
         self,
         *,
         user_id: str,
@@ -81,11 +90,13 @@ class NotificationsClient:
         thread_id: typing.Optional[str] = OMIT,
         post_id: typing.Optional[str] = OMIT,
         private_message_id: typing.Optional[str] = OMIT,
-        status: typing.Optional[PostNotificationsRequestStatus] = OMIT,
+        status: typing.Optional[CreateNotificationsRequestStatus] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostNotificationsResponse:
+    ) -> NotificationResponse:
         """
+        Create a new notification.
+
         Parameters
         ----------
         user_id : str
@@ -109,7 +120,7 @@ class NotificationsClient:
         private_message_id : typing.Optional[str]
             Related private message ID
 
-        status : typing.Optional[PostNotificationsRequestStatus]
+        status : typing.Optional[CreateNotificationsRequestStatus]
             Initial notification status
 
         extended_data : typing.Optional[typing.Dict[str, typing.Any]]
@@ -120,7 +131,7 @@ class NotificationsClient:
 
         Returns
         -------
-        PostNotificationsResponse
+        NotificationResponse
             Created
 
         Examples
@@ -130,12 +141,12 @@ class NotificationsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.notifications.create_a_notification(
+        client.notifications.create(
             user_id="userId",
             type="type",
         )
         """
-        _response = self._raw_client.create_a_notification(
+        _response = self._raw_client.create(
             user_id=user_id,
             type=type,
             notifier_id=notifier_id,
@@ -149,20 +160,21 @@ class NotificationsClient:
         )
         return _response.data
 
-    def get_a_notification(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetNotificationsIdResponse:
+    def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> NotificationResponse:
         """
+        Retrieve a notification by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Notification ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetNotificationsIdResponse
+        NotificationResponse
             Success
 
         Examples
@@ -172,27 +184,28 @@ class NotificationsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.notifications.get_a_notification(
+        client.notifications.retrieve(
             id="id",
         )
         """
-        _response = self._raw_client.get_a_notification(id, request_options=request_options)
+        _response = self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    def delete_a_notification(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteNotificationsIdResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a notification.
+
         Parameters
         ----------
         id : str
+            Notification ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteNotificationsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -202,27 +215,30 @@ class NotificationsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.notifications.delete_a_notification(
+        client.notifications.delete(
             id="id",
         )
         """
-        _response = self._raw_client.delete_a_notification(id, request_options=request_options)
+        _response = self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    def update_a_notification(
+    def update(
         self,
         id: str,
         *,
-        status: typing.Optional[PatchNotificationsIdRequestStatus] = OMIT,
+        status: typing.Optional[UpdateNotificationsRequestStatus] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchNotificationsIdResponse:
+    ) -> UpdateNotificationsResponse:
         """
+        Update an existing notification. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Notification ID
 
-        status : typing.Optional[PatchNotificationsIdRequestStatus]
+        status : typing.Optional[UpdateNotificationsRequestStatus]
             Notification status
 
         extended_data : typing.Optional[typing.Dict[str, typing.Any]]
@@ -233,7 +249,7 @@ class NotificationsClient:
 
         Returns
         -------
-        PatchNotificationsIdResponse
+        UpdateNotificationsResponse
             Updated
 
         Examples
@@ -243,11 +259,11 @@ class NotificationsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.notifications.update_a_notification(
+        client.notifications.update(
             id="id",
         )
         """
-        _response = self._raw_client.update_a_notification(
+        _response = self._raw_client.update(
             id, status=status, extended_data=extended_data, request_options=request_options
         )
         return _response.data
@@ -268,29 +284,38 @@ class AsyncNotificationsClient:
         """
         return self._raw_client
 
-    async def list_all_notifications(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        status: typing.Optional[ListNotificationsRequestStatus] = None,
+        user_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetNotificationsResponse:
+    ) -> NotificationListResponse:
         """
+        Retrieve a paginated list of notifications. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        status : typing.Optional[ListNotificationsRequestStatus]
+            Filter by notification status
+
+        user_id : typing.Optional[str]
+            Filter by recipient user ID (admin only)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetNotificationsResponse
+        NotificationListResponse
             Success
 
         Examples
@@ -305,17 +330,17 @@ class AsyncNotificationsClient:
 
 
         async def main() -> None:
-            await client.notifications.list_all_notifications()
+            await client.notifications.list()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_all_notifications(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = await self._raw_client.list(
+            limit=limit, cursor=cursor, status=status, user_id=user_id, request_options=request_options
         )
         return _response.data
 
-    async def create_a_notification(
+    async def create(
         self,
         *,
         user_id: str,
@@ -325,11 +350,13 @@ class AsyncNotificationsClient:
         thread_id: typing.Optional[str] = OMIT,
         post_id: typing.Optional[str] = OMIT,
         private_message_id: typing.Optional[str] = OMIT,
-        status: typing.Optional[PostNotificationsRequestStatus] = OMIT,
+        status: typing.Optional[CreateNotificationsRequestStatus] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostNotificationsResponse:
+    ) -> NotificationResponse:
         """
+        Create a new notification.
+
         Parameters
         ----------
         user_id : str
@@ -353,7 +380,7 @@ class AsyncNotificationsClient:
         private_message_id : typing.Optional[str]
             Related private message ID
 
-        status : typing.Optional[PostNotificationsRequestStatus]
+        status : typing.Optional[CreateNotificationsRequestStatus]
             Initial notification status
 
         extended_data : typing.Optional[typing.Dict[str, typing.Any]]
@@ -364,7 +391,7 @@ class AsyncNotificationsClient:
 
         Returns
         -------
-        PostNotificationsResponse
+        NotificationResponse
             Created
 
         Examples
@@ -379,7 +406,7 @@ class AsyncNotificationsClient:
 
 
         async def main() -> None:
-            await client.notifications.create_a_notification(
+            await client.notifications.create(
                 user_id="userId",
                 type="type",
             )
@@ -387,7 +414,7 @@ class AsyncNotificationsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_notification(
+        _response = await self._raw_client.create(
             user_id=user_id,
             type=type,
             notifier_id=notifier_id,
@@ -401,20 +428,23 @@ class AsyncNotificationsClient:
         )
         return _response.data
 
-    async def get_a_notification(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetNotificationsIdResponse:
+    ) -> NotificationResponse:
         """
+        Retrieve a notification by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Notification ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetNotificationsIdResponse
+        NotificationResponse
             Success
 
         Examples
@@ -429,30 +459,31 @@ class AsyncNotificationsClient:
 
 
         async def main() -> None:
-            await client.notifications.get_a_notification(
+            await client.notifications.retrieve(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_notification(id, request_options=request_options)
+        _response = await self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    async def delete_a_notification(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteNotificationsIdResponse:
+    async def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a notification.
+
         Parameters
         ----------
         id : str
+            Notification ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteNotificationsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -467,30 +498,33 @@ class AsyncNotificationsClient:
 
 
         async def main() -> None:
-            await client.notifications.delete_a_notification(
+            await client.notifications.delete(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_notification(id, request_options=request_options)
+        _response = await self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    async def update_a_notification(
+    async def update(
         self,
         id: str,
         *,
-        status: typing.Optional[PatchNotificationsIdRequestStatus] = OMIT,
+        status: typing.Optional[UpdateNotificationsRequestStatus] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchNotificationsIdResponse:
+    ) -> UpdateNotificationsResponse:
         """
+        Update an existing notification. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Notification ID
 
-        status : typing.Optional[PatchNotificationsIdRequestStatus]
+        status : typing.Optional[UpdateNotificationsRequestStatus]
             Notification status
 
         extended_data : typing.Optional[typing.Dict[str, typing.Any]]
@@ -501,7 +535,7 @@ class AsyncNotificationsClient:
 
         Returns
         -------
-        PatchNotificationsIdResponse
+        UpdateNotificationsResponse
             Updated
 
         Examples
@@ -516,14 +550,14 @@ class AsyncNotificationsClient:
 
 
         async def main() -> None:
-            await client.notifications.update_a_notification(
+            await client.notifications.update(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_a_notification(
+        _response = await self._raw_client.update(
             id, status=status, extended_data=extended_data, request_options=request_options
         )
         return _response.data

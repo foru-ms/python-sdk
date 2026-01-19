@@ -16,10 +16,10 @@ from ..errors.payment_required_error import PaymentRequiredError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error_response import ErrorResponse
-from .types.delete_reports_id_response import DeleteReportsIdResponse
-from .types.get_reports_id_response import GetReportsIdResponse
-from .types.get_reports_response import GetReportsResponse
-from .types.post_reports_response import PostReportsResponse
+from ..types.report_list_response import ReportListResponse
+from ..types.report_response import ReportResponse
+from ..types.success_response import SuccessResponse
+from .types.update_reports_response import UpdateReportsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -29,47 +29,62 @@ class RawReportsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_all_reports(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        status: typing.Optional[str] = None,
+        reporter_id: typing.Optional[str] = None,
+        reported_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetReportsResponse]:
+    ) -> HttpResponse[ReportListResponse]:
         """
+        Retrieve a paginated list of reports. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        status : typing.Optional[str]
+            Filter by status
+
+        reporter_id : typing.Optional[str]
+            Filter by reporter ID
+
+        reported_id : typing.Optional[str]
+            Filter by reported user ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetReportsResponse]
+        HttpResponse[ReportListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             "reports",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
+                "status": status,
+                "reporterId": reporter_id,
+                "reportedId": reported_id,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetReportsResponse,
+                    ReportListResponse,
                     parse_obj_as(
-                        type_=GetReportsResponse,  # type: ignore
+                        type_=ReportListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -123,23 +138,30 @@ class RawReportsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_report(
+    def create(
         self,
         *,
         type: str,
+        status: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         user_id: typing.Optional[str] = OMIT,
         reported_id: typing.Optional[str] = OMIT,
         thread_id: typing.Optional[str] = OMIT,
         post_id: typing.Optional[str] = OMIT,
         private_message_id: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostReportsResponse]:
+    ) -> HttpResponse[ReportResponse]:
         """
+        Create a new report.
+
         Parameters
         ----------
         type : str
             Report type (e.g. spam, abuse)
+
+        status : typing.Optional[str]
+            Report status (default: pending)
 
         description : typing.Optional[str]
             Reason for reporting
@@ -159,12 +181,15 @@ class RawReportsClient:
         private_message_id : typing.Optional[str]
             ID of private message being reported
 
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[PostReportsResponse]
+        HttpResponse[ReportResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -172,12 +197,14 @@ class RawReportsClient:
             method="POST",
             json={
                 "type": type,
+                "status": status,
                 "description": description,
                 "userId": user_id,
                 "reportedId": reported_id,
                 "threadId": thread_id,
                 "postId": post_id,
                 "privateMessageId": private_message_id,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -188,9 +215,9 @@ class RawReportsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostReportsResponse,
+                    ReportResponse,
                     parse_obj_as(
-                        type_=PostReportsResponse,  # type: ignore
+                        type_=ReportResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -255,20 +282,23 @@ class RawReportsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_report(
+    def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetReportsIdResponse]:
+    ) -> HttpResponse[ReportResponse]:
         """
+        Retrieve a report by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Report ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetReportsIdResponse]
+        HttpResponse[ReportResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -279,9 +309,9 @@ class RawReportsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetReportsIdResponse,
+                    ReportResponse,
                     parse_obj_as(
-                        type_=GetReportsIdResponse,  # type: ignore
+                        type_=ReportResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -346,20 +376,23 @@ class RawReportsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_report(
+    def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteReportsIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
+        Permanently delete a report.
+
         Parameters
         ----------
         id : str
+            Report ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeleteReportsIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -370,13 +403,142 @@ class RawReportsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteReportsIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteReportsIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 402:
+                raise PaymentRequiredError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def update(
+        self,
+        id: str,
+        *,
+        status: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[UpdateReportsResponse]:
+        """
+        Update an existing report. Only provided fields will be modified.
+
+        Parameters
+        ----------
+        id : str
+            Report ID
+
+        status : typing.Optional[str]
+            Report status (pending, reviewed, resolved, dismissed)
+
+        description : typing.Optional[str]
+            Updated description or admin notes
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[UpdateReportsResponse]
+            Updated
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"reports/{jsonable_encoder(id)}",
+            method="PATCH",
+            json={
+                "status": status,
+                "description": description,
+                "extendedData": extended_data,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UpdateReportsResponse,
+                    parse_obj_as(
+                        type_=UpdateReportsResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 401:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
@@ -442,47 +604,62 @@ class AsyncRawReportsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_all_reports(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        status: typing.Optional[str] = None,
+        reporter_id: typing.Optional[str] = None,
+        reported_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetReportsResponse]:
+    ) -> AsyncHttpResponse[ReportListResponse]:
         """
+        Retrieve a paginated list of reports. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        status : typing.Optional[str]
+            Filter by status
+
+        reporter_id : typing.Optional[str]
+            Filter by reporter ID
+
+        reported_id : typing.Optional[str]
+            Filter by reported user ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetReportsResponse]
+        AsyncHttpResponse[ReportListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             "reports",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
+                "status": status,
+                "reporterId": reporter_id,
+                "reportedId": reported_id,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetReportsResponse,
+                    ReportListResponse,
                     parse_obj_as(
-                        type_=GetReportsResponse,  # type: ignore
+                        type_=ReportListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -536,23 +713,30 @@ class AsyncRawReportsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_report(
+    async def create(
         self,
         *,
         type: str,
+        status: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         user_id: typing.Optional[str] = OMIT,
         reported_id: typing.Optional[str] = OMIT,
         thread_id: typing.Optional[str] = OMIT,
         post_id: typing.Optional[str] = OMIT,
         private_message_id: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostReportsResponse]:
+    ) -> AsyncHttpResponse[ReportResponse]:
         """
+        Create a new report.
+
         Parameters
         ----------
         type : str
             Report type (e.g. spam, abuse)
+
+        status : typing.Optional[str]
+            Report status (default: pending)
 
         description : typing.Optional[str]
             Reason for reporting
@@ -572,12 +756,15 @@ class AsyncRawReportsClient:
         private_message_id : typing.Optional[str]
             ID of private message being reported
 
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[PostReportsResponse]
+        AsyncHttpResponse[ReportResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -585,12 +772,14 @@ class AsyncRawReportsClient:
             method="POST",
             json={
                 "type": type,
+                "status": status,
                 "description": description,
                 "userId": user_id,
                 "reportedId": reported_id,
                 "threadId": thread_id,
                 "postId": post_id,
                 "privateMessageId": private_message_id,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -601,9 +790,9 @@ class AsyncRawReportsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostReportsResponse,
+                    ReportResponse,
                     parse_obj_as(
-                        type_=PostReportsResponse,  # type: ignore
+                        type_=ReportResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -668,20 +857,23 @@ class AsyncRawReportsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_report(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetReportsIdResponse]:
+    ) -> AsyncHttpResponse[ReportResponse]:
         """
+        Retrieve a report by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Report ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetReportsIdResponse]
+        AsyncHttpResponse[ReportResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -692,9 +884,9 @@ class AsyncRawReportsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetReportsIdResponse,
+                    ReportResponse,
                     parse_obj_as(
-                        type_=GetReportsIdResponse,  # type: ignore
+                        type_=ReportResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -759,20 +951,23 @@ class AsyncRawReportsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_report(
+    async def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteReportsIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
+        Permanently delete a report.
+
         Parameters
         ----------
         id : str
+            Report ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeleteReportsIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -783,13 +978,142 @@ class AsyncRawReportsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteReportsIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteReportsIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 402:
+                raise PaymentRequiredError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def update(
+        self,
+        id: str,
+        *,
+        status: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[UpdateReportsResponse]:
+        """
+        Update an existing report. Only provided fields will be modified.
+
+        Parameters
+        ----------
+        id : str
+            Report ID
+
+        status : typing.Optional[str]
+            Report status (pending, reviewed, resolved, dismissed)
+
+        description : typing.Optional[str]
+            Updated description or admin notes
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[UpdateReportsResponse]
+            Updated
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"reports/{jsonable_encoder(id)}",
+            method="PATCH",
+            json={
+                "status": status,
+                "description": description,
+                "extendedData": extended_data,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UpdateReportsResponse,
+                    parse_obj_as(
+                        type_=UpdateReportsResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 401:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),

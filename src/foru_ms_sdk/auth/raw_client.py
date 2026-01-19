@@ -14,11 +14,11 @@ from ..errors.payment_required_error import PaymentRequiredError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error_response import ErrorResponse
-from .types.get_auth_me_response import GetAuthMeResponse
-from .types.post_auth_forgot_password_response import PostAuthForgotPasswordResponse
-from .types.post_auth_login_response import PostAuthLoginResponse
-from .types.post_auth_register_response import PostAuthRegisterResponse
-from .types.post_auth_reset_password_response import PostAuthResetPasswordResponse
+from ..types.forgot_password_response import ForgotPasswordResponse
+from ..types.login_response import LoginResponse
+from ..types.me_response import MeResponse
+from ..types.register_response import RegisterResponse
+from ..types.reset_password_response import ResetPasswordResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -39,8 +39,10 @@ class RawAuthClient:
         bio: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostAuthRegisterResponse]:
+    ) -> HttpResponse[RegisterResponse]:
         """
+        Register a new user in your forum instance. Requires API key for instance identification. Returns a JWT token for subsequent authenticated requests.
+
         Parameters
         ----------
         username : str
@@ -69,7 +71,7 @@ class RawAuthClient:
 
         Returns
         -------
-        HttpResponse[PostAuthRegisterResponse]
+        HttpResponse[RegisterResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -93,15 +95,26 @@ class RawAuthClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostAuthRegisterResponse,
+                    RegisterResponse,
                     parse_obj_as(
-                        type_=PostAuthRegisterResponse,  # type: ignore
+                        type_=RegisterResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
             if _response.status_code == 400:
                 raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -151,8 +164,10 @@ class RawAuthClient:
 
     def login(
         self, *, login: str, password: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[PostAuthLoginResponse]:
+    ) -> HttpResponse[LoginResponse]:
         """
+        Authenticate an existing user. Requires API key for instance identification. Returns a JWT token for subsequent authenticated requests.
+
         Parameters
         ----------
         login : str
@@ -166,7 +181,7 @@ class RawAuthClient:
 
         Returns
         -------
-        HttpResponse[PostAuthLoginResponse]
+        HttpResponse[LoginResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -185,15 +200,26 @@ class RawAuthClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostAuthLoginResponse,
+                    LoginResponse,
                     parse_obj_as(
-                        type_=PostAuthLoginResponse,  # type: ignore
+                        type_=LoginResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
             if _response.status_code == 400:
                 raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -241,9 +267,7 @@ class RawAuthClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_current_user(
-        self, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetAuthMeResponse]:
+    def me(self, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[MeResponse]:
         """
         Parameters
         ----------
@@ -252,7 +276,7 @@ class RawAuthClient:
 
         Returns
         -------
-        HttpResponse[GetAuthMeResponse]
+        HttpResponse[MeResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -263,9 +287,9 @@ class RawAuthClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetAuthMeResponse,
+                    MeResponse,
                     parse_obj_as(
-                        type_=GetAuthMeResponse,  # type: ignore
+                        type_=MeResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -319,10 +343,12 @@ class RawAuthClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def request_password_reset(
+    def forgot_password(
         self, *, email: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[PostAuthForgotPasswordResponse]:
+    ) -> HttpResponse[ForgotPasswordResponse]:
         """
+        Request a password reset email. Requires API key for instance identification.
+
         Parameters
         ----------
         email : str
@@ -333,7 +359,7 @@ class RawAuthClient:
 
         Returns
         -------
-        HttpResponse[PostAuthForgotPasswordResponse]
+        HttpResponse[ForgotPasswordResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -351,15 +377,26 @@ class RawAuthClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostAuthForgotPasswordResponse,
+                    ForgotPasswordResponse,
                     parse_obj_as(
-                        type_=PostAuthForgotPasswordResponse,  # type: ignore
+                        type_=ForgotPasswordResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
             if _response.status_code == 400:
                 raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -415,8 +452,10 @@ class RawAuthClient:
         email: typing.Optional[str] = OMIT,
         token: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostAuthResetPasswordResponse]:
+    ) -> HttpResponse[ResetPasswordResponse]:
         """
+        Reset password using a reset token. Requires API key for instance identification.
+
         Parameters
         ----------
         password : str
@@ -436,7 +475,7 @@ class RawAuthClient:
 
         Returns
         -------
-        HttpResponse[PostAuthResetPasswordResponse]
+        HttpResponse[ResetPasswordResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -457,15 +496,26 @@ class RawAuthClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostAuthResetPasswordResponse,
+                    ResetPasswordResponse,
                     parse_obj_as(
-                        type_=PostAuthResetPasswordResponse,  # type: ignore
+                        type_=ResetPasswordResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
             if _response.status_code == 400:
                 raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -529,8 +579,10 @@ class AsyncRawAuthClient:
         bio: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostAuthRegisterResponse]:
+    ) -> AsyncHttpResponse[RegisterResponse]:
         """
+        Register a new user in your forum instance. Requires API key for instance identification. Returns a JWT token for subsequent authenticated requests.
+
         Parameters
         ----------
         username : str
@@ -559,7 +611,7 @@ class AsyncRawAuthClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostAuthRegisterResponse]
+        AsyncHttpResponse[RegisterResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -583,15 +635,26 @@ class AsyncRawAuthClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostAuthRegisterResponse,
+                    RegisterResponse,
                     parse_obj_as(
-                        type_=PostAuthRegisterResponse,  # type: ignore
+                        type_=RegisterResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
             if _response.status_code == 400:
                 raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -641,8 +704,10 @@ class AsyncRawAuthClient:
 
     async def login(
         self, *, login: str, password: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[PostAuthLoginResponse]:
+    ) -> AsyncHttpResponse[LoginResponse]:
         """
+        Authenticate an existing user. Requires API key for instance identification. Returns a JWT token for subsequent authenticated requests.
+
         Parameters
         ----------
         login : str
@@ -656,7 +721,7 @@ class AsyncRawAuthClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostAuthLoginResponse]
+        AsyncHttpResponse[LoginResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -675,15 +740,26 @@ class AsyncRawAuthClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostAuthLoginResponse,
+                    LoginResponse,
                     parse_obj_as(
-                        type_=PostAuthLoginResponse,  # type: ignore
+                        type_=LoginResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
             if _response.status_code == 400:
                 raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -731,9 +807,7 @@ class AsyncRawAuthClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_current_user(
-        self, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetAuthMeResponse]:
+    async def me(self, *, request_options: typing.Optional[RequestOptions] = None) -> AsyncHttpResponse[MeResponse]:
         """
         Parameters
         ----------
@@ -742,7 +816,7 @@ class AsyncRawAuthClient:
 
         Returns
         -------
-        AsyncHttpResponse[GetAuthMeResponse]
+        AsyncHttpResponse[MeResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -753,9 +827,9 @@ class AsyncRawAuthClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetAuthMeResponse,
+                    MeResponse,
                     parse_obj_as(
-                        type_=GetAuthMeResponse,  # type: ignore
+                        type_=MeResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -809,10 +883,12 @@ class AsyncRawAuthClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def request_password_reset(
+    async def forgot_password(
         self, *, email: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[PostAuthForgotPasswordResponse]:
+    ) -> AsyncHttpResponse[ForgotPasswordResponse]:
         """
+        Request a password reset email. Requires API key for instance identification.
+
         Parameters
         ----------
         email : str
@@ -823,7 +899,7 @@ class AsyncRawAuthClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostAuthForgotPasswordResponse]
+        AsyncHttpResponse[ForgotPasswordResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -841,15 +917,26 @@ class AsyncRawAuthClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostAuthForgotPasswordResponse,
+                    ForgotPasswordResponse,
                     parse_obj_as(
-                        type_=PostAuthForgotPasswordResponse,  # type: ignore
+                        type_=ForgotPasswordResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
             if _response.status_code == 400:
                 raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -905,8 +992,10 @@ class AsyncRawAuthClient:
         email: typing.Optional[str] = OMIT,
         token: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostAuthResetPasswordResponse]:
+    ) -> AsyncHttpResponse[ResetPasswordResponse]:
         """
+        Reset password using a reset token. Requires API key for instance identification.
+
         Parameters
         ----------
         password : str
@@ -926,7 +1015,7 @@ class AsyncRawAuthClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostAuthResetPasswordResponse]
+        AsyncHttpResponse[ResetPasswordResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -947,15 +1036,26 @@ class AsyncRawAuthClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostAuthResetPasswordResponse,
+                    ResetPasswordResponse,
                     parse_obj_as(
-                        type_=PostAuthResetPasswordResponse,  # type: ignore
+                        type_=ResetPasswordResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
             if _response.status_code == 400:
                 raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

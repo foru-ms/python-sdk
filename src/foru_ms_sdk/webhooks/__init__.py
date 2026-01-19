@@ -7,36 +7,16 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .types import (
-        DeleteWebhooksIdDeliveriesSubIdResponse,
-        DeleteWebhooksIdResponse,
-        GetWebhooksIdDeliveriesResponse,
-        GetWebhooksIdDeliveriesResponseData,
-        GetWebhooksIdDeliveriesResponseDataItemsItem,
-        GetWebhooksIdDeliveriesSubIdResponse,
-        GetWebhooksIdDeliveriesSubIdResponseData,
-        GetWebhooksIdResponse,
-        GetWebhooksIdResponseData,
-        GetWebhooksResponse,
-        GetWebhooksResponseDataItem,
-        GetWebhooksResponseMeta,
-        PostWebhooksResponse,
-        PostWebhooksResponseData,
+        RetrieveDeliveryWebhooksResponse,
+        RetrieveDeliveryWebhooksResponseData,
+        UpdateWebhooksResponse,
+        UpdateWebhooksResponseData,
     )
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteWebhooksIdDeliveriesSubIdResponse": ".types",
-    "DeleteWebhooksIdResponse": ".types",
-    "GetWebhooksIdDeliveriesResponse": ".types",
-    "GetWebhooksIdDeliveriesResponseData": ".types",
-    "GetWebhooksIdDeliveriesResponseDataItemsItem": ".types",
-    "GetWebhooksIdDeliveriesSubIdResponse": ".types",
-    "GetWebhooksIdDeliveriesSubIdResponseData": ".types",
-    "GetWebhooksIdResponse": ".types",
-    "GetWebhooksIdResponseData": ".types",
-    "GetWebhooksResponse": ".types",
-    "GetWebhooksResponseDataItem": ".types",
-    "GetWebhooksResponseMeta": ".types",
-    "PostWebhooksResponse": ".types",
-    "PostWebhooksResponseData": ".types",
+    "RetrieveDeliveryWebhooksResponse": ".types",
+    "RetrieveDeliveryWebhooksResponseData": ".types",
+    "UpdateWebhooksResponse": ".types",
+    "UpdateWebhooksResponseData": ".types",
 }
 
 
@@ -62,18 +42,8 @@ def __dir__():
 
 
 __all__ = [
-    "DeleteWebhooksIdDeliveriesSubIdResponse",
-    "DeleteWebhooksIdResponse",
-    "GetWebhooksIdDeliveriesResponse",
-    "GetWebhooksIdDeliveriesResponseData",
-    "GetWebhooksIdDeliveriesResponseDataItemsItem",
-    "GetWebhooksIdDeliveriesSubIdResponse",
-    "GetWebhooksIdDeliveriesSubIdResponseData",
-    "GetWebhooksIdResponse",
-    "GetWebhooksIdResponseData",
-    "GetWebhooksResponse",
-    "GetWebhooksResponseDataItem",
-    "GetWebhooksResponseMeta",
-    "PostWebhooksResponse",
-    "PostWebhooksResponseData",
+    "RetrieveDeliveryWebhooksResponse",
+    "RetrieveDeliveryWebhooksResponseData",
+    "UpdateWebhooksResponse",
+    "UpdateWebhooksResponseData",
 ]

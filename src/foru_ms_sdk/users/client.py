@@ -4,17 +4,16 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.success_response import SuccessResponse
+from ..types.user_follower_list_response import UserFollowerListResponse
+from ..types.user_following_list_response import UserFollowingListResponse
+from ..types.user_list_response import UserListResponse
+from ..types.user_response import UserResponse
 from .raw_client import AsyncRawUsersClient, RawUsersClient
-from .types.delete_users_id_followers_sub_id_response import DeleteUsersIdFollowersSubIdResponse
-from .types.delete_users_id_following_sub_id_response import DeleteUsersIdFollowingSubIdResponse
-from .types.delete_users_id_response import DeleteUsersIdResponse
-from .types.get_users_id_followers_response import GetUsersIdFollowersResponse
-from .types.get_users_id_followers_sub_id_response import GetUsersIdFollowersSubIdResponse
-from .types.get_users_id_following_response import GetUsersIdFollowingResponse
-from .types.get_users_id_following_sub_id_response import GetUsersIdFollowingSubIdResponse
-from .types.get_users_id_response import GetUsersIdResponse
-from .types.get_users_response import GetUsersResponse
-from .types.patch_users_id_response import PatchUsersIdResponse
+from .types.list_users_request_sort import ListUsersRequestSort
+from .types.retrieve_follower_users_response import RetrieveFollowerUsersResponse
+from .types.retrieve_following_users_response import RetrieveFollowingUsersResponse
+from .types.update_users_response import UpdateUsersResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -35,29 +34,38 @@ class UsersClient:
         """
         return self._raw_client
 
-    def list_all_users(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        sort: typing.Optional[ListUsersRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetUsersResponse:
+    ) -> UserListResponse:
         """
+        Retrieve a paginated list of users. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search by username or display name
+
+        sort : typing.Optional[ListUsersRequestSort]
+            Sort by creation date
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetUsersResponse
+        UserListResponse
             Success
 
         Examples
@@ -67,25 +75,107 @@ class UsersClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.users.list_all_users()
+        client.users.list()
         """
-        _response = self._raw_client.list_all_users(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = self._raw_client.list(
+            limit=limit, cursor=cursor, search=search, sort=sort, request_options=request_options
         )
         return _response.data
 
-    def get_a_user(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetUsersIdResponse:
+    def create(
+        self,
+        *,
+        username: str,
+        email: typing.Optional[str] = OMIT,
+        password: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
+        bio: typing.Optional[str] = OMIT,
+        signature: typing.Optional[str] = OMIT,
+        url: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[str]] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UserResponse:
         """
+        Create a new user.
+
         Parameters
         ----------
-        id : str
+        username : str
+            Username (letters, numbers, underscores, hyphens)
+
+        email : typing.Optional[str]
+            Email address
+
+        password : typing.Optional[str]
+            Password (min 8 chars)
+
+        display_name : typing.Optional[str]
+            Display name
+
+        bio : typing.Optional[str]
+            User bio
+
+        signature : typing.Optional[str]
+            Forum signature
+
+        url : typing.Optional[str]
+            Website URL
+
+        roles : typing.Optional[typing.Sequence[str]]
+            Role slugs to assign
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetUsersIdResponse
+        UserResponse
+            Created
+
+        Examples
+        --------
+        from foru_ms_sdk import ForumClient
+
+        client = ForumClient(
+            api_key="YOUR_API_KEY",
+        )
+        client.users.create(
+            username="username",
+        )
+        """
+        _response = self._raw_client.create(
+            username=username,
+            email=email,
+            password=password,
+            display_name=display_name,
+            bio=bio,
+            signature=signature,
+            url=url,
+            roles=roles,
+            extended_data=extended_data,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> UserResponse:
+        """
+        Retrieve a user by ID or slug (if supported).
+
+        Parameters
+        ----------
+        id : str
+            User ID
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UserResponse
             Success
 
         Examples
@@ -95,27 +185,28 @@ class UsersClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.users.get_a_user(
+        client.users.retrieve(
             id="id",
         )
         """
-        _response = self._raw_client.get_a_user(id, request_options=request_options)
+        _response = self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    def delete_a_user(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteUsersIdResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a user.
+
         Parameters
         ----------
         id : str
+            User ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteUsersIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -125,14 +216,14 @@ class UsersClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.users.delete_a_user(
+        client.users.delete(
             id="id",
         )
         """
-        _response = self._raw_client.delete_a_user(id, request_options=request_options)
+        _response = self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    def update_a_user(
+    def update(
         self,
         id: str,
         *,
@@ -146,11 +237,14 @@ class UsersClient:
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         roles: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchUsersIdResponse:
+    ) -> UpdateUsersResponse:
         """
+        Update an existing user. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            User ID
 
         display_name : typing.Optional[str]
             Display name
@@ -184,7 +278,7 @@ class UsersClient:
 
         Returns
         -------
-        PatchUsersIdResponse
+        UpdateUsersResponse
             Updated
 
         Examples
@@ -194,11 +288,11 @@ class UsersClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.users.update_a_user(
+        client.users.update(
             id="id",
         )
         """
-        _response = self._raw_client.update_a_user(
+        _response = self._raw_client.update(
             id,
             display_name=display_name,
             bio=bio,
@@ -213,32 +307,34 @@ class UsersClient:
         )
         return _response.data
 
-    def list_user_followers(
+    def list_followers(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetUsersIdFollowersResponse:
+    ) -> UserFollowerListResponse:
         """
+        Retrieve a paginated list of followers for User.
+
         Parameters
         ----------
         id : str
             User ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetUsersIdFollowersResponse
+        UserFollowerListResponse
             Success
 
         Examples
@@ -248,18 +344,16 @@ class UsersClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.users.list_user_followers(
+        client.users.list_followers(
             id="id",
         )
         """
-        _response = self._raw_client.list_user_followers(
-            id, cursor=cursor, limit=limit, request_options=request_options
-        )
+        _response = self._raw_client.list_followers(id, limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
-    def get_a_follower_from_user(
+    def retrieve_follower(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetUsersIdFollowersSubIdResponse:
+    ) -> RetrieveFollowerUsersResponse:
         """
         Parameters
         ----------
@@ -274,7 +368,7 @@ class UsersClient:
 
         Returns
         -------
-        GetUsersIdFollowersSubIdResponse
+        RetrieveFollowerUsersResponse
             Success
 
         Examples
@@ -284,17 +378,17 @@ class UsersClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.users.get_a_follower_from_user(
+        client.users.retrieve_follower(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.get_a_follower_from_user(id, sub_id, request_options=request_options)
+        _response = self._raw_client.retrieve_follower(id, sub_id, request_options=request_options)
         return _response.data
 
-    def delete_a_follower_from_user(
+    def delete_follower(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteUsersIdFollowersSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -309,7 +403,7 @@ class UsersClient:
 
         Returns
         -------
-        DeleteUsersIdFollowersSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -319,40 +413,42 @@ class UsersClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.users.delete_a_follower_from_user(
+        client.users.delete_follower(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.delete_a_follower_from_user(id, sub_id, request_options=request_options)
+        _response = self._raw_client.delete_follower(id, sub_id, request_options=request_options)
         return _response.data
 
-    def list_user_following(
+    def list_following(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetUsersIdFollowingResponse:
+    ) -> UserFollowingListResponse:
         """
+        Retrieve a paginated list of following for User.
+
         Parameters
         ----------
         id : str
             User ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetUsersIdFollowingResponse
+        UserFollowingListResponse
             Success
 
         Examples
@@ -362,18 +458,16 @@ class UsersClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.users.list_user_following(
+        client.users.list_following(
             id="id",
         )
         """
-        _response = self._raw_client.list_user_following(
-            id, cursor=cursor, limit=limit, request_options=request_options
-        )
+        _response = self._raw_client.list_following(id, limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
-    def get_a_following_from_user(
+    def retrieve_following(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetUsersIdFollowingSubIdResponse:
+    ) -> RetrieveFollowingUsersResponse:
         """
         Parameters
         ----------
@@ -388,7 +482,7 @@ class UsersClient:
 
         Returns
         -------
-        GetUsersIdFollowingSubIdResponse
+        RetrieveFollowingUsersResponse
             Success
 
         Examples
@@ -398,17 +492,17 @@ class UsersClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.users.get_a_following_from_user(
+        client.users.retrieve_following(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.get_a_following_from_user(id, sub_id, request_options=request_options)
+        _response = self._raw_client.retrieve_following(id, sub_id, request_options=request_options)
         return _response.data
 
-    def delete_a_following_from_user(
+    def delete_following(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteUsersIdFollowingSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -423,7 +517,7 @@ class UsersClient:
 
         Returns
         -------
-        DeleteUsersIdFollowingSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -433,12 +527,12 @@ class UsersClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.users.delete_a_following_from_user(
+        client.users.delete_following(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.delete_a_following_from_user(id, sub_id, request_options=request_options)
+        _response = self._raw_client.delete_following(id, sub_id, request_options=request_options)
         return _response.data
 
 
@@ -457,29 +551,38 @@ class AsyncUsersClient:
         """
         return self._raw_client
 
-    async def list_all_users(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        sort: typing.Optional[ListUsersRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetUsersResponse:
+    ) -> UserListResponse:
         """
+        Retrieve a paginated list of users. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search by username or display name
+
+        sort : typing.Optional[ListUsersRequestSort]
+            Sort by creation date
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetUsersResponse
+        UserListResponse
             Success
 
         Examples
@@ -494,30 +597,118 @@ class AsyncUsersClient:
 
 
         async def main() -> None:
-            await client.users.list_all_users()
+            await client.users.list()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_all_users(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = await self._raw_client.list(
+            limit=limit, cursor=cursor, search=search, sort=sort, request_options=request_options
         )
         return _response.data
 
-    async def get_a_user(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetUsersIdResponse:
+    async def create(
+        self,
+        *,
+        username: str,
+        email: typing.Optional[str] = OMIT,
+        password: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
+        bio: typing.Optional[str] = OMIT,
+        signature: typing.Optional[str] = OMIT,
+        url: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[str]] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UserResponse:
         """
+        Create a new user.
+
         Parameters
         ----------
-        id : str
+        username : str
+            Username (letters, numbers, underscores, hyphens)
+
+        email : typing.Optional[str]
+            Email address
+
+        password : typing.Optional[str]
+            Password (min 8 chars)
+
+        display_name : typing.Optional[str]
+            Display name
+
+        bio : typing.Optional[str]
+            User bio
+
+        signature : typing.Optional[str]
+            Forum signature
+
+        url : typing.Optional[str]
+            Website URL
+
+        roles : typing.Optional[typing.Sequence[str]]
+            Role slugs to assign
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetUsersIdResponse
+        UserResponse
+            Created
+
+        Examples
+        --------
+        import asyncio
+
+        from foru_ms_sdk import AsyncForumClient
+
+        client = AsyncForumClient(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.users.create(
+                username="username",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.create(
+            username=username,
+            email=email,
+            password=password,
+            display_name=display_name,
+            bio=bio,
+            signature=signature,
+            url=url,
+            roles=roles,
+            extended_data=extended_data,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> UserResponse:
+        """
+        Retrieve a user by ID or slug (if supported).
+
+        Parameters
+        ----------
+        id : str
+            User ID
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UserResponse
             Success
 
         Examples
@@ -532,30 +723,31 @@ class AsyncUsersClient:
 
 
         async def main() -> None:
-            await client.users.get_a_user(
+            await client.users.retrieve(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_user(id, request_options=request_options)
+        _response = await self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    async def delete_a_user(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteUsersIdResponse:
+    async def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a user.
+
         Parameters
         ----------
         id : str
+            User ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteUsersIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -570,17 +762,17 @@ class AsyncUsersClient:
 
 
         async def main() -> None:
-            await client.users.delete_a_user(
+            await client.users.delete(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_user(id, request_options=request_options)
+        _response = await self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    async def update_a_user(
+    async def update(
         self,
         id: str,
         *,
@@ -594,11 +786,14 @@ class AsyncUsersClient:
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         roles: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchUsersIdResponse:
+    ) -> UpdateUsersResponse:
         """
+        Update an existing user. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            User ID
 
         display_name : typing.Optional[str]
             Display name
@@ -632,7 +827,7 @@ class AsyncUsersClient:
 
         Returns
         -------
-        PatchUsersIdResponse
+        UpdateUsersResponse
             Updated
 
         Examples
@@ -647,14 +842,14 @@ class AsyncUsersClient:
 
 
         async def main() -> None:
-            await client.users.update_a_user(
+            await client.users.update(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_a_user(
+        _response = await self._raw_client.update(
             id,
             display_name=display_name,
             bio=bio,
@@ -669,32 +864,34 @@ class AsyncUsersClient:
         )
         return _response.data
 
-    async def list_user_followers(
+    async def list_followers(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetUsersIdFollowersResponse:
+    ) -> UserFollowerListResponse:
         """
+        Retrieve a paginated list of followers for User.
+
         Parameters
         ----------
         id : str
             User ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetUsersIdFollowersResponse
+        UserFollowerListResponse
             Success
 
         Examples
@@ -709,21 +906,21 @@ class AsyncUsersClient:
 
 
         async def main() -> None:
-            await client.users.list_user_followers(
+            await client.users.list_followers(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_user_followers(
-            id, cursor=cursor, limit=limit, request_options=request_options
+        _response = await self._raw_client.list_followers(
+            id, limit=limit, cursor=cursor, request_options=request_options
         )
         return _response.data
 
-    async def get_a_follower_from_user(
+    async def retrieve_follower(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetUsersIdFollowersSubIdResponse:
+    ) -> RetrieveFollowerUsersResponse:
         """
         Parameters
         ----------
@@ -738,7 +935,7 @@ class AsyncUsersClient:
 
         Returns
         -------
-        GetUsersIdFollowersSubIdResponse
+        RetrieveFollowerUsersResponse
             Success
 
         Examples
@@ -753,7 +950,7 @@ class AsyncUsersClient:
 
 
         async def main() -> None:
-            await client.users.get_a_follower_from_user(
+            await client.users.retrieve_follower(
                 id="id",
                 sub_id="subId",
             )
@@ -761,12 +958,12 @@ class AsyncUsersClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_follower_from_user(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.retrieve_follower(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def delete_a_follower_from_user(
+    async def delete_follower(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteUsersIdFollowersSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -781,7 +978,7 @@ class AsyncUsersClient:
 
         Returns
         -------
-        DeleteUsersIdFollowersSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -796,7 +993,7 @@ class AsyncUsersClient:
 
 
         async def main() -> None:
-            await client.users.delete_a_follower_from_user(
+            await client.users.delete_follower(
                 id="id",
                 sub_id="subId",
             )
@@ -804,35 +1001,37 @@ class AsyncUsersClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_follower_from_user(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.delete_follower(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def list_user_following(
+    async def list_following(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetUsersIdFollowingResponse:
+    ) -> UserFollowingListResponse:
         """
+        Retrieve a paginated list of following for User.
+
         Parameters
         ----------
         id : str
             User ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetUsersIdFollowingResponse
+        UserFollowingListResponse
             Success
 
         Examples
@@ -847,21 +1046,21 @@ class AsyncUsersClient:
 
 
         async def main() -> None:
-            await client.users.list_user_following(
+            await client.users.list_following(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_user_following(
-            id, cursor=cursor, limit=limit, request_options=request_options
+        _response = await self._raw_client.list_following(
+            id, limit=limit, cursor=cursor, request_options=request_options
         )
         return _response.data
 
-    async def get_a_following_from_user(
+    async def retrieve_following(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetUsersIdFollowingSubIdResponse:
+    ) -> RetrieveFollowingUsersResponse:
         """
         Parameters
         ----------
@@ -876,7 +1075,7 @@ class AsyncUsersClient:
 
         Returns
         -------
-        GetUsersIdFollowingSubIdResponse
+        RetrieveFollowingUsersResponse
             Success
 
         Examples
@@ -891,7 +1090,7 @@ class AsyncUsersClient:
 
 
         async def main() -> None:
-            await client.users.get_a_following_from_user(
+            await client.users.retrieve_following(
                 id="id",
                 sub_id="subId",
             )
@@ -899,12 +1098,12 @@ class AsyncUsersClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_following_from_user(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.retrieve_following(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def delete_a_following_from_user(
+    async def delete_following(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteUsersIdFollowingSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -919,7 +1118,7 @@ class AsyncUsersClient:
 
         Returns
         -------
-        DeleteUsersIdFollowingSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -934,7 +1133,7 @@ class AsyncUsersClient:
 
 
         async def main() -> None:
-            await client.users.delete_a_following_from_user(
+            await client.users.delete_following(
                 id="id",
                 sub_id="subId",
             )
@@ -942,5 +1141,5 @@ class AsyncUsersClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_following_from_user(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.delete_following(id, sub_id, request_options=request_options)
         return _response.data

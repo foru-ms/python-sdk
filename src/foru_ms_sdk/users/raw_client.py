@@ -16,16 +16,15 @@ from ..errors.payment_required_error import PaymentRequiredError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error_response import ErrorResponse
-from .types.delete_users_id_followers_sub_id_response import DeleteUsersIdFollowersSubIdResponse
-from .types.delete_users_id_following_sub_id_response import DeleteUsersIdFollowingSubIdResponse
-from .types.delete_users_id_response import DeleteUsersIdResponse
-from .types.get_users_id_followers_response import GetUsersIdFollowersResponse
-from .types.get_users_id_followers_sub_id_response import GetUsersIdFollowersSubIdResponse
-from .types.get_users_id_following_response import GetUsersIdFollowingResponse
-from .types.get_users_id_following_sub_id_response import GetUsersIdFollowingSubIdResponse
-from .types.get_users_id_response import GetUsersIdResponse
-from .types.get_users_response import GetUsersResponse
-from .types.patch_users_id_response import PatchUsersIdResponse
+from ..types.success_response import SuccessResponse
+from ..types.user_follower_list_response import UserFollowerListResponse
+from ..types.user_following_list_response import UserFollowingListResponse
+from ..types.user_list_response import UserListResponse
+from ..types.user_response import UserResponse
+from .types.list_users_request_sort import ListUsersRequestSort
+from .types.retrieve_follower_users_response import RetrieveFollowerUsersResponse
+from .types.retrieve_following_users_response import RetrieveFollowingUsersResponse
+from .types.update_users_response import UpdateUsersResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -35,47 +34,57 @@ class RawUsersClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_all_users(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        sort: typing.Optional[ListUsersRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetUsersResponse]:
+    ) -> HttpResponse[UserListResponse]:
         """
+        Retrieve a paginated list of users. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search by username or display name
+
+        sort : typing.Optional[ListUsersRequestSort]
+            Sort by creation date
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetUsersResponse]
+        HttpResponse[UserListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             "users",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
+                "cursor": cursor,
                 "search": search,
+                "sort": sort,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersResponse,
+                    UserListResponse,
                     parse_obj_as(
-                        type_=GetUsersResponse,  # type: ignore
+                        type_=UserListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -129,20 +138,167 @@ class RawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_user(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetUsersIdResponse]:
+    def create(
+        self,
+        *,
+        username: str,
+        email: typing.Optional[str] = OMIT,
+        password: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
+        bio: typing.Optional[str] = OMIT,
+        signature: typing.Optional[str] = OMIT,
+        url: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[str]] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[UserResponse]:
         """
+        Create a new user.
+
         Parameters
         ----------
-        id : str
+        username : str
+            Username (letters, numbers, underscores, hyphens)
+
+        email : typing.Optional[str]
+            Email address
+
+        password : typing.Optional[str]
+            Password (min 8 chars)
+
+        display_name : typing.Optional[str]
+            Display name
+
+        bio : typing.Optional[str]
+            User bio
+
+        signature : typing.Optional[str]
+            Forum signature
+
+        url : typing.Optional[str]
+            Website URL
+
+        roles : typing.Optional[typing.Sequence[str]]
+            Role slugs to assign
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetUsersIdResponse]
+        HttpResponse[UserResponse]
+            Created
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "users",
+            method="POST",
+            json={
+                "username": username,
+                "email": email,
+                "password": password,
+                "displayName": display_name,
+                "bio": bio,
+                "signature": signature,
+                "url": url,
+                "roles": roles,
+                "extendedData": extended_data,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UserResponse,
+                    parse_obj_as(
+                        type_=UserResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 402:
+                raise PaymentRequiredError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def retrieve(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[UserResponse]:
+        """
+        Retrieve a user by ID or slug (if supported).
+
+        Parameters
+        ----------
+        id : str
+            User ID
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[UserResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -153,9 +309,9 @@ class RawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersIdResponse,
+                    UserResponse,
                     parse_obj_as(
-                        type_=GetUsersIdResponse,  # type: ignore
+                        type_=UserResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -220,20 +376,23 @@ class RawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_user(
+    def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteUsersIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
+        Permanently delete a user.
+
         Parameters
         ----------
         id : str
+            User ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeleteUsersIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -244,9 +403,9 @@ class RawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteUsersIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteUsersIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -311,7 +470,7 @@ class RawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_a_user(
+    def update(
         self,
         id: str,
         *,
@@ -325,11 +484,14 @@ class RawUsersClient:
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         roles: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PatchUsersIdResponse]:
+    ) -> HttpResponse[UpdateUsersResponse]:
         """
+        Update an existing user. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            User ID
 
         display_name : typing.Optional[str]
             Display name
@@ -363,7 +525,7 @@ class RawUsersClient:
 
         Returns
         -------
-        HttpResponse[PatchUsersIdResponse]
+        HttpResponse[UpdateUsersResponse]
             Updated
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -389,9 +551,9 @@ class RawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchUsersIdResponse,
+                    UpdateUsersResponse,
                     parse_obj_as(
-                        type_=PatchUsersIdResponse,  # type: ignore
+                        type_=UpdateUsersResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -467,49 +629,51 @@ class RawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def list_user_followers(
+    def list_followers(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetUsersIdFollowersResponse]:
+    ) -> HttpResponse[UserFollowerListResponse]:
         """
+        Retrieve a paginated list of followers for User.
+
         Parameters
         ----------
         id : str
             User ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetUsersIdFollowersResponse]
+        HttpResponse[UserFollowerListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             f"users/{jsonable_encoder(id)}/followers",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersIdFollowersResponse,
+                    UserFollowerListResponse,
                     parse_obj_as(
-                        type_=GetUsersIdFollowersResponse,  # type: ignore
+                        type_=UserFollowerListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -563,9 +727,9 @@ class RawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_follower_from_user(
+    def retrieve_follower(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetUsersIdFollowersSubIdResponse]:
+    ) -> HttpResponse[RetrieveFollowerUsersResponse]:
         """
         Parameters
         ----------
@@ -580,7 +744,7 @@ class RawUsersClient:
 
         Returns
         -------
-        HttpResponse[GetUsersIdFollowersSubIdResponse]
+        HttpResponse[RetrieveFollowerUsersResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -591,9 +755,9 @@ class RawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersIdFollowersSubIdResponse,
+                    RetrieveFollowerUsersResponse,
                     parse_obj_as(
-                        type_=GetUsersIdFollowersSubIdResponse,  # type: ignore
+                        type_=RetrieveFollowerUsersResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -647,9 +811,9 @@ class RawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_follower_from_user(
+    def delete_follower(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteUsersIdFollowersSubIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -664,7 +828,7 @@ class RawUsersClient:
 
         Returns
         -------
-        HttpResponse[DeleteUsersIdFollowersSubIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -675,9 +839,9 @@ class RawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteUsersIdFollowersSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteUsersIdFollowersSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -731,49 +895,51 @@ class RawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def list_user_following(
+    def list_following(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetUsersIdFollowingResponse]:
+    ) -> HttpResponse[UserFollowingListResponse]:
         """
+        Retrieve a paginated list of following for User.
+
         Parameters
         ----------
         id : str
             User ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetUsersIdFollowingResponse]
+        HttpResponse[UserFollowingListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             f"users/{jsonable_encoder(id)}/following",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersIdFollowingResponse,
+                    UserFollowingListResponse,
                     parse_obj_as(
-                        type_=GetUsersIdFollowingResponse,  # type: ignore
+                        type_=UserFollowingListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -827,9 +993,9 @@ class RawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_following_from_user(
+    def retrieve_following(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetUsersIdFollowingSubIdResponse]:
+    ) -> HttpResponse[RetrieveFollowingUsersResponse]:
         """
         Parameters
         ----------
@@ -844,7 +1010,7 @@ class RawUsersClient:
 
         Returns
         -------
-        HttpResponse[GetUsersIdFollowingSubIdResponse]
+        HttpResponse[RetrieveFollowingUsersResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -855,9 +1021,9 @@ class RawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersIdFollowingSubIdResponse,
+                    RetrieveFollowingUsersResponse,
                     parse_obj_as(
-                        type_=GetUsersIdFollowingSubIdResponse,  # type: ignore
+                        type_=RetrieveFollowingUsersResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -911,9 +1077,9 @@ class RawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_following_from_user(
+    def delete_following(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteUsersIdFollowingSubIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -928,7 +1094,7 @@ class RawUsersClient:
 
         Returns
         -------
-        HttpResponse[DeleteUsersIdFollowingSubIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -939,9 +1105,9 @@ class RawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteUsersIdFollowingSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteUsersIdFollowingSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1000,47 +1166,57 @@ class AsyncRawUsersClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_all_users(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        sort: typing.Optional[ListUsersRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetUsersResponse]:
+    ) -> AsyncHttpResponse[UserListResponse]:
         """
+        Retrieve a paginated list of users. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search by username or display name
+
+        sort : typing.Optional[ListUsersRequestSort]
+            Sort by creation date
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetUsersResponse]
+        AsyncHttpResponse[UserListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             "users",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
+                "cursor": cursor,
                 "search": search,
+                "sort": sort,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersResponse,
+                    UserListResponse,
                     parse_obj_as(
-                        type_=GetUsersResponse,  # type: ignore
+                        type_=UserListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1094,20 +1270,167 @@ class AsyncRawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_user(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetUsersIdResponse]:
+    async def create(
+        self,
+        *,
+        username: str,
+        email: typing.Optional[str] = OMIT,
+        password: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
+        bio: typing.Optional[str] = OMIT,
+        signature: typing.Optional[str] = OMIT,
+        url: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[str]] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[UserResponse]:
         """
+        Create a new user.
+
         Parameters
         ----------
-        id : str
+        username : str
+            Username (letters, numbers, underscores, hyphens)
+
+        email : typing.Optional[str]
+            Email address
+
+        password : typing.Optional[str]
+            Password (min 8 chars)
+
+        display_name : typing.Optional[str]
+            Display name
+
+        bio : typing.Optional[str]
+            User bio
+
+        signature : typing.Optional[str]
+            Forum signature
+
+        url : typing.Optional[str]
+            Website URL
+
+        roles : typing.Optional[typing.Sequence[str]]
+            Role slugs to assign
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetUsersIdResponse]
+        AsyncHttpResponse[UserResponse]
+            Created
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "users",
+            method="POST",
+            json={
+                "username": username,
+                "email": email,
+                "password": password,
+                "displayName": display_name,
+                "bio": bio,
+                "signature": signature,
+                "url": url,
+                "roles": roles,
+                "extendedData": extended_data,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UserResponse,
+                    parse_obj_as(
+                        type_=UserResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 402:
+                raise PaymentRequiredError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def retrieve(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[UserResponse]:
+        """
+        Retrieve a user by ID or slug (if supported).
+
+        Parameters
+        ----------
+        id : str
+            User ID
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[UserResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1118,9 +1441,9 @@ class AsyncRawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersIdResponse,
+                    UserResponse,
                     parse_obj_as(
-                        type_=GetUsersIdResponse,  # type: ignore
+                        type_=UserResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1185,20 +1508,23 @@ class AsyncRawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_user(
+    async def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteUsersIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
+        Permanently delete a user.
+
         Parameters
         ----------
         id : str
+            User ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeleteUsersIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1209,9 +1535,9 @@ class AsyncRawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteUsersIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteUsersIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1276,7 +1602,7 @@ class AsyncRawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_a_user(
+    async def update(
         self,
         id: str,
         *,
@@ -1290,11 +1616,14 @@ class AsyncRawUsersClient:
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         roles: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PatchUsersIdResponse]:
+    ) -> AsyncHttpResponse[UpdateUsersResponse]:
         """
+        Update an existing user. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            User ID
 
         display_name : typing.Optional[str]
             Display name
@@ -1328,7 +1657,7 @@ class AsyncRawUsersClient:
 
         Returns
         -------
-        AsyncHttpResponse[PatchUsersIdResponse]
+        AsyncHttpResponse[UpdateUsersResponse]
             Updated
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1354,9 +1683,9 @@ class AsyncRawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchUsersIdResponse,
+                    UpdateUsersResponse,
                     parse_obj_as(
-                        type_=PatchUsersIdResponse,  # type: ignore
+                        type_=UpdateUsersResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1432,49 +1761,51 @@ class AsyncRawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def list_user_followers(
+    async def list_followers(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetUsersIdFollowersResponse]:
+    ) -> AsyncHttpResponse[UserFollowerListResponse]:
         """
+        Retrieve a paginated list of followers for User.
+
         Parameters
         ----------
         id : str
             User ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetUsersIdFollowersResponse]
+        AsyncHttpResponse[UserFollowerListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"users/{jsonable_encoder(id)}/followers",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersIdFollowersResponse,
+                    UserFollowerListResponse,
                     parse_obj_as(
-                        type_=GetUsersIdFollowersResponse,  # type: ignore
+                        type_=UserFollowerListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1528,9 +1859,9 @@ class AsyncRawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_follower_from_user(
+    async def retrieve_follower(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetUsersIdFollowersSubIdResponse]:
+    ) -> AsyncHttpResponse[RetrieveFollowerUsersResponse]:
         """
         Parameters
         ----------
@@ -1545,7 +1876,7 @@ class AsyncRawUsersClient:
 
         Returns
         -------
-        AsyncHttpResponse[GetUsersIdFollowersSubIdResponse]
+        AsyncHttpResponse[RetrieveFollowerUsersResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1556,9 +1887,9 @@ class AsyncRawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersIdFollowersSubIdResponse,
+                    RetrieveFollowerUsersResponse,
                     parse_obj_as(
-                        type_=GetUsersIdFollowersSubIdResponse,  # type: ignore
+                        type_=RetrieveFollowerUsersResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1612,9 +1943,9 @@ class AsyncRawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_follower_from_user(
+    async def delete_follower(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteUsersIdFollowersSubIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -1629,7 +1960,7 @@ class AsyncRawUsersClient:
 
         Returns
         -------
-        AsyncHttpResponse[DeleteUsersIdFollowersSubIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1640,9 +1971,9 @@ class AsyncRawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteUsersIdFollowersSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteUsersIdFollowersSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1696,49 +2027,51 @@ class AsyncRawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def list_user_following(
+    async def list_following(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetUsersIdFollowingResponse]:
+    ) -> AsyncHttpResponse[UserFollowingListResponse]:
         """
+        Retrieve a paginated list of following for User.
+
         Parameters
         ----------
         id : str
             User ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetUsersIdFollowingResponse]
+        AsyncHttpResponse[UserFollowingListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"users/{jsonable_encoder(id)}/following",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersIdFollowingResponse,
+                    UserFollowingListResponse,
                     parse_obj_as(
-                        type_=GetUsersIdFollowingResponse,  # type: ignore
+                        type_=UserFollowingListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1792,9 +2125,9 @@ class AsyncRawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_following_from_user(
+    async def retrieve_following(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetUsersIdFollowingSubIdResponse]:
+    ) -> AsyncHttpResponse[RetrieveFollowingUsersResponse]:
         """
         Parameters
         ----------
@@ -1809,7 +2142,7 @@ class AsyncRawUsersClient:
 
         Returns
         -------
-        AsyncHttpResponse[GetUsersIdFollowingSubIdResponse]
+        AsyncHttpResponse[RetrieveFollowingUsersResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1820,9 +2153,9 @@ class AsyncRawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetUsersIdFollowingSubIdResponse,
+                    RetrieveFollowingUsersResponse,
                     parse_obj_as(
-                        type_=GetUsersIdFollowingSubIdResponse,  # type: ignore
+                        type_=RetrieveFollowingUsersResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1876,9 +2209,9 @@ class AsyncRawUsersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_following_from_user(
+    async def delete_following(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteUsersIdFollowingSubIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -1893,7 +2226,7 @@ class AsyncRawUsersClient:
 
         Returns
         -------
-        AsyncHttpResponse[DeleteUsersIdFollowingSubIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1904,9 +2237,9 @@ class AsyncRawUsersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteUsersIdFollowingSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteUsersIdFollowingSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

@@ -3,38 +3,12 @@
 import typing
 
 import pydantic
-import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from ..core.serialization import FieldMetadata
-from .integration_response_type import IntegrationResponseType
+from .integration_response_data import IntegrationResponseData
 
 
 class IntegrationResponse(UniversalBaseModel):
-    id: str
-    type: IntegrationResponseType = pydantic.Field()
-    """
-    Integration type
-    """
-
-    name: str = pydantic.Field()
-    """
-    Integration name
-    """
-
-    active: bool = pydantic.Field()
-    """
-    Whether integration is active
-    """
-
-    created_at: typing_extensions.Annotated[str, FieldMetadata(alias="createdAt")] = pydantic.Field(alias="createdAt")
-    """
-    Integration creation timestamp
-    """
-
-    updated_at: typing_extensions.Annotated[str, FieldMetadata(alias="updatedAt")] = pydantic.Field(alias="updatedAt")
-    """
-    Integration last update timestamp
-    """
+    data: typing.Optional[IntegrationResponseData] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

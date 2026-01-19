@@ -3,38 +3,12 @@
 import typing
 
 import pydantic
-import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from ..core.serialization import FieldMetadata
-from .sso_response_provider import SsoResponseProvider
+from .sso_response_data import SsoResponseData
 
 
 class SsoResponse(UniversalBaseModel):
-    id: str
-    provider: SsoResponseProvider = pydantic.Field()
-    """
-    SSO provider type
-    """
-
-    domain: str = pydantic.Field()
-    """
-    Email domain for this provider
-    """
-
-    active: bool = pydantic.Field()
-    """
-    Whether SSO is active
-    """
-
-    created_at: typing_extensions.Annotated[str, FieldMetadata(alias="createdAt")] = pydantic.Field(alias="createdAt")
-    """
-    SSO configuration creation timestamp
-    """
-
-    updated_at: typing_extensions.Annotated[str, FieldMetadata(alias="updatedAt")] = pydantic.Field(alias="updatedAt")
-    """
-    SSO configuration last update timestamp
-    """
+    data: typing.Optional[SsoResponseData] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

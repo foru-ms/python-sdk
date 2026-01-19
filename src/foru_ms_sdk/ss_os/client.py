@@ -4,12 +4,13 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.sso_list_response import SsoListResponse
+from ..types.sso_response import SsoResponse
+from ..types.success_response import SuccessResponse
 from .raw_client import AsyncRawSsOsClient, RawSsOsClient
-from .types.delete_sso_id_response import DeleteSsoIdResponse
-from .types.get_sso_id_response import GetSsoIdResponse
-from .types.get_sso_response import GetSsoResponse
-from .types.patch_sso_id_response import PatchSsoIdResponse
-from .types.post_sso_response import PostSsoResponse
+from .types.create_ss_os_request_provider import CreateSsOsRequestProvider
+from .types.update_ss_os_request_provider import UpdateSsOsRequestProvider
+from .types.update_ss_os_response import UpdateSsOsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -30,29 +31,32 @@ class SsOsClient:
         """
         return self._raw_client
 
-    def list_all_ss_os(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetSsoResponse:
+    ) -> SsoListResponse:
         """
+        Retrieve a paginated list of ssos. Use cursor for pagination.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetSsoResponse
+        SsoListResponse
             Success
 
         Examples
@@ -62,49 +66,49 @@ class SsOsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.ss_os.list_all_ss_os()
+        client.ss_os.list()
         """
-        _response = self._raw_client.list_all_ss_os(
-            page=page, limit=limit, search=search, request_options=request_options
-        )
+        _response = self._raw_client.list(limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
-    def create_an_sso(
+    def create(
         self,
         *,
-        name: str,
-        client_id: str,
-        client_secret: str,
-        issuer: str,
-        authorization_endpoint: str,
-        token_endpoint: str,
-        user_info_endpoint: str,
+        provider: CreateSsOsRequestProvider,
+        domain: str,
+        config: typing.Dict[str, typing.Any],
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostSsoResponse:
+    ) -> SsoResponse:
         """
+        Create an new sso.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
-        name : str
-            Provider name (e.g. Google)
+        provider : CreateSsOsRequestProvider
+            SSO provider type
 
-        client_id : str
+        domain : str
+            Email domain to match (e.g. 'acme.com')
 
-        client_secret : str
+        config : typing.Dict[str, typing.Any]
+            Provider configuration (clientId, issuer, etc.)
 
-        issuer : str
+        active : typing.Optional[bool]
+            Whether SSO is active
 
-        authorization_endpoint : str
-
-        token_endpoint : str
-
-        user_info_endpoint : str
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PostSsoResponse
+        SsoResponse
             Created
 
         Examples
@@ -114,40 +118,39 @@ class SsOsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.ss_os.create_an_sso(
-            name="name",
-            client_id="clientId",
-            client_secret="clientSecret",
-            issuer="issuer",
-            authorization_endpoint="authorizationEndpoint",
-            token_endpoint="tokenEndpoint",
-            user_info_endpoint="userInfoEndpoint",
+        client.ss_os.create(
+            provider="OKTA",
+            domain="domain",
+            config={"key": "value"},
         )
         """
-        _response = self._raw_client.create_an_sso(
-            name=name,
-            client_id=client_id,
-            client_secret=client_secret,
-            issuer=issuer,
-            authorization_endpoint=authorization_endpoint,
-            token_endpoint=token_endpoint,
-            user_info_endpoint=user_info_endpoint,
+        _response = self._raw_client.create(
+            provider=provider,
+            domain=domain,
+            config=config,
+            active=active,
+            extended_data=extended_data,
             request_options=request_options,
         )
         return _response.data
 
-    def get_an_sso(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetSsoIdResponse:
+    def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SsoResponse:
         """
+        Retrieve an sso by ID or slug (if supported).
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetSsoIdResponse
+        SsoResponse
             Success
 
         Examples
@@ -157,25 +160,30 @@ class SsOsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.ss_os.get_an_sso(
+        client.ss_os.retrieve(
             id="id",
         )
         """
-        _response = self._raw_client.get_an_sso(id, request_options=request_options)
+        _response = self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    def delete_an_sso(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> DeleteSsoIdResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete an sso.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteSsoIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -185,60 +193,55 @@ class SsOsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.ss_os.delete_an_sso(
+        client.ss_os.delete(
             id="id",
         )
         """
-        _response = self._raw_client.delete_an_sso(id, request_options=request_options)
+        _response = self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    def update_an_sso(
+    def update(
         self,
         id: str,
         *,
-        name: typing.Optional[str] = OMIT,
+        provider: typing.Optional[UpdateSsOsRequestProvider] = OMIT,
         domain: typing.Optional[str] = OMIT,
-        client_id: typing.Optional[str] = OMIT,
-        client_secret: typing.Optional[str] = OMIT,
-        issuer: typing.Optional[str] = OMIT,
-        authorization_endpoint: typing.Optional[str] = OMIT,
-        token_endpoint: typing.Optional[str] = OMIT,
-        user_info_endpoint: typing.Optional[str] = OMIT,
+        config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchSsoIdResponse:
+    ) -> UpdateSsOsResponse:
         """
+        Update an existing sso. Only provided fields will be modified.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
-        name : typing.Optional[str]
-            Provider name
+        provider : typing.Optional[UpdateSsOsRequestProvider]
+            SSO provider type
 
         domain : typing.Optional[str]
             Email domain to match
 
-        client_id : typing.Optional[str]
-
-        client_secret : typing.Optional[str]
-
-        issuer : typing.Optional[str]
-
-        authorization_endpoint : typing.Optional[str]
-
-        token_endpoint : typing.Optional[str]
-
-        user_info_endpoint : typing.Optional[str]
+        config : typing.Optional[typing.Dict[str, typing.Any]]
+            Provider configuration
 
         active : typing.Optional[bool]
             Enable/disable provider
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PatchSsoIdResponse
+        UpdateSsOsResponse
             Updated
 
         Examples
@@ -248,21 +251,17 @@ class SsOsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.ss_os.update_an_sso(
+        client.ss_os.update(
             id="id",
         )
         """
-        _response = self._raw_client.update_an_sso(
+        _response = self._raw_client.update(
             id,
-            name=name,
+            provider=provider,
             domain=domain,
-            client_id=client_id,
-            client_secret=client_secret,
-            issuer=issuer,
-            authorization_endpoint=authorization_endpoint,
-            token_endpoint=token_endpoint,
-            user_info_endpoint=user_info_endpoint,
+            config=config,
             active=active,
+            extended_data=extended_data,
             request_options=request_options,
         )
         return _response.data
@@ -283,29 +282,32 @@ class AsyncSsOsClient:
         """
         return self._raw_client
 
-    async def list_all_ss_os(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetSsoResponse:
+    ) -> SsoListResponse:
         """
+        Retrieve a paginated list of ssos. Use cursor for pagination.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetSsoResponse
+        SsoListResponse
             Success
 
         Examples
@@ -320,52 +322,52 @@ class AsyncSsOsClient:
 
 
         async def main() -> None:
-            await client.ss_os.list_all_ss_os()
+            await client.ss_os.list()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_all_ss_os(
-            page=page, limit=limit, search=search, request_options=request_options
-        )
+        _response = await self._raw_client.list(limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
-    async def create_an_sso(
+    async def create(
         self,
         *,
-        name: str,
-        client_id: str,
-        client_secret: str,
-        issuer: str,
-        authorization_endpoint: str,
-        token_endpoint: str,
-        user_info_endpoint: str,
+        provider: CreateSsOsRequestProvider,
+        domain: str,
+        config: typing.Dict[str, typing.Any],
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostSsoResponse:
+    ) -> SsoResponse:
         """
+        Create an new sso.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
-        name : str
-            Provider name (e.g. Google)
+        provider : CreateSsOsRequestProvider
+            SSO provider type
 
-        client_id : str
+        domain : str
+            Email domain to match (e.g. 'acme.com')
 
-        client_secret : str
+        config : typing.Dict[str, typing.Any]
+            Provider configuration (clientId, issuer, etc.)
 
-        issuer : str
+        active : typing.Optional[bool]
+            Whether SSO is active
 
-        authorization_endpoint : str
-
-        token_endpoint : str
-
-        user_info_endpoint : str
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PostSsoResponse
+        SsoResponse
             Created
 
         Examples
@@ -380,43 +382,42 @@ class AsyncSsOsClient:
 
 
         async def main() -> None:
-            await client.ss_os.create_an_sso(
-                name="name",
-                client_id="clientId",
-                client_secret="clientSecret",
-                issuer="issuer",
-                authorization_endpoint="authorizationEndpoint",
-                token_endpoint="tokenEndpoint",
-                user_info_endpoint="userInfoEndpoint",
+            await client.ss_os.create(
+                provider="OKTA",
+                domain="domain",
+                config={"key": "value"},
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_an_sso(
-            name=name,
-            client_id=client_id,
-            client_secret=client_secret,
-            issuer=issuer,
-            authorization_endpoint=authorization_endpoint,
-            token_endpoint=token_endpoint,
-            user_info_endpoint=user_info_endpoint,
+        _response = await self._raw_client.create(
+            provider=provider,
+            domain=domain,
+            config=config,
+            active=active,
+            extended_data=extended_data,
             request_options=request_options,
         )
         return _response.data
 
-    async def get_an_sso(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetSsoIdResponse:
+    async def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SsoResponse:
         """
+        Retrieve an sso by ID or slug (if supported).
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetSsoIdResponse
+        SsoResponse
             Success
 
         Examples
@@ -431,30 +432,33 @@ class AsyncSsOsClient:
 
 
         async def main() -> None:
-            await client.ss_os.get_an_sso(
+            await client.ss_os.retrieve(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_an_sso(id, request_options=request_options)
+        _response = await self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    async def delete_an_sso(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteSsoIdResponse:
+    async def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete an sso.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteSsoIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -469,63 +473,58 @@ class AsyncSsOsClient:
 
 
         async def main() -> None:
-            await client.ss_os.delete_an_sso(
+            await client.ss_os.delete(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_an_sso(id, request_options=request_options)
+        _response = await self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    async def update_an_sso(
+    async def update(
         self,
         id: str,
         *,
-        name: typing.Optional[str] = OMIT,
+        provider: typing.Optional[UpdateSsOsRequestProvider] = OMIT,
         domain: typing.Optional[str] = OMIT,
-        client_id: typing.Optional[str] = OMIT,
-        client_secret: typing.Optional[str] = OMIT,
-        issuer: typing.Optional[str] = OMIT,
-        authorization_endpoint: typing.Optional[str] = OMIT,
-        token_endpoint: typing.Optional[str] = OMIT,
-        user_info_endpoint: typing.Optional[str] = OMIT,
+        config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchSsoIdResponse:
+    ) -> UpdateSsOsResponse:
         """
+        Update an existing sso. Only provided fields will be modified.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
-        name : typing.Optional[str]
-            Provider name
+        provider : typing.Optional[UpdateSsOsRequestProvider]
+            SSO provider type
 
         domain : typing.Optional[str]
             Email domain to match
 
-        client_id : typing.Optional[str]
-
-        client_secret : typing.Optional[str]
-
-        issuer : typing.Optional[str]
-
-        authorization_endpoint : typing.Optional[str]
-
-        token_endpoint : typing.Optional[str]
-
-        user_info_endpoint : typing.Optional[str]
+        config : typing.Optional[typing.Dict[str, typing.Any]]
+            Provider configuration
 
         active : typing.Optional[bool]
             Enable/disable provider
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PatchSsoIdResponse
+        UpdateSsOsResponse
             Updated
 
         Examples
@@ -540,24 +539,20 @@ class AsyncSsOsClient:
 
 
         async def main() -> None:
-            await client.ss_os.update_an_sso(
+            await client.ss_os.update(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_an_sso(
+        _response = await self._raw_client.update(
             id,
-            name=name,
+            provider=provider,
             domain=domain,
-            client_id=client_id,
-            client_secret=client_secret,
-            issuer=issuer,
-            authorization_endpoint=authorization_endpoint,
-            token_endpoint=token_endpoint,
-            user_info_endpoint=user_info_endpoint,
+            config=config,
             active=active,
+            extended_data=extended_data,
             request_options=request_options,
         )
         return _response.data

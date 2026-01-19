@@ -6,23 +6,11 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .delete_reports_id_response import DeleteReportsIdResponse
-    from .get_reports_id_response import GetReportsIdResponse
-    from .get_reports_id_response_data import GetReportsIdResponseData
-    from .get_reports_response import GetReportsResponse
-    from .get_reports_response_data_item import GetReportsResponseDataItem
-    from .get_reports_response_meta import GetReportsResponseMeta
-    from .post_reports_response import PostReportsResponse
-    from .post_reports_response_data import PostReportsResponseData
+    from .update_reports_response import UpdateReportsResponse
+    from .update_reports_response_data import UpdateReportsResponseData
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteReportsIdResponse": ".delete_reports_id_response",
-    "GetReportsIdResponse": ".get_reports_id_response",
-    "GetReportsIdResponseData": ".get_reports_id_response_data",
-    "GetReportsResponse": ".get_reports_response",
-    "GetReportsResponseDataItem": ".get_reports_response_data_item",
-    "GetReportsResponseMeta": ".get_reports_response_meta",
-    "PostReportsResponse": ".post_reports_response",
-    "PostReportsResponseData": ".post_reports_response_data",
+    "UpdateReportsResponse": ".update_reports_response",
+    "UpdateReportsResponseData": ".update_reports_response_data",
 }
 
 
@@ -47,13 +35,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = [
-    "DeleteReportsIdResponse",
-    "GetReportsIdResponse",
-    "GetReportsIdResponseData",
-    "GetReportsResponse",
-    "GetReportsResponseDataItem",
-    "GetReportsResponseMeta",
-    "PostReportsResponse",
-    "PostReportsResponseData",
-]
+__all__ = ["UpdateReportsResponse", "UpdateReportsResponseData"]

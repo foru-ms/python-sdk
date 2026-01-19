@@ -7,36 +7,18 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .types import (
-        DeleteSsoIdResponse,
-        GetSsoIdResponse,
-        GetSsoIdResponseData,
-        GetSsoIdResponseDataProvider,
-        GetSsoResponse,
-        GetSsoResponseDataItem,
-        GetSsoResponseDataItemProvider,
-        GetSsoResponseMeta,
-        PatchSsoIdResponse,
-        PatchSsoIdResponseData,
-        PatchSsoIdResponseDataProvider,
-        PostSsoResponse,
-        PostSsoResponseData,
-        PostSsoResponseDataProvider,
+        CreateSsOsRequestProvider,
+        UpdateSsOsRequestProvider,
+        UpdateSsOsResponse,
+        UpdateSsOsResponseData,
+        UpdateSsOsResponseDataProvider,
     )
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteSsoIdResponse": ".types",
-    "GetSsoIdResponse": ".types",
-    "GetSsoIdResponseData": ".types",
-    "GetSsoIdResponseDataProvider": ".types",
-    "GetSsoResponse": ".types",
-    "GetSsoResponseDataItem": ".types",
-    "GetSsoResponseDataItemProvider": ".types",
-    "GetSsoResponseMeta": ".types",
-    "PatchSsoIdResponse": ".types",
-    "PatchSsoIdResponseData": ".types",
-    "PatchSsoIdResponseDataProvider": ".types",
-    "PostSsoResponse": ".types",
-    "PostSsoResponseData": ".types",
-    "PostSsoResponseDataProvider": ".types",
+    "CreateSsOsRequestProvider": ".types",
+    "UpdateSsOsRequestProvider": ".types",
+    "UpdateSsOsResponse": ".types",
+    "UpdateSsOsResponseData": ".types",
+    "UpdateSsOsResponseDataProvider": ".types",
 }
 
 
@@ -62,18 +44,9 @@ def __dir__():
 
 
 __all__ = [
-    "DeleteSsoIdResponse",
-    "GetSsoIdResponse",
-    "GetSsoIdResponseData",
-    "GetSsoIdResponseDataProvider",
-    "GetSsoResponse",
-    "GetSsoResponseDataItem",
-    "GetSsoResponseDataItemProvider",
-    "GetSsoResponseMeta",
-    "PatchSsoIdResponse",
-    "PatchSsoIdResponseData",
-    "PatchSsoIdResponseDataProvider",
-    "PostSsoResponse",
-    "PostSsoResponseData",
-    "PostSsoResponseDataProvider",
+    "CreateSsOsRequestProvider",
+    "UpdateSsOsRequestProvider",
+    "UpdateSsOsResponse",
+    "UpdateSsOsResponseData",
+    "UpdateSsOsResponseDataProvider",
 ]

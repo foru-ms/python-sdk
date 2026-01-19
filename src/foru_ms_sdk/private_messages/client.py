@@ -4,15 +4,14 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.private_message_list_response import PrivateMessageListResponse
+from ..types.private_message_reply_list_response import PrivateMessageReplyListResponse
+from ..types.private_message_reply_response import PrivateMessageReplyResponse
+from ..types.private_message_response import PrivateMessageResponse
+from ..types.success_response import SuccessResponse
 from .raw_client import AsyncRawPrivateMessagesClient, RawPrivateMessagesClient
-from .types.delete_private_messages_id_replies_sub_id_response import DeletePrivateMessagesIdRepliesSubIdResponse
-from .types.delete_private_messages_id_response import DeletePrivateMessagesIdResponse
-from .types.get_private_messages_id_replies_response import GetPrivateMessagesIdRepliesResponse
-from .types.get_private_messages_id_replies_sub_id_response import GetPrivateMessagesIdRepliesSubIdResponse
-from .types.get_private_messages_id_response import GetPrivateMessagesIdResponse
-from .types.get_private_messages_response import GetPrivateMessagesResponse
-from .types.post_private_messages_id_replies_response import PostPrivateMessagesIdRepliesResponse
-from .types.post_private_messages_response import PostPrivateMessagesResponse
+from .types.retrieve_reply_private_messages_response import RetrieveReplyPrivateMessagesResponse
+from .types.update_private_messages_response import UpdatePrivateMessagesResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -33,29 +32,34 @@ class PrivateMessagesClient:
         """
         return self._raw_client
 
-    def list_all_private_messages(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        query: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetPrivateMessagesResponse:
+    ) -> PrivateMessageListResponse:
         """
+        Retrieve a paginated list of private messages. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        query : typing.Optional[str]
+            Search query (title or body)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPrivateMessagesResponse
+        PrivateMessageListResponse
             Success
 
         Examples
@@ -65,14 +69,12 @@ class PrivateMessagesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.private_messages.list_all_private_messages()
+        client.private_messages.list()
         """
-        _response = self._raw_client.list_all_private_messages(
-            page=page, limit=limit, search=search, request_options=request_options
-        )
+        _response = self._raw_client.list(limit=limit, cursor=cursor, query=query, request_options=request_options)
         return _response.data
 
-    def create_a_private_message(
+    def create(
         self,
         *,
         recipient_id: str,
@@ -82,8 +84,10 @@ class PrivateMessagesClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostPrivateMessagesResponse:
+    ) -> PrivateMessageResponse:
         """
+        Create a new private message.
+
         Parameters
         ----------
         recipient_id : str
@@ -109,7 +113,7 @@ class PrivateMessagesClient:
 
         Returns
         -------
-        PostPrivateMessagesResponse
+        PrivateMessageResponse
             Created
 
         Examples
@@ -119,12 +123,12 @@ class PrivateMessagesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.private_messages.create_a_private_message(
+        client.private_messages.create(
             recipient_id="recipientId",
             body="body",
         )
         """
-        _response = self._raw_client.create_a_private_message(
+        _response = self._raw_client.create(
             recipient_id=recipient_id,
             body=body,
             sender_id=sender_id,
@@ -135,20 +139,21 @@ class PrivateMessagesClient:
         )
         return _response.data
 
-    def get_a_private_message(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetPrivateMessagesIdResponse:
+    def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> PrivateMessageResponse:
         """
+        Retrieve a private message by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Private Message ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPrivateMessagesIdResponse
+        PrivateMessageResponse
             Success
 
         Examples
@@ -158,27 +163,28 @@ class PrivateMessagesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.private_messages.get_a_private_message(
+        client.private_messages.retrieve(
             id="id",
         )
         """
-        _response = self._raw_client.get_a_private_message(id, request_options=request_options)
+        _response = self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    def delete_a_private_message(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePrivateMessagesIdResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a private message.
+
         Parameters
         ----------
         id : str
+            Private Message ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeletePrivateMessagesIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -188,22 +194,74 @@ class PrivateMessagesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.private_messages.delete_a_private_message(
+        client.private_messages.delete(
             id="id",
         )
         """
-        _response = self._raw_client.delete_a_private_message(id, request_options=request_options)
+        _response = self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    def list_private_message_replies(
+    def update(
+        self,
+        id: str,
+        *,
+        body: typing.Optional[str] = OMIT,
+        status: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UpdatePrivateMessagesResponse:
+        """
+        Update an existing private message. Only provided fields will be modified.
+
+        Parameters
+        ----------
+        id : str
+            Private Message ID
+
+        body : typing.Optional[str]
+            Message content
+
+        status : typing.Optional[str]
+            Message status (read, unread, archived)
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdatePrivateMessagesResponse
+            Updated
+
+        Examples
+        --------
+        from foru_ms_sdk import ForumClient
+
+        client = ForumClient(
+            api_key="YOUR_API_KEY",
+        )
+        client.private_messages.update(
+            id="id",
+        )
+        """
+        _response = self._raw_client.update(
+            id, body=body, status=status, extended_data=extended_data, request_options=request_options
+        )
+        return _response.data
+
+    def list_replies(
         self,
         id: str,
         *,
         cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetPrivateMessagesIdRepliesResponse:
+    ) -> PrivateMessageReplyListResponse:
         """
+        Retrieve a paginated list of replies for Private Message.
+
         Parameters
         ----------
         id : str
@@ -213,14 +271,14 @@ class PrivateMessagesClient:
             Pagination cursor
 
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPrivateMessagesIdRepliesResponse
+        PrivateMessageReplyListResponse
             Success
 
         Examples
@@ -230,16 +288,14 @@ class PrivateMessagesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.private_messages.list_private_message_replies(
+        client.private_messages.list_replies(
             id="id",
         )
         """
-        _response = self._raw_client.list_private_message_replies(
-            id, cursor=cursor, limit=limit, request_options=request_options
-        )
+        _response = self._raw_client.list_replies(id, cursor=cursor, limit=limit, request_options=request_options)
         return _response.data
 
-    def create_a_reply_in_private_message(
+    def create_reply(
         self,
         id: str,
         *,
@@ -250,8 +306,10 @@ class PrivateMessagesClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostPrivateMessagesIdRepliesResponse:
+    ) -> PrivateMessageReplyResponse:
         """
+        Create a Reply in Private Message.
+
         Parameters
         ----------
         id : str
@@ -280,7 +338,7 @@ class PrivateMessagesClient:
 
         Returns
         -------
-        PostPrivateMessagesIdRepliesResponse
+        PrivateMessageReplyResponse
             Created
 
         Examples
@@ -290,13 +348,13 @@ class PrivateMessagesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.private_messages.create_a_reply_in_private_message(
+        client.private_messages.create_reply(
             id="id",
             recipient_id="recipientId",
             body="body",
         )
         """
-        _response = self._raw_client.create_a_reply_in_private_message(
+        _response = self._raw_client.create_reply(
             id,
             recipient_id=recipient_id,
             body=body,
@@ -308,9 +366,9 @@ class PrivateMessagesClient:
         )
         return _response.data
 
-    def get_a_reply_from_private_message(
+    def retrieve_reply(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetPrivateMessagesIdRepliesSubIdResponse:
+    ) -> RetrieveReplyPrivateMessagesResponse:
         """
         Parameters
         ----------
@@ -325,7 +383,7 @@ class PrivateMessagesClient:
 
         Returns
         -------
-        GetPrivateMessagesIdRepliesSubIdResponse
+        RetrieveReplyPrivateMessagesResponse
             Success
 
         Examples
@@ -335,17 +393,17 @@ class PrivateMessagesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.private_messages.get_a_reply_from_private_message(
+        client.private_messages.retrieve_reply(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.get_a_reply_from_private_message(id, sub_id, request_options=request_options)
+        _response = self._raw_client.retrieve_reply(id, sub_id, request_options=request_options)
         return _response.data
 
-    def delete_a_reply_from_private_message(
+    def delete_reply(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePrivateMessagesIdRepliesSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -360,7 +418,7 @@ class PrivateMessagesClient:
 
         Returns
         -------
-        DeletePrivateMessagesIdRepliesSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -370,12 +428,12 @@ class PrivateMessagesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.private_messages.delete_a_reply_from_private_message(
+        client.private_messages.delete_reply(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.delete_a_reply_from_private_message(id, sub_id, request_options=request_options)
+        _response = self._raw_client.delete_reply(id, sub_id, request_options=request_options)
         return _response.data
 
 
@@ -394,29 +452,34 @@ class AsyncPrivateMessagesClient:
         """
         return self._raw_client
 
-    async def list_all_private_messages(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        query: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetPrivateMessagesResponse:
+    ) -> PrivateMessageListResponse:
         """
+        Retrieve a paginated list of private messages. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        query : typing.Optional[str]
+            Search query (title or body)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPrivateMessagesResponse
+        PrivateMessageListResponse
             Success
 
         Examples
@@ -431,17 +494,17 @@ class AsyncPrivateMessagesClient:
 
 
         async def main() -> None:
-            await client.private_messages.list_all_private_messages()
+            await client.private_messages.list()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_all_private_messages(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = await self._raw_client.list(
+            limit=limit, cursor=cursor, query=query, request_options=request_options
         )
         return _response.data
 
-    async def create_a_private_message(
+    async def create(
         self,
         *,
         recipient_id: str,
@@ -451,8 +514,10 @@ class AsyncPrivateMessagesClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostPrivateMessagesResponse:
+    ) -> PrivateMessageResponse:
         """
+        Create a new private message.
+
         Parameters
         ----------
         recipient_id : str
@@ -478,7 +543,7 @@ class AsyncPrivateMessagesClient:
 
         Returns
         -------
-        PostPrivateMessagesResponse
+        PrivateMessageResponse
             Created
 
         Examples
@@ -493,7 +558,7 @@ class AsyncPrivateMessagesClient:
 
 
         async def main() -> None:
-            await client.private_messages.create_a_private_message(
+            await client.private_messages.create(
                 recipient_id="recipientId",
                 body="body",
             )
@@ -501,7 +566,7 @@ class AsyncPrivateMessagesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_private_message(
+        _response = await self._raw_client.create(
             recipient_id=recipient_id,
             body=body,
             sender_id=sender_id,
@@ -512,20 +577,23 @@ class AsyncPrivateMessagesClient:
         )
         return _response.data
 
-    async def get_a_private_message(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetPrivateMessagesIdResponse:
+    ) -> PrivateMessageResponse:
         """
+        Retrieve a private message by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Private Message ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPrivateMessagesIdResponse
+        PrivateMessageResponse
             Success
 
         Examples
@@ -540,30 +608,31 @@ class AsyncPrivateMessagesClient:
 
 
         async def main() -> None:
-            await client.private_messages.get_a_private_message(
+            await client.private_messages.retrieve(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_private_message(id, request_options=request_options)
+        _response = await self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    async def delete_a_private_message(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePrivateMessagesIdResponse:
+    async def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a private message.
+
         Parameters
         ----------
         id : str
+            Private Message ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeletePrivateMessagesIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -578,25 +647,85 @@ class AsyncPrivateMessagesClient:
 
 
         async def main() -> None:
-            await client.private_messages.delete_a_private_message(
+            await client.private_messages.delete(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_private_message(id, request_options=request_options)
+        _response = await self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    async def list_private_message_replies(
+    async def update(
+        self,
+        id: str,
+        *,
+        body: typing.Optional[str] = OMIT,
+        status: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UpdatePrivateMessagesResponse:
+        """
+        Update an existing private message. Only provided fields will be modified.
+
+        Parameters
+        ----------
+        id : str
+            Private Message ID
+
+        body : typing.Optional[str]
+            Message content
+
+        status : typing.Optional[str]
+            Message status (read, unread, archived)
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdatePrivateMessagesResponse
+            Updated
+
+        Examples
+        --------
+        import asyncio
+
+        from foru_ms_sdk import AsyncForumClient
+
+        client = AsyncForumClient(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.private_messages.update(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.update(
+            id, body=body, status=status, extended_data=extended_data, request_options=request_options
+        )
+        return _response.data
+
+    async def list_replies(
         self,
         id: str,
         *,
         cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetPrivateMessagesIdRepliesResponse:
+    ) -> PrivateMessageReplyListResponse:
         """
+        Retrieve a paginated list of replies for Private Message.
+
         Parameters
         ----------
         id : str
@@ -606,14 +735,14 @@ class AsyncPrivateMessagesClient:
             Pagination cursor
 
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPrivateMessagesIdRepliesResponse
+        PrivateMessageReplyListResponse
             Success
 
         Examples
@@ -628,19 +757,17 @@ class AsyncPrivateMessagesClient:
 
 
         async def main() -> None:
-            await client.private_messages.list_private_message_replies(
+            await client.private_messages.list_replies(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_private_message_replies(
-            id, cursor=cursor, limit=limit, request_options=request_options
-        )
+        _response = await self._raw_client.list_replies(id, cursor=cursor, limit=limit, request_options=request_options)
         return _response.data
 
-    async def create_a_reply_in_private_message(
+    async def create_reply(
         self,
         id: str,
         *,
@@ -651,8 +778,10 @@ class AsyncPrivateMessagesClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostPrivateMessagesIdRepliesResponse:
+    ) -> PrivateMessageReplyResponse:
         """
+        Create a Reply in Private Message.
+
         Parameters
         ----------
         id : str
@@ -681,7 +810,7 @@ class AsyncPrivateMessagesClient:
 
         Returns
         -------
-        PostPrivateMessagesIdRepliesResponse
+        PrivateMessageReplyResponse
             Created
 
         Examples
@@ -696,7 +825,7 @@ class AsyncPrivateMessagesClient:
 
 
         async def main() -> None:
-            await client.private_messages.create_a_reply_in_private_message(
+            await client.private_messages.create_reply(
                 id="id",
                 recipient_id="recipientId",
                 body="body",
@@ -705,7 +834,7 @@ class AsyncPrivateMessagesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_reply_in_private_message(
+        _response = await self._raw_client.create_reply(
             id,
             recipient_id=recipient_id,
             body=body,
@@ -717,9 +846,9 @@ class AsyncPrivateMessagesClient:
         )
         return _response.data
 
-    async def get_a_reply_from_private_message(
+    async def retrieve_reply(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetPrivateMessagesIdRepliesSubIdResponse:
+    ) -> RetrieveReplyPrivateMessagesResponse:
         """
         Parameters
         ----------
@@ -734,7 +863,7 @@ class AsyncPrivateMessagesClient:
 
         Returns
         -------
-        GetPrivateMessagesIdRepliesSubIdResponse
+        RetrieveReplyPrivateMessagesResponse
             Success
 
         Examples
@@ -749,7 +878,7 @@ class AsyncPrivateMessagesClient:
 
 
         async def main() -> None:
-            await client.private_messages.get_a_reply_from_private_message(
+            await client.private_messages.retrieve_reply(
                 id="id",
                 sub_id="subId",
             )
@@ -757,12 +886,12 @@ class AsyncPrivateMessagesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_reply_from_private_message(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.retrieve_reply(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def delete_a_reply_from_private_message(
+    async def delete_reply(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePrivateMessagesIdRepliesSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -777,7 +906,7 @@ class AsyncPrivateMessagesClient:
 
         Returns
         -------
-        DeletePrivateMessagesIdRepliesSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -792,7 +921,7 @@ class AsyncPrivateMessagesClient:
 
 
         async def main() -> None:
-            await client.private_messages.delete_a_reply_from_private_message(
+            await client.private_messages.delete_reply(
                 id="id",
                 sub_id="subId",
             )
@@ -800,7 +929,5 @@ class AsyncPrivateMessagesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_reply_from_private_message(
-            id, sub_id, request_options=request_options
-        )
+        _response = await self._raw_client.delete_reply(id, sub_id, request_options=request_options)
         return _response.data

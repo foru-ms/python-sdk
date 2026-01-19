@@ -3,86 +3,12 @@
 import typing
 
 import pydantic
-import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from ..core.serialization import FieldMetadata
-from .user_response_roles_item import UserResponseRolesItem
+from .user_response_data import UserResponseData
 
 
 class UserResponse(UniversalBaseModel):
-    id: str
-    username: str
-    display_name: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="displayName")] = (
-        pydantic.Field(alias="displayName", default=None)
-    )
-    """
-    Display name
-    """
-
-    bio: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    User bio
-    """
-
-    signature: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Forum signature
-    """
-
-    url: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    User website URL
-    """
-
-    posts_count: typing_extensions.Annotated[typing.Optional[int], FieldMetadata(alias="postsCount")] = pydantic.Field(
-        alias="postsCount", default=None
-    )
-    """
-    Total posts by user
-    """
-
-    threads_count: typing_extensions.Annotated[typing.Optional[int], FieldMetadata(alias="threadsCount")] = (
-        pydantic.Field(alias="threadsCount", default=None)
-    )
-    """
-    Total threads by user
-    """
-
-    is_online: typing_extensions.Annotated[typing.Optional[bool], FieldMetadata(alias="isOnline")] = pydantic.Field(
-        alias="isOnline", default=None
-    )
-    """
-    Online status
-    """
-
-    last_seen_at: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="lastSeenAt")] = pydantic.Field(
-        alias="lastSeenAt", default=None
-    )
-    """
-    Last activity timestamp
-    """
-
-    roles: typing.Optional[typing.List[UserResponseRolesItem]] = pydantic.Field(default=None)
-    """
-    User roles
-    """
-
-    extended_data: typing_extensions.Annotated[
-        typing.Optional[typing.Dict[str, typing.Any]], FieldMetadata(alias="extendedData")
-    ] = pydantic.Field(alias="extendedData", default=None)
-    """
-    Custom user data
-    """
-
-    created_at: typing_extensions.Annotated[str, FieldMetadata(alias="createdAt")] = pydantic.Field(alias="createdAt")
-    """
-    Account creation timestamp
-    """
-
-    updated_at: typing_extensions.Annotated[str, FieldMetadata(alias="updatedAt")] = pydantic.Field(alias="updatedAt")
-    """
-    Profile last update timestamp
-    """
+    data: UserResponseData
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

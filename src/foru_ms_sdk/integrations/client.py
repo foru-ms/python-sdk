@@ -4,12 +4,11 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.integration_list_response import IntegrationListResponse
+from ..types.integration_response import IntegrationResponse
+from ..types.success_response import SuccessResponse
 from .raw_client import AsyncRawIntegrationsClient, RawIntegrationsClient
-from .types.delete_integrations_id_response import DeleteIntegrationsIdResponse
-from .types.get_integrations_id_response import GetIntegrationsIdResponse
-from .types.get_integrations_response import GetIntegrationsResponse
-from .types.patch_integrations_id_response import PatchIntegrationsIdResponse
-from .types.post_integrations_response import PostIntegrationsResponse
+from .types.update_integrations_response import UpdateIntegrationsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -30,29 +29,32 @@ class IntegrationsClient:
         """
         return self._raw_client
 
-    def list_all_integrations(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetIntegrationsResponse:
+    ) -> IntegrationListResponse:
         """
+        Retrieve a paginated list of integrations. Use cursor for pagination.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetIntegrationsResponse
+        IntegrationListResponse
             Success
 
         Examples
@@ -62,38 +64,49 @@ class IntegrationsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.integrations.list_all_integrations()
+        client.integrations.list()
         """
-        _response = self._raw_client.list_all_integrations(
-            page=page, limit=limit, search=search, request_options=request_options
-        )
+        _response = self._raw_client.list(limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
-    def create_an_integration(
+    def create(
         self,
         *,
         type: str,
+        name: str,
         config: typing.Dict[str, typing.Any],
-        enabled: typing.Optional[bool] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostIntegrationsResponse:
+    ) -> IntegrationResponse:
         """
+        Create an new integration.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         type : str
-            Integration type (e.g. slack, discord)
+            Integration type (e.g. SLACK, DISCORD)
+
+        name : str
+            Integration name
 
         config : typing.Dict[str, typing.Any]
             JSON configuration
 
-        enabled : typing.Optional[bool]
+        active : typing.Optional[bool]
+            Whether integration is active
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PostIntegrationsResponse
+        IntegrationResponse
             Created
 
         Examples
@@ -103,30 +116,39 @@ class IntegrationsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.integrations.create_an_integration(
+        client.integrations.create(
             type="type",
+            name="name",
             config={"key": "value"},
         )
         """
-        _response = self._raw_client.create_an_integration(
-            type=type, config=config, enabled=enabled, request_options=request_options
+        _response = self._raw_client.create(
+            type=type,
+            name=name,
+            config=config,
+            active=active,
+            extended_data=extended_data,
+            request_options=request_options,
         )
         return _response.data
 
-    def get_an_integration(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetIntegrationsIdResponse:
+    def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> IntegrationResponse:
         """
+        Retrieve an integration by ID or slug (if supported).
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetIntegrationsIdResponse
+        IntegrationResponse
             Success
 
         Examples
@@ -136,27 +158,30 @@ class IntegrationsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.integrations.get_an_integration(
+        client.integrations.retrieve(
             id="id",
         )
         """
-        _response = self._raw_client.get_an_integration(id, request_options=request_options)
+        _response = self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    def delete_an_integration(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteIntegrationsIdResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete an integration.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteIntegrationsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -166,26 +191,32 @@ class IntegrationsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.integrations.delete_an_integration(
+        client.integrations.delete(
             id="id",
         )
         """
-        _response = self._raw_client.delete_an_integration(id, request_options=request_options)
+        _response = self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    def update_an_integration(
+    def update(
         self,
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
         config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchIntegrationsIdResponse:
+    ) -> UpdateIntegrationsResponse:
         """
+        Update an existing integration. Only provided fields will be modified.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         name : typing.Optional[str]
             Integration name
@@ -196,12 +227,15 @@ class IntegrationsClient:
         active : typing.Optional[bool]
             Enable/disable integration
 
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PatchIntegrationsIdResponse
+        UpdateIntegrationsResponse
             Updated
 
         Examples
@@ -211,12 +245,12 @@ class IntegrationsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.integrations.update_an_integration(
+        client.integrations.update(
             id="id",
         )
         """
-        _response = self._raw_client.update_an_integration(
-            id, name=name, config=config, active=active, request_options=request_options
+        _response = self._raw_client.update(
+            id, name=name, config=config, active=active, extended_data=extended_data, request_options=request_options
         )
         return _response.data
 
@@ -236,29 +270,32 @@ class AsyncIntegrationsClient:
         """
         return self._raw_client
 
-    async def list_all_integrations(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetIntegrationsResponse:
+    ) -> IntegrationListResponse:
         """
+        Retrieve a paginated list of integrations. Use cursor for pagination.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetIntegrationsResponse
+        IntegrationListResponse
             Success
 
         Examples
@@ -273,41 +310,52 @@ class AsyncIntegrationsClient:
 
 
         async def main() -> None:
-            await client.integrations.list_all_integrations()
+            await client.integrations.list()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_all_integrations(
-            page=page, limit=limit, search=search, request_options=request_options
-        )
+        _response = await self._raw_client.list(limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
-    async def create_an_integration(
+    async def create(
         self,
         *,
         type: str,
+        name: str,
         config: typing.Dict[str, typing.Any],
-        enabled: typing.Optional[bool] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostIntegrationsResponse:
+    ) -> IntegrationResponse:
         """
+        Create an new integration.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         type : str
-            Integration type (e.g. slack, discord)
+            Integration type (e.g. SLACK, DISCORD)
+
+        name : str
+            Integration name
 
         config : typing.Dict[str, typing.Any]
             JSON configuration
 
-        enabled : typing.Optional[bool]
+        active : typing.Optional[bool]
+            Whether integration is active
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PostIntegrationsResponse
+        IntegrationResponse
             Created
 
         Examples
@@ -322,33 +370,44 @@ class AsyncIntegrationsClient:
 
 
         async def main() -> None:
-            await client.integrations.create_an_integration(
+            await client.integrations.create(
                 type="type",
+                name="name",
                 config={"key": "value"},
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_an_integration(
-            type=type, config=config, enabled=enabled, request_options=request_options
+        _response = await self._raw_client.create(
+            type=type,
+            name=name,
+            config=config,
+            active=active,
+            extended_data=extended_data,
+            request_options=request_options,
         )
         return _response.data
 
-    async def get_an_integration(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetIntegrationsIdResponse:
+    ) -> IntegrationResponse:
         """
+        Retrieve an integration by ID or slug (if supported).
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetIntegrationsIdResponse
+        IntegrationResponse
             Success
 
         Examples
@@ -363,30 +422,33 @@ class AsyncIntegrationsClient:
 
 
         async def main() -> None:
-            await client.integrations.get_an_integration(
+            await client.integrations.retrieve(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_an_integration(id, request_options=request_options)
+        _response = await self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    async def delete_an_integration(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteIntegrationsIdResponse:
+    async def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete an integration.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteIntegrationsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -401,29 +463,35 @@ class AsyncIntegrationsClient:
 
 
         async def main() -> None:
-            await client.integrations.delete_an_integration(
+            await client.integrations.delete(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_an_integration(id, request_options=request_options)
+        _response = await self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    async def update_an_integration(
+    async def update(
         self,
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
         config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchIntegrationsIdResponse:
+    ) -> UpdateIntegrationsResponse:
         """
+        Update an existing integration. Only provided fields will be modified.
+
+        **Requires feature: integrations**
+
         Parameters
         ----------
         id : str
+            Integration ID
 
         name : typing.Optional[str]
             Integration name
@@ -434,12 +502,15 @@ class AsyncIntegrationsClient:
         active : typing.Optional[bool]
             Enable/disable integration
 
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PatchIntegrationsIdResponse
+        UpdateIntegrationsResponse
             Updated
 
         Examples
@@ -454,14 +525,14 @@ class AsyncIntegrationsClient:
 
 
         async def main() -> None:
-            await client.integrations.update_an_integration(
+            await client.integrations.update(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_an_integration(
-            id, name=name, config=config, active=active, request_options=request_options
+        _response = await self._raw_client.update(
+            id, name=name, config=config, active=active, extended_data=extended_data, request_options=request_options
         )
         return _response.data

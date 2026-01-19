@@ -18,28 +18,25 @@ from ..errors.payment_required_error import PaymentRequiredError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error_response import ErrorResponse
-from .types.delete_threads_id_posts_sub_id_response import DeleteThreadsIdPostsSubIdResponse
-from .types.delete_threads_id_reactions_response import DeleteThreadsIdReactionsResponse
-from .types.delete_threads_id_reactions_sub_id_response import DeleteThreadsIdReactionsSubIdResponse
-from .types.delete_threads_id_response import DeleteThreadsIdResponse
-from .types.delete_threads_id_subscribers_sub_id_response import DeleteThreadsIdSubscribersSubIdResponse
-from .types.get_threads_id_poll_response import GetThreadsIdPollResponse
-from .types.get_threads_id_posts_response import GetThreadsIdPostsResponse
-from .types.get_threads_id_posts_sub_id_response import GetThreadsIdPostsSubIdResponse
-from .types.get_threads_id_reactions_response import GetThreadsIdReactionsResponse
-from .types.get_threads_id_reactions_sub_id_response import GetThreadsIdReactionsSubIdResponse
-from .types.get_threads_id_response import GetThreadsIdResponse
-from .types.get_threads_id_subscribers_response import GetThreadsIdSubscribersResponse
-from .types.get_threads_id_subscribers_sub_id_response import GetThreadsIdSubscribersSubIdResponse
-from .types.get_threads_response import GetThreadsResponse
-from .types.patch_threads_id_poll_response import PatchThreadsIdPollResponse
-from .types.patch_threads_id_response import PatchThreadsIdResponse
-from .types.post_threads_id_poll_request_options_item import PostThreadsIdPollRequestOptionsItem
-from .types.post_threads_id_poll_response import PostThreadsIdPollResponse
-from .types.post_threads_id_reactions_request_type import PostThreadsIdReactionsRequestType
-from .types.post_threads_id_reactions_response import PostThreadsIdReactionsResponse
-from .types.post_threads_request_poll import PostThreadsRequestPoll
-from .types.post_threads_response import PostThreadsResponse
+from ..types.success_response import SuccessResponse
+from ..types.thread_list_response import ThreadListResponse
+from ..types.thread_poll_response import ThreadPollResponse
+from ..types.thread_post_list_response import ThreadPostListResponse
+from ..types.thread_reaction_list_response import ThreadReactionListResponse
+from ..types.thread_reaction_response import ThreadReactionResponse
+from ..types.thread_response import ThreadResponse
+from ..types.thread_subscriber_list_response import ThreadSubscriberListResponse
+from .types.create_poll_threads_request_options_item import CreatePollThreadsRequestOptionsItem
+from .types.create_reaction_threads_request_type import CreateReactionThreadsRequestType
+from .types.create_threads_request_poll import CreateThreadsRequestPoll
+from .types.list_posts_threads_request_sort import ListPostsThreadsRequestSort
+from .types.list_posts_threads_request_type import ListPostsThreadsRequestType
+from .types.list_reactions_threads_request_type import ListReactionsThreadsRequestType
+from .types.list_threads_request_sort import ListThreadsRequestSort
+from .types.retrieve_post_threads_response import RetrievePostThreadsResponse
+from .types.retrieve_reaction_threads_response import RetrieveReactionThreadsResponse
+from .types.retrieve_subscriber_threads_response import RetrieveSubscriberThreadsResponse
+from .types.update_threads_response import UpdateThreadsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -49,47 +46,67 @@ class RawThreadsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_all_threads(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        tag_id: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListThreadsRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetThreadsResponse]:
+    ) -> HttpResponse[ThreadListResponse]:
         """
+        Retrieve a paginated list of threads. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search term for title
+
+        tag_id : typing.Optional[str]
+            Filter by tag ID
+
+        user_id : typing.Optional[str]
+            Filter by author ID
+
+        sort : typing.Optional[ListThreadsRequestSort]
+            Sort criteria
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetThreadsResponse]
+        HttpResponse[ThreadListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             "threads",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
+                "cursor": cursor,
                 "search": search,
+                "tagId": tag_id,
+                "userId": user_id,
+                "sort": sort,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsResponse,
+                    ThreadListResponse,
                     parse_obj_as(
-                        type_=GetThreadsResponse,  # type: ignore
+                        type_=ThreadListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -143,17 +160,22 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_thread(
+    def create(
         self,
         *,
         title: str,
         body: str,
         user_id: typing.Optional[str] = OMIT,
         tags: typing.Optional[typing.Sequence[str]] = OMIT,
-        poll: typing.Optional[PostThreadsRequestPoll] = OMIT,
+        poll: typing.Optional[CreateThreadsRequestPoll] = OMIT,
+        locked: typing.Optional[bool] = OMIT,
+        pinned: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostThreadsResponse]:
+    ) -> HttpResponse[ThreadResponse]:
         """
+        Create a new thread.
+
         Parameters
         ----------
         title : str
@@ -168,15 +190,24 @@ class RawThreadsClient:
         tags : typing.Optional[typing.Sequence[str]]
             List of tag slugs, names, or IDs to attach
 
-        poll : typing.Optional[PostThreadsRequestPoll]
+        poll : typing.Optional[CreateThreadsRequestPoll]
             Poll data
+
+        locked : typing.Optional[bool]
+            Lock thread on creation
+
+        pinned : typing.Optional[bool]
+            Pin thread on creation
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[PostThreadsResponse]
+        HttpResponse[ThreadResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -188,8 +219,11 @@ class RawThreadsClient:
                 "userId": user_id,
                 "tags": tags,
                 "poll": convert_and_respect_annotation_metadata(
-                    object_=poll, annotation=PostThreadsRequestPoll, direction="write"
+                    object_=poll, annotation=CreateThreadsRequestPoll, direction="write"
                 ),
+                "locked": locked,
+                "pinned": pinned,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -200,9 +234,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostThreadsResponse,
+                    ThreadResponse,
                     parse_obj_as(
-                        type_=PostThreadsResponse,  # type: ignore
+                        type_=ThreadResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -267,20 +301,23 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_thread(
+    def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetThreadsIdResponse]:
+    ) -> HttpResponse[ThreadResponse]:
         """
+        Retrieve a thread by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetThreadsIdResponse]
+        HttpResponse[ThreadResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -291,9 +328,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdResponse,
+                    ThreadResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdResponse,  # type: ignore
+                        type_=ThreadResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -358,20 +395,23 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_thread(
+    def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteThreadsIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
+        Permanently delete a thread.
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeleteThreadsIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -382,9 +422,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteThreadsIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteThreadsIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -449,7 +489,7 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_a_thread(
+    def update(
         self,
         id: str,
         *,
@@ -460,11 +500,14 @@ class RawThreadsClient:
         tags: typing.Optional[typing.Sequence[str]] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PatchThreadsIdResponse]:
+    ) -> HttpResponse[UpdateThreadsResponse]:
         """
+        Update an existing thread. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         title : typing.Optional[str]
             New title
@@ -489,7 +532,7 @@ class RawThreadsClient:
 
         Returns
         -------
-        HttpResponse[PatchThreadsIdResponse]
+        HttpResponse[UpdateThreadsResponse]
             Updated
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -512,9 +555,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchThreadsIdResponse,
+                    UpdateThreadsResponse,
                     parse_obj_as(
-                        type_=PatchThreadsIdResponse,  # type: ignore
+                        type_=UpdateThreadsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -590,49 +633,71 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def list_thread_posts(
+    def list_posts(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsThreadsRequestSort] = None,
+        search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsThreadsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetThreadsIdPostsResponse]:
+    ) -> HttpResponse[ThreadPostListResponse]:
         """
+        Retrieve a paginated list of posts for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsThreadsRequestSort]
+            Sort posts by creation time
+
+        search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsThreadsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetThreadsIdPostsResponse]
+        HttpResponse[ThreadPostListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             f"threads/{jsonable_encoder(id)}/posts",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
+                "userId": user_id,
+                "sort": sort,
+                "search": search,
+                "type": type,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdPostsResponse,
+                    ThreadPostListResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdPostsResponse,  # type: ignore
+                        type_=ThreadPostListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -686,9 +751,9 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_post_from_thread(
+    def retrieve_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetThreadsIdPostsSubIdResponse]:
+    ) -> HttpResponse[RetrievePostThreadsResponse]:
         """
         Parameters
         ----------
@@ -703,7 +768,7 @@ class RawThreadsClient:
 
         Returns
         -------
-        HttpResponse[GetThreadsIdPostsSubIdResponse]
+        HttpResponse[RetrievePostThreadsResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -714,9 +779,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdPostsSubIdResponse,
+                    RetrievePostThreadsResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdPostsSubIdResponse,  # type: ignore
+                        type_=RetrievePostThreadsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -770,9 +835,9 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_post_from_thread(
+    def delete_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteThreadsIdPostsSubIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -787,7 +852,7 @@ class RawThreadsClient:
 
         Returns
         -------
-        HttpResponse[DeleteThreadsIdPostsSubIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -798,9 +863,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteThreadsIdPostsSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteThreadsIdPostsSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -854,49 +919,56 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def list_thread_reactions(
+    def list_reactions(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        type: typing.Optional[ListReactionsThreadsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetThreadsIdReactionsResponse]:
+    ) -> HttpResponse[ThreadReactionListResponse]:
         """
+        Retrieve a paginated list of reactions for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        type : typing.Optional[ListReactionsThreadsRequestType]
+            Filter by reaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetThreadsIdReactionsResponse]
+        HttpResponse[ThreadReactionListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             f"threads/{jsonable_encoder(id)}/reactions",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
+                "type": type,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdReactionsResponse,
+                    ThreadReactionListResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdReactionsResponse,  # type: ignore
+                        type_=ThreadReactionListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -950,22 +1022,24 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_reaction_in_thread(
+    def create_reaction(
         self,
         id: str,
         *,
-        type: PostThreadsIdReactionsRequestType,
+        type: CreateReactionThreadsRequestType,
         user_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostThreadsIdReactionsResponse]:
+    ) -> HttpResponse[ThreadReactionResponse]:
         """
+        Create a Reaction in Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        type : PostThreadsIdReactionsRequestType
+        type : CreateReactionThreadsRequestType
             Type of reaction
 
         user_id : typing.Optional[str]
@@ -979,7 +1053,7 @@ class RawThreadsClient:
 
         Returns
         -------
-        HttpResponse[PostThreadsIdReactionsResponse]
+        HttpResponse[ThreadReactionResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -999,9 +1073,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostThreadsIdReactionsResponse,
+                    ThreadReactionResponse,
                     parse_obj_as(
-                        type_=PostThreadsIdReactionsResponse,  # type: ignore
+                        type_=ThreadReactionResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1066,36 +1140,37 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def remove_your_reaction_from_thread(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteThreadsIdReactionsResponse]:
+    def delete_reaction(
+        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[SuccessResponse]:
         """
-        Removes the authenticated user's reaction. No subId needed.
-
         Parameters
         ----------
         id : str
             Thread ID
+
+        sub_id : str
+            Reaction ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeleteThreadsIdReactionsResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"threads/{jsonable_encoder(id)}/reactions",
+            f"threads/{jsonable_encoder(id)}/reactions/{jsonable_encoder(sub_id)}",
             method="DELETE",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteThreadsIdReactionsResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteThreadsIdReactionsResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1149,9 +1224,9 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_reaction_from_thread(
+    def retrieve_reaction(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetThreadsIdReactionsSubIdResponse]:
+    ) -> HttpResponse[RetrieveReactionThreadsResponse]:
         """
         Parameters
         ----------
@@ -1166,7 +1241,7 @@ class RawThreadsClient:
 
         Returns
         -------
-        HttpResponse[GetThreadsIdReactionsSubIdResponse]
+        HttpResponse[RetrieveReactionThreadsResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1177,9 +1252,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdReactionsSubIdResponse,
+                    RetrieveReactionThreadsResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdReactionsSubIdResponse,  # type: ignore
+                        type_=RetrieveReactionThreadsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1233,133 +1308,51 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_reaction_from_thread(
-        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteThreadsIdReactionsSubIdResponse]:
-        """
-        Parameters
-        ----------
-        id : str
-            Thread ID
-
-        sub_id : str
-            Reaction ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[DeleteThreadsIdReactionsSubIdResponse]
-            Deleted
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"threads/{jsonable_encoder(id)}/reactions/{jsonable_encoder(sub_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DeleteThreadsIdReactionsSubIdResponse,
-                    parse_obj_as(
-                        type_=DeleteThreadsIdReactionsSubIdResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 429:
-                raise TooManyRequestsError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def list_thread_subscribers(
+    def list_subscribers(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetThreadsIdSubscribersResponse]:
+    ) -> HttpResponse[ThreadSubscriberListResponse]:
         """
+        Retrieve a paginated list of subscribers for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetThreadsIdSubscribersResponse]
+        HttpResponse[ThreadSubscriberListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             f"threads/{jsonable_encoder(id)}/subscribers",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdSubscribersResponse,
+                    ThreadSubscriberListResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdSubscribersResponse,  # type: ignore
+                        type_=ThreadSubscriberListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1413,9 +1406,9 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_subscriber_from_thread(
+    def retrieve_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetThreadsIdSubscribersSubIdResponse]:
+    ) -> HttpResponse[RetrieveSubscriberThreadsResponse]:
         """
         Parameters
         ----------
@@ -1430,7 +1423,7 @@ class RawThreadsClient:
 
         Returns
         -------
-        HttpResponse[GetThreadsIdSubscribersSubIdResponse]
+        HttpResponse[RetrieveSubscriberThreadsResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1441,9 +1434,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdSubscribersSubIdResponse,
+                    RetrieveSubscriberThreadsResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdSubscribersSubIdResponse,  # type: ignore
+                        type_=RetrieveSubscriberThreadsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1497,9 +1490,9 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_subscriber_from_thread(
+    def delete_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteThreadsIdSubscribersSubIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -1514,7 +1507,7 @@ class RawThreadsClient:
 
         Returns
         -------
-        HttpResponse[DeleteThreadsIdSubscribersSubIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1525,9 +1518,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteThreadsIdSubscribersSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteThreadsIdSubscribersSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1581,9 +1574,9 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_thread_poll(
+    def retrieve_poll(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetThreadsIdPollResponse]:
+    ) -> HttpResponse[ThreadPollResponse]:
         """
         Parameters
         ----------
@@ -1595,7 +1588,7 @@ class RawThreadsClient:
 
         Returns
         -------
-        HttpResponse[GetThreadsIdPollResponse]
+        HttpResponse[ThreadPollResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1606,9 +1599,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdPollResponse,
+                    ThreadPollResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdPollResponse,  # type: ignore
+                        type_=ThreadPollResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1662,16 +1655,16 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_thread_poll(
+    def create_poll(
         self,
         id: str,
         *,
         title: str,
-        options: typing.Sequence[PostThreadsIdPollRequestOptionsItem],
+        options: typing.Sequence[CreatePollThreadsRequestOptionsItem],
         expires_at: typing.Optional[dt.datetime] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostThreadsIdPollResponse]:
+    ) -> HttpResponse[ThreadPollResponse]:
         """
         Parameters
         ----------
@@ -1681,7 +1674,7 @@ class RawThreadsClient:
         title : str
             Poll question/title
 
-        options : typing.Sequence[PostThreadsIdPollRequestOptionsItem]
+        options : typing.Sequence[CreatePollThreadsRequestOptionsItem]
             Poll options (2-20)
 
         expires_at : typing.Optional[dt.datetime]
@@ -1695,7 +1688,7 @@ class RawThreadsClient:
 
         Returns
         -------
-        HttpResponse[PostThreadsIdPollResponse]
+        HttpResponse[ThreadPollResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1704,7 +1697,7 @@ class RawThreadsClient:
             json={
                 "title": title,
                 "options": convert_and_respect_annotation_metadata(
-                    object_=options, annotation=typing.Sequence[PostThreadsIdPollRequestOptionsItem], direction="write"
+                    object_=options, annotation=typing.Sequence[CreatePollThreadsRequestOptionsItem], direction="write"
                 ),
                 "expiresAt": expires_at,
                 "extendedData": extended_data,
@@ -1718,9 +1711,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostThreadsIdPollResponse,
+                    ThreadPollResponse,
                     parse_obj_as(
-                        type_=PostThreadsIdPollResponse,  # type: ignore
+                        type_=ThreadPollResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1785,7 +1778,7 @@ class RawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_thread_poll(
+    def update_poll(
         self,
         id: str,
         *,
@@ -1794,7 +1787,7 @@ class RawThreadsClient:
         expires_at: typing.Optional[dt.datetime] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PatchThreadsIdPollResponse]:
+    ) -> HttpResponse[ThreadPollResponse]:
         """
         Parameters
         ----------
@@ -1818,7 +1811,7 @@ class RawThreadsClient:
 
         Returns
         -------
-        HttpResponse[PatchThreadsIdPollResponse]
+        HttpResponse[ThreadPollResponse]
             Updated
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1839,9 +1832,9 @@ class RawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchThreadsIdPollResponse,
+                    ThreadPollResponse,
                     parse_obj_as(
-                        type_=PatchThreadsIdPollResponse,  # type: ignore
+                        type_=ThreadPollResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1911,47 +1904,67 @@ class AsyncRawThreadsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_all_threads(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        tag_id: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListThreadsRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetThreadsResponse]:
+    ) -> AsyncHttpResponse[ThreadListResponse]:
         """
+        Retrieve a paginated list of threads. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search term for title
+
+        tag_id : typing.Optional[str]
+            Filter by tag ID
+
+        user_id : typing.Optional[str]
+            Filter by author ID
+
+        sort : typing.Optional[ListThreadsRequestSort]
+            Sort criteria
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetThreadsResponse]
+        AsyncHttpResponse[ThreadListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             "threads",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
+                "cursor": cursor,
                 "search": search,
+                "tagId": tag_id,
+                "userId": user_id,
+                "sort": sort,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsResponse,
+                    ThreadListResponse,
                     parse_obj_as(
-                        type_=GetThreadsResponse,  # type: ignore
+                        type_=ThreadListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2005,17 +2018,22 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_thread(
+    async def create(
         self,
         *,
         title: str,
         body: str,
         user_id: typing.Optional[str] = OMIT,
         tags: typing.Optional[typing.Sequence[str]] = OMIT,
-        poll: typing.Optional[PostThreadsRequestPoll] = OMIT,
+        poll: typing.Optional[CreateThreadsRequestPoll] = OMIT,
+        locked: typing.Optional[bool] = OMIT,
+        pinned: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostThreadsResponse]:
+    ) -> AsyncHttpResponse[ThreadResponse]:
         """
+        Create a new thread.
+
         Parameters
         ----------
         title : str
@@ -2030,15 +2048,24 @@ class AsyncRawThreadsClient:
         tags : typing.Optional[typing.Sequence[str]]
             List of tag slugs, names, or IDs to attach
 
-        poll : typing.Optional[PostThreadsRequestPoll]
+        poll : typing.Optional[CreateThreadsRequestPoll]
             Poll data
+
+        locked : typing.Optional[bool]
+            Lock thread on creation
+
+        pinned : typing.Optional[bool]
+            Pin thread on creation
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[PostThreadsResponse]
+        AsyncHttpResponse[ThreadResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -2050,8 +2077,11 @@ class AsyncRawThreadsClient:
                 "userId": user_id,
                 "tags": tags,
                 "poll": convert_and_respect_annotation_metadata(
-                    object_=poll, annotation=PostThreadsRequestPoll, direction="write"
+                    object_=poll, annotation=CreateThreadsRequestPoll, direction="write"
                 ),
+                "locked": locked,
+                "pinned": pinned,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -2062,9 +2092,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostThreadsResponse,
+                    ThreadResponse,
                     parse_obj_as(
-                        type_=PostThreadsResponse,  # type: ignore
+                        type_=ThreadResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2129,20 +2159,23 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_thread(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetThreadsIdResponse]:
+    ) -> AsyncHttpResponse[ThreadResponse]:
         """
+        Retrieve a thread by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetThreadsIdResponse]
+        AsyncHttpResponse[ThreadResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -2153,9 +2186,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdResponse,
+                    ThreadResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdResponse,  # type: ignore
+                        type_=ThreadResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2220,20 +2253,23 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_thread(
+    async def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteThreadsIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
+        Permanently delete a thread.
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeleteThreadsIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -2244,9 +2280,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteThreadsIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteThreadsIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2311,7 +2347,7 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_a_thread(
+    async def update(
         self,
         id: str,
         *,
@@ -2322,11 +2358,14 @@ class AsyncRawThreadsClient:
         tags: typing.Optional[typing.Sequence[str]] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PatchThreadsIdResponse]:
+    ) -> AsyncHttpResponse[UpdateThreadsResponse]:
         """
+        Update an existing thread. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Thread ID
 
         title : typing.Optional[str]
             New title
@@ -2351,7 +2390,7 @@ class AsyncRawThreadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[PatchThreadsIdResponse]
+        AsyncHttpResponse[UpdateThreadsResponse]
             Updated
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -2374,9 +2413,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchThreadsIdResponse,
+                    UpdateThreadsResponse,
                     parse_obj_as(
-                        type_=PatchThreadsIdResponse,  # type: ignore
+                        type_=UpdateThreadsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2452,49 +2491,71 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def list_thread_posts(
+    async def list_posts(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsThreadsRequestSort] = None,
+        search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsThreadsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetThreadsIdPostsResponse]:
+    ) -> AsyncHttpResponse[ThreadPostListResponse]:
         """
+        Retrieve a paginated list of posts for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsThreadsRequestSort]
+            Sort posts by creation time
+
+        search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsThreadsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetThreadsIdPostsResponse]
+        AsyncHttpResponse[ThreadPostListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"threads/{jsonable_encoder(id)}/posts",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
+                "userId": user_id,
+                "sort": sort,
+                "search": search,
+                "type": type,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdPostsResponse,
+                    ThreadPostListResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdPostsResponse,  # type: ignore
+                        type_=ThreadPostListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2548,9 +2609,9 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_post_from_thread(
+    async def retrieve_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetThreadsIdPostsSubIdResponse]:
+    ) -> AsyncHttpResponse[RetrievePostThreadsResponse]:
         """
         Parameters
         ----------
@@ -2565,7 +2626,7 @@ class AsyncRawThreadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[GetThreadsIdPostsSubIdResponse]
+        AsyncHttpResponse[RetrievePostThreadsResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -2576,9 +2637,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdPostsSubIdResponse,
+                    RetrievePostThreadsResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdPostsSubIdResponse,  # type: ignore
+                        type_=RetrievePostThreadsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2632,9 +2693,9 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_post_from_thread(
+    async def delete_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteThreadsIdPostsSubIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -2649,7 +2710,7 @@ class AsyncRawThreadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[DeleteThreadsIdPostsSubIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -2660,9 +2721,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteThreadsIdPostsSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteThreadsIdPostsSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2716,49 +2777,56 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def list_thread_reactions(
+    async def list_reactions(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        type: typing.Optional[ListReactionsThreadsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetThreadsIdReactionsResponse]:
+    ) -> AsyncHttpResponse[ThreadReactionListResponse]:
         """
+        Retrieve a paginated list of reactions for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        type : typing.Optional[ListReactionsThreadsRequestType]
+            Filter by reaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetThreadsIdReactionsResponse]
+        AsyncHttpResponse[ThreadReactionListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"threads/{jsonable_encoder(id)}/reactions",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
+                "type": type,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdReactionsResponse,
+                    ThreadReactionListResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdReactionsResponse,  # type: ignore
+                        type_=ThreadReactionListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2812,22 +2880,24 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_reaction_in_thread(
+    async def create_reaction(
         self,
         id: str,
         *,
-        type: PostThreadsIdReactionsRequestType,
+        type: CreateReactionThreadsRequestType,
         user_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostThreadsIdReactionsResponse]:
+    ) -> AsyncHttpResponse[ThreadReactionResponse]:
         """
+        Create a Reaction in Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        type : PostThreadsIdReactionsRequestType
+        type : CreateReactionThreadsRequestType
             Type of reaction
 
         user_id : typing.Optional[str]
@@ -2841,7 +2911,7 @@ class AsyncRawThreadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostThreadsIdReactionsResponse]
+        AsyncHttpResponse[ThreadReactionResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -2861,9 +2931,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostThreadsIdReactionsResponse,
+                    ThreadReactionResponse,
                     parse_obj_as(
-                        type_=PostThreadsIdReactionsResponse,  # type: ignore
+                        type_=ThreadReactionResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2928,36 +2998,37 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def remove_your_reaction_from_thread(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteThreadsIdReactionsResponse]:
+    async def delete_reaction(
+        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
-        Removes the authenticated user's reaction. No subId needed.
-
         Parameters
         ----------
         id : str
             Thread ID
+
+        sub_id : str
+            Reaction ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeleteThreadsIdReactionsResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"threads/{jsonable_encoder(id)}/reactions",
+            f"threads/{jsonable_encoder(id)}/reactions/{jsonable_encoder(sub_id)}",
             method="DELETE",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteThreadsIdReactionsResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteThreadsIdReactionsResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -3011,9 +3082,9 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_reaction_from_thread(
+    async def retrieve_reaction(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetThreadsIdReactionsSubIdResponse]:
+    ) -> AsyncHttpResponse[RetrieveReactionThreadsResponse]:
         """
         Parameters
         ----------
@@ -3028,7 +3099,7 @@ class AsyncRawThreadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[GetThreadsIdReactionsSubIdResponse]
+        AsyncHttpResponse[RetrieveReactionThreadsResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -3039,9 +3110,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdReactionsSubIdResponse,
+                    RetrieveReactionThreadsResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdReactionsSubIdResponse,  # type: ignore
+                        type_=RetrieveReactionThreadsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -3095,133 +3166,51 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_reaction_from_thread(
-        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteThreadsIdReactionsSubIdResponse]:
-        """
-        Parameters
-        ----------
-        id : str
-            Thread ID
-
-        sub_id : str
-            Reaction ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[DeleteThreadsIdReactionsSubIdResponse]
-            Deleted
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"threads/{jsonable_encoder(id)}/reactions/{jsonable_encoder(sub_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DeleteThreadsIdReactionsSubIdResponse,
-                    parse_obj_as(
-                        type_=DeleteThreadsIdReactionsSubIdResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 429:
-                raise TooManyRequestsError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def list_thread_subscribers(
+    async def list_subscribers(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetThreadsIdSubscribersResponse]:
+    ) -> AsyncHttpResponse[ThreadSubscriberListResponse]:
         """
+        Retrieve a paginated list of subscribers for Thread.
+
         Parameters
         ----------
         id : str
             Thread ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetThreadsIdSubscribersResponse]
+        AsyncHttpResponse[ThreadSubscriberListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"threads/{jsonable_encoder(id)}/subscribers",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdSubscribersResponse,
+                    ThreadSubscriberListResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdSubscribersResponse,  # type: ignore
+                        type_=ThreadSubscriberListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -3275,9 +3264,9 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_subscriber_from_thread(
+    async def retrieve_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetThreadsIdSubscribersSubIdResponse]:
+    ) -> AsyncHttpResponse[RetrieveSubscriberThreadsResponse]:
         """
         Parameters
         ----------
@@ -3292,7 +3281,7 @@ class AsyncRawThreadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[GetThreadsIdSubscribersSubIdResponse]
+        AsyncHttpResponse[RetrieveSubscriberThreadsResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -3303,9 +3292,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdSubscribersSubIdResponse,
+                    RetrieveSubscriberThreadsResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdSubscribersSubIdResponse,  # type: ignore
+                        type_=RetrieveSubscriberThreadsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -3359,9 +3348,9 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_subscriber_from_thread(
+    async def delete_subscriber(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteThreadsIdSubscribersSubIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -3376,7 +3365,7 @@ class AsyncRawThreadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[DeleteThreadsIdSubscribersSubIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -3387,9 +3376,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteThreadsIdSubscribersSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteThreadsIdSubscribersSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -3443,9 +3432,9 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_thread_poll(
+    async def retrieve_poll(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetThreadsIdPollResponse]:
+    ) -> AsyncHttpResponse[ThreadPollResponse]:
         """
         Parameters
         ----------
@@ -3457,7 +3446,7 @@ class AsyncRawThreadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[GetThreadsIdPollResponse]
+        AsyncHttpResponse[ThreadPollResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -3468,9 +3457,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetThreadsIdPollResponse,
+                    ThreadPollResponse,
                     parse_obj_as(
-                        type_=GetThreadsIdPollResponse,  # type: ignore
+                        type_=ThreadPollResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -3524,16 +3513,16 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_thread_poll(
+    async def create_poll(
         self,
         id: str,
         *,
         title: str,
-        options: typing.Sequence[PostThreadsIdPollRequestOptionsItem],
+        options: typing.Sequence[CreatePollThreadsRequestOptionsItem],
         expires_at: typing.Optional[dt.datetime] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostThreadsIdPollResponse]:
+    ) -> AsyncHttpResponse[ThreadPollResponse]:
         """
         Parameters
         ----------
@@ -3543,7 +3532,7 @@ class AsyncRawThreadsClient:
         title : str
             Poll question/title
 
-        options : typing.Sequence[PostThreadsIdPollRequestOptionsItem]
+        options : typing.Sequence[CreatePollThreadsRequestOptionsItem]
             Poll options (2-20)
 
         expires_at : typing.Optional[dt.datetime]
@@ -3557,7 +3546,7 @@ class AsyncRawThreadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostThreadsIdPollResponse]
+        AsyncHttpResponse[ThreadPollResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -3566,7 +3555,7 @@ class AsyncRawThreadsClient:
             json={
                 "title": title,
                 "options": convert_and_respect_annotation_metadata(
-                    object_=options, annotation=typing.Sequence[PostThreadsIdPollRequestOptionsItem], direction="write"
+                    object_=options, annotation=typing.Sequence[CreatePollThreadsRequestOptionsItem], direction="write"
                 ),
                 "expiresAt": expires_at,
                 "extendedData": extended_data,
@@ -3580,9 +3569,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostThreadsIdPollResponse,
+                    ThreadPollResponse,
                     parse_obj_as(
-                        type_=PostThreadsIdPollResponse,  # type: ignore
+                        type_=ThreadPollResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -3647,7 +3636,7 @@ class AsyncRawThreadsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_thread_poll(
+    async def update_poll(
         self,
         id: str,
         *,
@@ -3656,7 +3645,7 @@ class AsyncRawThreadsClient:
         expires_at: typing.Optional[dt.datetime] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PatchThreadsIdPollResponse]:
+    ) -> AsyncHttpResponse[ThreadPollResponse]:
         """
         Parameters
         ----------
@@ -3680,7 +3669,7 @@ class AsyncRawThreadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[PatchThreadsIdPollResponse]
+        AsyncHttpResponse[ThreadPollResponse]
             Updated
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -3701,9 +3690,9 @@ class AsyncRawThreadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchThreadsIdPollResponse,
+                    ThreadPollResponse,
                     parse_obj_as(
-                        type_=PatchThreadsIdPollResponse,  # type: ignore
+                        type_=ThreadPollResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

@@ -3,54 +3,12 @@
 import typing
 
 import pydantic
-import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from ..core.serialization import FieldMetadata
+from .post_response_data import PostResponseData
 
 
 class PostResponse(UniversalBaseModel):
-    thread_id: typing_extensions.Annotated[str, FieldMetadata(alias="threadId")] = pydantic.Field(alias="threadId")
-    """
-    Thread ID to post in
-    """
-
-    body: str = pydantic.Field()
-    """
-    Post content (Markdown supported)
-    """
-
-    user_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="userId")] = pydantic.Field(
-        alias="userId", default=None
-    )
-    """
-    Author user ID (required for API key auth, ignored for JWT auth)
-    """
-
-    parent_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="parentId")] = pydantic.Field(
-        alias="parentId", default=None
-    )
-    """
-    Parent post ID for threading
-    """
-
-    extended_data: typing_extensions.Annotated[
-        typing.Optional[typing.Dict[str, typing.Any]], FieldMetadata(alias="extendedData")
-    ] = pydantic.Field(alias="extendedData", default=None)
-    id: str
-    depth: typing.Optional[int] = pydantic.Field(default=None)
-    """
-    Nesting level for threaded replies
-    """
-
-    created_at: typing_extensions.Annotated[str, FieldMetadata(alias="createdAt")] = pydantic.Field(alias="createdAt")
-    """
-    Post creation timestamp
-    """
-
-    updated_at: typing_extensions.Annotated[str, FieldMetadata(alias="updatedAt")] = pydantic.Field(alias="updatedAt")
-    """
-    Post last update timestamp
-    """
+    data: typing.Optional[PostResponseData] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

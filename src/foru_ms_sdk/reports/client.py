@@ -4,11 +4,11 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.report_list_response import ReportListResponse
+from ..types.report_response import ReportResponse
+from ..types.success_response import SuccessResponse
 from .raw_client import AsyncRawReportsClient, RawReportsClient
-from .types.delete_reports_id_response import DeleteReportsIdResponse
-from .types.get_reports_id_response import GetReportsIdResponse
-from .types.get_reports_response import GetReportsResponse
-from .types.post_reports_response import PostReportsResponse
+from .types.update_reports_response import UpdateReportsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -29,29 +29,42 @@ class ReportsClient:
         """
         return self._raw_client
 
-    def list_all_reports(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        status: typing.Optional[str] = None,
+        reporter_id: typing.Optional[str] = None,
+        reported_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetReportsResponse:
+    ) -> ReportListResponse:
         """
+        Retrieve a paginated list of reports. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        status : typing.Optional[str]
+            Filter by status
+
+        reporter_id : typing.Optional[str]
+            Filter by reporter ID
+
+        reported_id : typing.Optional[str]
+            Filter by reported user ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetReportsResponse
+        ReportListResponse
             Success
 
         Examples
@@ -61,30 +74,42 @@ class ReportsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.reports.list_all_reports()
+        client.reports.list()
         """
-        _response = self._raw_client.list_all_reports(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = self._raw_client.list(
+            limit=limit,
+            cursor=cursor,
+            status=status,
+            reporter_id=reporter_id,
+            reported_id=reported_id,
+            request_options=request_options,
         )
         return _response.data
 
-    def create_a_report(
+    def create(
         self,
         *,
         type: str,
+        status: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         user_id: typing.Optional[str] = OMIT,
         reported_id: typing.Optional[str] = OMIT,
         thread_id: typing.Optional[str] = OMIT,
         post_id: typing.Optional[str] = OMIT,
         private_message_id: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostReportsResponse:
+    ) -> ReportResponse:
         """
+        Create a new report.
+
         Parameters
         ----------
         type : str
             Report type (e.g. spam, abuse)
+
+        status : typing.Optional[str]
+            Report status (default: pending)
 
         description : typing.Optional[str]
             Reason for reporting
@@ -104,12 +129,15 @@ class ReportsClient:
         private_message_id : typing.Optional[str]
             ID of private message being reported
 
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PostReportsResponse
+        ReportResponse
             Created
 
         Examples
@@ -119,34 +147,39 @@ class ReportsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.reports.create_a_report(
+        client.reports.create(
             type="type",
         )
         """
-        _response = self._raw_client.create_a_report(
+        _response = self._raw_client.create(
             type=type,
+            status=status,
             description=description,
             user_id=user_id,
             reported_id=reported_id,
             thread_id=thread_id,
             post_id=post_id,
             private_message_id=private_message_id,
+            extended_data=extended_data,
             request_options=request_options,
         )
         return _response.data
 
-    def get_a_report(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetReportsIdResponse:
+    def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> ReportResponse:
         """
+        Retrieve a report by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Report ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetReportsIdResponse
+        ReportResponse
             Success
 
         Examples
@@ -156,27 +189,28 @@ class ReportsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.reports.get_a_report(
+        client.reports.retrieve(
             id="id",
         )
         """
-        _response = self._raw_client.get_a_report(id, request_options=request_options)
+        _response = self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    def delete_a_report(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteReportsIdResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a report.
+
         Parameters
         ----------
         id : str
+            Report ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteReportsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -186,11 +220,61 @@ class ReportsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.reports.delete_a_report(
+        client.reports.delete(
             id="id",
         )
         """
-        _response = self._raw_client.delete_a_report(id, request_options=request_options)
+        _response = self._raw_client.delete(id, request_options=request_options)
+        return _response.data
+
+    def update(
+        self,
+        id: str,
+        *,
+        status: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UpdateReportsResponse:
+        """
+        Update an existing report. Only provided fields will be modified.
+
+        Parameters
+        ----------
+        id : str
+            Report ID
+
+        status : typing.Optional[str]
+            Report status (pending, reviewed, resolved, dismissed)
+
+        description : typing.Optional[str]
+            Updated description or admin notes
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdateReportsResponse
+            Updated
+
+        Examples
+        --------
+        from foru_ms_sdk import ForumClient
+
+        client = ForumClient(
+            api_key="YOUR_API_KEY",
+        )
+        client.reports.update(
+            id="id",
+        )
+        """
+        _response = self._raw_client.update(
+            id, status=status, description=description, extended_data=extended_data, request_options=request_options
+        )
         return _response.data
 
 
@@ -209,29 +293,42 @@ class AsyncReportsClient:
         """
         return self._raw_client
 
-    async def list_all_reports(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        status: typing.Optional[str] = None,
+        reporter_id: typing.Optional[str] = None,
+        reported_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetReportsResponse:
+    ) -> ReportListResponse:
         """
+        Retrieve a paginated list of reports. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        status : typing.Optional[str]
+            Filter by status
+
+        reporter_id : typing.Optional[str]
+            Filter by reporter ID
+
+        reported_id : typing.Optional[str]
+            Filter by reported user ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetReportsResponse
+        ReportListResponse
             Success
 
         Examples
@@ -246,33 +343,45 @@ class AsyncReportsClient:
 
 
         async def main() -> None:
-            await client.reports.list_all_reports()
+            await client.reports.list()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_all_reports(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = await self._raw_client.list(
+            limit=limit,
+            cursor=cursor,
+            status=status,
+            reporter_id=reporter_id,
+            reported_id=reported_id,
+            request_options=request_options,
         )
         return _response.data
 
-    async def create_a_report(
+    async def create(
         self,
         *,
         type: str,
+        status: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         user_id: typing.Optional[str] = OMIT,
         reported_id: typing.Optional[str] = OMIT,
         thread_id: typing.Optional[str] = OMIT,
         post_id: typing.Optional[str] = OMIT,
         private_message_id: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostReportsResponse:
+    ) -> ReportResponse:
         """
+        Create a new report.
+
         Parameters
         ----------
         type : str
             Report type (e.g. spam, abuse)
+
+        status : typing.Optional[str]
+            Report status (default: pending)
 
         description : typing.Optional[str]
             Reason for reporting
@@ -292,12 +401,15 @@ class AsyncReportsClient:
         private_message_id : typing.Optional[str]
             ID of private message being reported
 
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PostReportsResponse
+        ReportResponse
             Created
 
         Examples
@@ -312,39 +424,42 @@ class AsyncReportsClient:
 
 
         async def main() -> None:
-            await client.reports.create_a_report(
+            await client.reports.create(
                 type="type",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_report(
+        _response = await self._raw_client.create(
             type=type,
+            status=status,
             description=description,
             user_id=user_id,
             reported_id=reported_id,
             thread_id=thread_id,
             post_id=post_id,
             private_message_id=private_message_id,
+            extended_data=extended_data,
             request_options=request_options,
         )
         return _response.data
 
-    async def get_a_report(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetReportsIdResponse:
+    async def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> ReportResponse:
         """
+        Retrieve a report by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Report ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetReportsIdResponse
+        ReportResponse
             Success
 
         Examples
@@ -359,30 +474,31 @@ class AsyncReportsClient:
 
 
         async def main() -> None:
-            await client.reports.get_a_report(
+            await client.reports.retrieve(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_report(id, request_options=request_options)
+        _response = await self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    async def delete_a_report(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteReportsIdResponse:
+    async def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a report.
+
         Parameters
         ----------
         id : str
+            Report ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteReportsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -397,12 +513,70 @@ class AsyncReportsClient:
 
 
         async def main() -> None:
-            await client.reports.delete_a_report(
+            await client.reports.delete(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_report(id, request_options=request_options)
+        _response = await self._raw_client.delete(id, request_options=request_options)
+        return _response.data
+
+    async def update(
+        self,
+        id: str,
+        *,
+        status: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UpdateReportsResponse:
+        """
+        Update an existing report. Only provided fields will be modified.
+
+        Parameters
+        ----------
+        id : str
+            Report ID
+
+        status : typing.Optional[str]
+            Report status (pending, reviewed, resolved, dismissed)
+
+        description : typing.Optional[str]
+            Updated description or admin notes
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdateReportsResponse
+            Updated
+
+        Examples
+        --------
+        import asyncio
+
+        from foru_ms_sdk import AsyncForumClient
+
+        client = AsyncForumClient(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.reports.update(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.update(
+            id, status=status, description=description, extended_data=extended_data, request_options=request_options
+        )
         return _response.data

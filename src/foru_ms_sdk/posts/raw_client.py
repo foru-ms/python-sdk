@@ -16,20 +16,21 @@ from ..errors.payment_required_error import PaymentRequiredError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error_response import ErrorResponse
-from .types.delete_posts_id_posts_sub_id_response import DeletePostsIdPostsSubIdResponse
-from .types.delete_posts_id_reactions_response import DeletePostsIdReactionsResponse
-from .types.delete_posts_id_reactions_sub_id_response import DeletePostsIdReactionsSubIdResponse
-from .types.delete_posts_id_response import DeletePostsIdResponse
-from .types.get_posts_id_posts_response import GetPostsIdPostsResponse
-from .types.get_posts_id_posts_sub_id_response import GetPostsIdPostsSubIdResponse
-from .types.get_posts_id_reactions_response import GetPostsIdReactionsResponse
-from .types.get_posts_id_reactions_sub_id_response import GetPostsIdReactionsSubIdResponse
-from .types.get_posts_id_response import GetPostsIdResponse
-from .types.get_posts_response import GetPostsResponse
-from .types.patch_posts_id_response import PatchPostsIdResponse
-from .types.post_posts_id_reactions_request_type import PostPostsIdReactionsRequestType
-from .types.post_posts_id_reactions_response import PostPostsIdReactionsResponse
-from .types.post_posts_response import PostPostsResponse
+from ..types.post_list_response import PostListResponse
+from ..types.post_post_list_response import PostPostListResponse
+from ..types.post_reaction_list_response import PostReactionListResponse
+from ..types.post_reaction_response import PostReactionResponse
+from ..types.post_response import PostResponse
+from ..types.success_response import SuccessResponse
+from .types.create_reaction_posts_request_type import CreateReactionPostsRequestType
+from .types.list_posts_posts_request_sort import ListPostsPostsRequestSort
+from .types.list_posts_posts_request_type import ListPostsPostsRequestType
+from .types.list_posts_request_sort import ListPostsRequestSort
+from .types.list_posts_request_type import ListPostsRequestType
+from .types.list_reactions_posts_request_type import ListReactionsPostsRequestType
+from .types.retrieve_post_posts_response import RetrievePostPostsResponse
+from .types.retrieve_reaction_posts_response import RetrieveReactionPostsResponse
+from .types.update_posts_response import UpdatePostsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -39,47 +40,67 @@ class RawPostsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_all_posts(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsRequestSort] = None,
         search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetPostsResponse]:
+    ) -> HttpResponse[PostListResponse]:
         """
+        Retrieve a paginated list of posts. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsRequestSort]
+            Sort posts by creation time
 
         search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetPostsResponse]
+        HttpResponse[PostListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             "posts",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
+                "cursor": cursor,
+                "userId": user_id,
+                "sort": sort,
                 "search": search,
+                "type": type,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsResponse,
+                    PostListResponse,
                     parse_obj_as(
-                        type_=GetPostsResponse,  # type: ignore
+                        type_=PostListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -133,7 +154,7 @@ class RawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_post(
+    def create(
         self,
         *,
         thread_id: str,
@@ -142,8 +163,10 @@ class RawPostsClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostPostsResponse]:
+    ) -> HttpResponse[PostResponse]:
         """
+        Create a new post.
+
         Parameters
         ----------
         thread_id : str
@@ -165,7 +188,7 @@ class RawPostsClient:
 
         Returns
         -------
-        HttpResponse[PostPostsResponse]
+        HttpResponse[PostResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -187,9 +210,9 @@ class RawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostPostsResponse,
+                    PostResponse,
                     parse_obj_as(
-                        type_=PostPostsResponse,  # type: ignore
+                        type_=PostResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -254,20 +277,23 @@ class RawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_post(
+    def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetPostsIdResponse]:
+    ) -> HttpResponse[PostResponse]:
         """
+        Retrieve a post by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Post ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetPostsIdResponse]
+        HttpResponse[PostResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -278,9 +304,9 @@ class RawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsIdResponse,
+                    PostResponse,
                     parse_obj_as(
-                        type_=GetPostsIdResponse,  # type: ignore
+                        type_=PostResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -345,20 +371,23 @@ class RawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_post(
+    def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeletePostsIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
+        Permanently delete a post.
+
         Parameters
         ----------
         id : str
+            Post ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeletePostsIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -369,9 +398,9 @@ class RawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeletePostsIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeletePostsIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -436,7 +465,7 @@ class RawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_a_post(
+    def update(
         self,
         id: str,
         *,
@@ -445,11 +474,14 @@ class RawPostsClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PatchPostsIdResponse]:
+    ) -> HttpResponse[UpdatePostsResponse]:
         """
+        Update an existing post. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Post ID
 
         body : typing.Optional[str]
             Updated post content
@@ -468,7 +500,7 @@ class RawPostsClient:
 
         Returns
         -------
-        HttpResponse[PatchPostsIdResponse]
+        HttpResponse[UpdatePostsResponse]
             Updated
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -489,9 +521,9 @@ class RawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchPostsIdResponse,
+                    UpdatePostsResponse,
                     parse_obj_as(
-                        type_=PatchPostsIdResponse,  # type: ignore
+                        type_=UpdatePostsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -567,49 +599,56 @@ class RawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def list_post_reactions(
+    def list_reactions(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        type: typing.Optional[ListReactionsPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetPostsIdReactionsResponse]:
+    ) -> HttpResponse[PostReactionListResponse]:
         """
+        Retrieve a paginated list of reactions for Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        type : typing.Optional[ListReactionsPostsRequestType]
+            Filter by reaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetPostsIdReactionsResponse]
+        HttpResponse[PostReactionListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             f"posts/{jsonable_encoder(id)}/reactions",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
+                "type": type,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsIdReactionsResponse,
+                    PostReactionListResponse,
                     parse_obj_as(
-                        type_=GetPostsIdReactionsResponse,  # type: ignore
+                        type_=PostReactionListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -663,22 +702,24 @@ class RawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_reaction_in_post(
+    def create_reaction(
         self,
         id: str,
         *,
-        type: PostPostsIdReactionsRequestType,
+        type: CreateReactionPostsRequestType,
         user_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostPostsIdReactionsResponse]:
+    ) -> HttpResponse[PostReactionResponse]:
         """
+        Create a Reaction in Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        type : PostPostsIdReactionsRequestType
+        type : CreateReactionPostsRequestType
             Type of reaction
 
         user_id : typing.Optional[str]
@@ -692,7 +733,7 @@ class RawPostsClient:
 
         Returns
         -------
-        HttpResponse[PostPostsIdReactionsResponse]
+        HttpResponse[PostReactionResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -712,9 +753,9 @@ class RawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostPostsIdReactionsResponse,
+                    PostReactionResponse,
                     parse_obj_as(
-                        type_=PostPostsIdReactionsResponse,  # type: ignore
+                        type_=PostReactionResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -779,36 +820,37 @@ class RawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def remove_your_reaction_from_post(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeletePostsIdReactionsResponse]:
+    def delete_reaction(
+        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[SuccessResponse]:
         """
-        Removes the authenticated user's reaction. No subId needed.
-
         Parameters
         ----------
         id : str
             Post ID
+
+        sub_id : str
+            Reaction ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeletePostsIdReactionsResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"posts/{jsonable_encoder(id)}/reactions",
+            f"posts/{jsonable_encoder(id)}/reactions/{jsonable_encoder(sub_id)}",
             method="DELETE",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeletePostsIdReactionsResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeletePostsIdReactionsResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -862,9 +904,9 @@ class RawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_reaction_from_post(
+    def retrieve_reaction(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetPostsIdReactionsSubIdResponse]:
+    ) -> HttpResponse[RetrieveReactionPostsResponse]:
         """
         Parameters
         ----------
@@ -879,7 +921,7 @@ class RawPostsClient:
 
         Returns
         -------
-        HttpResponse[GetPostsIdReactionsSubIdResponse]
+        HttpResponse[RetrieveReactionPostsResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -890,9 +932,9 @@ class RawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsIdReactionsSubIdResponse,
+                    RetrieveReactionPostsResponse,
                     parse_obj_as(
-                        type_=GetPostsIdReactionsSubIdResponse,  # type: ignore
+                        type_=RetrieveReactionPostsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -946,133 +988,71 @@ class RawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_reaction_from_post(
-        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeletePostsIdReactionsSubIdResponse]:
-        """
-        Parameters
-        ----------
-        id : str
-            Post ID
-
-        sub_id : str
-            Reaction ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[DeletePostsIdReactionsSubIdResponse]
-            Deleted
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"posts/{jsonable_encoder(id)}/reactions/{jsonable_encoder(sub_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DeletePostsIdReactionsSubIdResponse,
-                    parse_obj_as(
-                        type_=DeletePostsIdReactionsSubIdResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 429:
-                raise TooManyRequestsError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def list_post_posts(
+    def list_posts(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsPostsRequestSort] = None,
+        search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetPostsIdPostsResponse]:
+    ) -> HttpResponse[PostPostListResponse]:
         """
+        Retrieve a paginated list of posts for Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsPostsRequestSort]
+            Sort posts by creation time
+
+        search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsPostsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetPostsIdPostsResponse]
+        HttpResponse[PostPostListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             f"posts/{jsonable_encoder(id)}/posts",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
+                "userId": user_id,
+                "sort": sort,
+                "search": search,
+                "type": type,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsIdPostsResponse,
+                    PostPostListResponse,
                     parse_obj_as(
-                        type_=GetPostsIdPostsResponse,  # type: ignore
+                        type_=PostPostListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1126,9 +1106,9 @@ class RawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_post_from_post(
+    def retrieve_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetPostsIdPostsSubIdResponse]:
+    ) -> HttpResponse[RetrievePostPostsResponse]:
         """
         Parameters
         ----------
@@ -1143,7 +1123,7 @@ class RawPostsClient:
 
         Returns
         -------
-        HttpResponse[GetPostsIdPostsSubIdResponse]
+        HttpResponse[RetrievePostPostsResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1154,9 +1134,9 @@ class RawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsIdPostsSubIdResponse,
+                    RetrievePostPostsResponse,
                     parse_obj_as(
-                        type_=GetPostsIdPostsSubIdResponse,  # type: ignore
+                        type_=RetrievePostPostsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1210,9 +1190,9 @@ class RawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_post_from_post(
+    def delete_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeletePostsIdPostsSubIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -1227,7 +1207,7 @@ class RawPostsClient:
 
         Returns
         -------
-        HttpResponse[DeletePostsIdPostsSubIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1238,9 +1218,9 @@ class RawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeletePostsIdPostsSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeletePostsIdPostsSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1299,47 +1279,67 @@ class AsyncRawPostsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_all_posts(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsRequestSort] = None,
         search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetPostsResponse]:
+    ) -> AsyncHttpResponse[PostListResponse]:
         """
+        Retrieve a paginated list of posts. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsRequestSort]
+            Sort posts by creation time
 
         search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetPostsResponse]
+        AsyncHttpResponse[PostListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             "posts",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
+                "cursor": cursor,
+                "userId": user_id,
+                "sort": sort,
                 "search": search,
+                "type": type,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsResponse,
+                    PostListResponse,
                     parse_obj_as(
-                        type_=GetPostsResponse,  # type: ignore
+                        type_=PostListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1393,7 +1393,7 @@ class AsyncRawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_post(
+    async def create(
         self,
         *,
         thread_id: str,
@@ -1402,8 +1402,10 @@ class AsyncRawPostsClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostPostsResponse]:
+    ) -> AsyncHttpResponse[PostResponse]:
         """
+        Create a new post.
+
         Parameters
         ----------
         thread_id : str
@@ -1425,7 +1427,7 @@ class AsyncRawPostsClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostPostsResponse]
+        AsyncHttpResponse[PostResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1447,9 +1449,9 @@ class AsyncRawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostPostsResponse,
+                    PostResponse,
                     parse_obj_as(
-                        type_=PostPostsResponse,  # type: ignore
+                        type_=PostResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1514,20 +1516,23 @@ class AsyncRawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_post(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetPostsIdResponse]:
+    ) -> AsyncHttpResponse[PostResponse]:
         """
+        Retrieve a post by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Post ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetPostsIdResponse]
+        AsyncHttpResponse[PostResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1538,9 +1543,9 @@ class AsyncRawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsIdResponse,
+                    PostResponse,
                     parse_obj_as(
-                        type_=GetPostsIdResponse,  # type: ignore
+                        type_=PostResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1605,20 +1610,23 @@ class AsyncRawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_post(
+    async def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeletePostsIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
+        Permanently delete a post.
+
         Parameters
         ----------
         id : str
+            Post ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeletePostsIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1629,9 +1637,9 @@ class AsyncRawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeletePostsIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeletePostsIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1696,7 +1704,7 @@ class AsyncRawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_a_post(
+    async def update(
         self,
         id: str,
         *,
@@ -1705,11 +1713,14 @@ class AsyncRawPostsClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PatchPostsIdResponse]:
+    ) -> AsyncHttpResponse[UpdatePostsResponse]:
         """
+        Update an existing post. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Post ID
 
         body : typing.Optional[str]
             Updated post content
@@ -1728,7 +1739,7 @@ class AsyncRawPostsClient:
 
         Returns
         -------
-        AsyncHttpResponse[PatchPostsIdResponse]
+        AsyncHttpResponse[UpdatePostsResponse]
             Updated
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1749,9 +1760,9 @@ class AsyncRawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchPostsIdResponse,
+                    UpdatePostsResponse,
                     parse_obj_as(
-                        type_=PatchPostsIdResponse,  # type: ignore
+                        type_=UpdatePostsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1827,49 +1838,56 @@ class AsyncRawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def list_post_reactions(
+    async def list_reactions(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        type: typing.Optional[ListReactionsPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetPostsIdReactionsResponse]:
+    ) -> AsyncHttpResponse[PostReactionListResponse]:
         """
+        Retrieve a paginated list of reactions for Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        type : typing.Optional[ListReactionsPostsRequestType]
+            Filter by reaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetPostsIdReactionsResponse]
+        AsyncHttpResponse[PostReactionListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"posts/{jsonable_encoder(id)}/reactions",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
+                "type": type,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsIdReactionsResponse,
+                    PostReactionListResponse,
                     parse_obj_as(
-                        type_=GetPostsIdReactionsResponse,  # type: ignore
+                        type_=PostReactionListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1923,22 +1941,24 @@ class AsyncRawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_reaction_in_post(
+    async def create_reaction(
         self,
         id: str,
         *,
-        type: PostPostsIdReactionsRequestType,
+        type: CreateReactionPostsRequestType,
         user_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostPostsIdReactionsResponse]:
+    ) -> AsyncHttpResponse[PostReactionResponse]:
         """
+        Create a Reaction in Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        type : PostPostsIdReactionsRequestType
+        type : CreateReactionPostsRequestType
             Type of reaction
 
         user_id : typing.Optional[str]
@@ -1952,7 +1972,7 @@ class AsyncRawPostsClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostPostsIdReactionsResponse]
+        AsyncHttpResponse[PostReactionResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1972,9 +1992,9 @@ class AsyncRawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostPostsIdReactionsResponse,
+                    PostReactionResponse,
                     parse_obj_as(
-                        type_=PostPostsIdReactionsResponse,  # type: ignore
+                        type_=PostReactionResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2039,36 +2059,37 @@ class AsyncRawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def remove_your_reaction_from_post(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeletePostsIdReactionsResponse]:
+    async def delete_reaction(
+        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
-        Removes the authenticated user's reaction. No subId needed.
-
         Parameters
         ----------
         id : str
             Post ID
+
+        sub_id : str
+            Reaction ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeletePostsIdReactionsResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"posts/{jsonable_encoder(id)}/reactions",
+            f"posts/{jsonable_encoder(id)}/reactions/{jsonable_encoder(sub_id)}",
             method="DELETE",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeletePostsIdReactionsResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeletePostsIdReactionsResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2122,9 +2143,9 @@ class AsyncRawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_reaction_from_post(
+    async def retrieve_reaction(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetPostsIdReactionsSubIdResponse]:
+    ) -> AsyncHttpResponse[RetrieveReactionPostsResponse]:
         """
         Parameters
         ----------
@@ -2139,7 +2160,7 @@ class AsyncRawPostsClient:
 
         Returns
         -------
-        AsyncHttpResponse[GetPostsIdReactionsSubIdResponse]
+        AsyncHttpResponse[RetrieveReactionPostsResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -2150,9 +2171,9 @@ class AsyncRawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsIdReactionsSubIdResponse,
+                    RetrieveReactionPostsResponse,
                     parse_obj_as(
-                        type_=GetPostsIdReactionsSubIdResponse,  # type: ignore
+                        type_=RetrieveReactionPostsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2206,133 +2227,71 @@ class AsyncRawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_reaction_from_post(
-        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeletePostsIdReactionsSubIdResponse]:
-        """
-        Parameters
-        ----------
-        id : str
-            Post ID
-
-        sub_id : str
-            Reaction ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[DeletePostsIdReactionsSubIdResponse]
-            Deleted
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"posts/{jsonable_encoder(id)}/reactions/{jsonable_encoder(sub_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DeletePostsIdReactionsSubIdResponse,
-                    parse_obj_as(
-                        type_=DeletePostsIdReactionsSubIdResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 429:
-                raise TooManyRequestsError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def list_post_posts(
+    async def list_posts(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsPostsRequestSort] = None,
+        search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetPostsIdPostsResponse]:
+    ) -> AsyncHttpResponse[PostPostListResponse]:
         """
+        Retrieve a paginated list of posts for Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsPostsRequestSort]
+            Sort posts by creation time
+
+        search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsPostsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetPostsIdPostsResponse]
+        AsyncHttpResponse[PostPostListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"posts/{jsonable_encoder(id)}/posts",
             method="GET",
             params={
-                "cursor": cursor,
                 "limit": limit,
+                "cursor": cursor,
+                "userId": user_id,
+                "sort": sort,
+                "search": search,
+                "type": type,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsIdPostsResponse,
+                    PostPostListResponse,
                     parse_obj_as(
-                        type_=GetPostsIdPostsResponse,  # type: ignore
+                        type_=PostPostListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2386,9 +2345,9 @@ class AsyncRawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_post_from_post(
+    async def retrieve_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetPostsIdPostsSubIdResponse]:
+    ) -> AsyncHttpResponse[RetrievePostPostsResponse]:
         """
         Parameters
         ----------
@@ -2403,7 +2362,7 @@ class AsyncRawPostsClient:
 
         Returns
         -------
-        AsyncHttpResponse[GetPostsIdPostsSubIdResponse]
+        AsyncHttpResponse[RetrievePostPostsResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -2414,9 +2373,9 @@ class AsyncRawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPostsIdPostsSubIdResponse,
+                    RetrievePostPostsResponse,
                     parse_obj_as(
-                        type_=GetPostsIdPostsSubIdResponse,  # type: ignore
+                        type_=RetrievePostPostsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2470,9 +2429,9 @@ class AsyncRawPostsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_post_from_post(
+    async def delete_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeletePostsIdPostsSubIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -2487,7 +2446,7 @@ class AsyncRawPostsClient:
 
         Returns
         -------
-        AsyncHttpResponse[DeletePostsIdPostsSubIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -2498,9 +2457,9 @@ class AsyncRawPostsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeletePostsIdPostsSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeletePostsIdPostsSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

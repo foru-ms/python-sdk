@@ -7,40 +7,16 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .types import (
-        DeletePrivateMessagesIdRepliesSubIdResponse,
-        DeletePrivateMessagesIdResponse,
-        GetPrivateMessagesIdRepliesResponse,
-        GetPrivateMessagesIdRepliesResponseData,
-        GetPrivateMessagesIdRepliesResponseDataItemsItem,
-        GetPrivateMessagesIdRepliesSubIdResponse,
-        GetPrivateMessagesIdRepliesSubIdResponseData,
-        GetPrivateMessagesIdResponse,
-        GetPrivateMessagesIdResponseData,
-        GetPrivateMessagesResponse,
-        GetPrivateMessagesResponseDataItem,
-        GetPrivateMessagesResponseMeta,
-        PostPrivateMessagesIdRepliesResponse,
-        PostPrivateMessagesIdRepliesResponseData,
-        PostPrivateMessagesResponse,
-        PostPrivateMessagesResponseData,
+        RetrieveReplyPrivateMessagesResponse,
+        RetrieveReplyPrivateMessagesResponseData,
+        UpdatePrivateMessagesResponse,
+        UpdatePrivateMessagesResponseData,
     )
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeletePrivateMessagesIdRepliesSubIdResponse": ".types",
-    "DeletePrivateMessagesIdResponse": ".types",
-    "GetPrivateMessagesIdRepliesResponse": ".types",
-    "GetPrivateMessagesIdRepliesResponseData": ".types",
-    "GetPrivateMessagesIdRepliesResponseDataItemsItem": ".types",
-    "GetPrivateMessagesIdRepliesSubIdResponse": ".types",
-    "GetPrivateMessagesIdRepliesSubIdResponseData": ".types",
-    "GetPrivateMessagesIdResponse": ".types",
-    "GetPrivateMessagesIdResponseData": ".types",
-    "GetPrivateMessagesResponse": ".types",
-    "GetPrivateMessagesResponseDataItem": ".types",
-    "GetPrivateMessagesResponseMeta": ".types",
-    "PostPrivateMessagesIdRepliesResponse": ".types",
-    "PostPrivateMessagesIdRepliesResponseData": ".types",
-    "PostPrivateMessagesResponse": ".types",
-    "PostPrivateMessagesResponseData": ".types",
+    "RetrieveReplyPrivateMessagesResponse": ".types",
+    "RetrieveReplyPrivateMessagesResponseData": ".types",
+    "UpdatePrivateMessagesResponse": ".types",
+    "UpdatePrivateMessagesResponseData": ".types",
 }
 
 
@@ -66,20 +42,8 @@ def __dir__():
 
 
 __all__ = [
-    "DeletePrivateMessagesIdRepliesSubIdResponse",
-    "DeletePrivateMessagesIdResponse",
-    "GetPrivateMessagesIdRepliesResponse",
-    "GetPrivateMessagesIdRepliesResponseData",
-    "GetPrivateMessagesIdRepliesResponseDataItemsItem",
-    "GetPrivateMessagesIdRepliesSubIdResponse",
-    "GetPrivateMessagesIdRepliesSubIdResponseData",
-    "GetPrivateMessagesIdResponse",
-    "GetPrivateMessagesIdResponseData",
-    "GetPrivateMessagesResponse",
-    "GetPrivateMessagesResponseDataItem",
-    "GetPrivateMessagesResponseMeta",
-    "PostPrivateMessagesIdRepliesResponse",
-    "PostPrivateMessagesIdRepliesResponseData",
-    "PostPrivateMessagesResponse",
-    "PostPrivateMessagesResponseData",
+    "RetrieveReplyPrivateMessagesResponse",
+    "RetrieveReplyPrivateMessagesResponseData",
+    "UpdatePrivateMessagesResponse",
+    "UpdatePrivateMessagesResponseData",
 ]

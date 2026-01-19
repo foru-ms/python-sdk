@@ -7,32 +7,18 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .types import (
-        DeleteNotificationsIdResponse,
-        GetNotificationsIdResponse,
-        GetNotificationsIdResponseData,
-        GetNotificationsResponse,
-        GetNotificationsResponseDataItem,
-        GetNotificationsResponseMeta,
-        PatchNotificationsIdRequestStatus,
-        PatchNotificationsIdResponse,
-        PatchNotificationsIdResponseData,
-        PostNotificationsRequestStatus,
-        PostNotificationsResponse,
-        PostNotificationsResponseData,
+        CreateNotificationsRequestStatus,
+        ListNotificationsRequestStatus,
+        UpdateNotificationsRequestStatus,
+        UpdateNotificationsResponse,
+        UpdateNotificationsResponseData,
     )
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteNotificationsIdResponse": ".types",
-    "GetNotificationsIdResponse": ".types",
-    "GetNotificationsIdResponseData": ".types",
-    "GetNotificationsResponse": ".types",
-    "GetNotificationsResponseDataItem": ".types",
-    "GetNotificationsResponseMeta": ".types",
-    "PatchNotificationsIdRequestStatus": ".types",
-    "PatchNotificationsIdResponse": ".types",
-    "PatchNotificationsIdResponseData": ".types",
-    "PostNotificationsRequestStatus": ".types",
-    "PostNotificationsResponse": ".types",
-    "PostNotificationsResponseData": ".types",
+    "CreateNotificationsRequestStatus": ".types",
+    "ListNotificationsRequestStatus": ".types",
+    "UpdateNotificationsRequestStatus": ".types",
+    "UpdateNotificationsResponse": ".types",
+    "UpdateNotificationsResponseData": ".types",
 }
 
 
@@ -58,16 +44,9 @@ def __dir__():
 
 
 __all__ = [
-    "DeleteNotificationsIdResponse",
-    "GetNotificationsIdResponse",
-    "GetNotificationsIdResponseData",
-    "GetNotificationsResponse",
-    "GetNotificationsResponseDataItem",
-    "GetNotificationsResponseMeta",
-    "PatchNotificationsIdRequestStatus",
-    "PatchNotificationsIdResponse",
-    "PatchNotificationsIdResponseData",
-    "PostNotificationsRequestStatus",
-    "PostNotificationsResponse",
-    "PostNotificationsResponseData",
+    "CreateNotificationsRequestStatus",
+    "ListNotificationsRequestStatus",
+    "UpdateNotificationsRequestStatus",
+    "UpdateNotificationsResponse",
+    "UpdateNotificationsResponseData",
 ]

@@ -6,35 +6,17 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .delete_sso_id_response import DeleteSsoIdResponse
-    from .get_sso_id_response import GetSsoIdResponse
-    from .get_sso_id_response_data import GetSsoIdResponseData
-    from .get_sso_id_response_data_provider import GetSsoIdResponseDataProvider
-    from .get_sso_response import GetSsoResponse
-    from .get_sso_response_data_item import GetSsoResponseDataItem
-    from .get_sso_response_data_item_provider import GetSsoResponseDataItemProvider
-    from .get_sso_response_meta import GetSsoResponseMeta
-    from .patch_sso_id_response import PatchSsoIdResponse
-    from .patch_sso_id_response_data import PatchSsoIdResponseData
-    from .patch_sso_id_response_data_provider import PatchSsoIdResponseDataProvider
-    from .post_sso_response import PostSsoResponse
-    from .post_sso_response_data import PostSsoResponseData
-    from .post_sso_response_data_provider import PostSsoResponseDataProvider
+    from .create_ss_os_request_provider import CreateSsOsRequestProvider
+    from .update_ss_os_request_provider import UpdateSsOsRequestProvider
+    from .update_ss_os_response import UpdateSsOsResponse
+    from .update_ss_os_response_data import UpdateSsOsResponseData
+    from .update_ss_os_response_data_provider import UpdateSsOsResponseDataProvider
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteSsoIdResponse": ".delete_sso_id_response",
-    "GetSsoIdResponse": ".get_sso_id_response",
-    "GetSsoIdResponseData": ".get_sso_id_response_data",
-    "GetSsoIdResponseDataProvider": ".get_sso_id_response_data_provider",
-    "GetSsoResponse": ".get_sso_response",
-    "GetSsoResponseDataItem": ".get_sso_response_data_item",
-    "GetSsoResponseDataItemProvider": ".get_sso_response_data_item_provider",
-    "GetSsoResponseMeta": ".get_sso_response_meta",
-    "PatchSsoIdResponse": ".patch_sso_id_response",
-    "PatchSsoIdResponseData": ".patch_sso_id_response_data",
-    "PatchSsoIdResponseDataProvider": ".patch_sso_id_response_data_provider",
-    "PostSsoResponse": ".post_sso_response",
-    "PostSsoResponseData": ".post_sso_response_data",
-    "PostSsoResponseDataProvider": ".post_sso_response_data_provider",
+    "CreateSsOsRequestProvider": ".create_ss_os_request_provider",
+    "UpdateSsOsRequestProvider": ".update_ss_os_request_provider",
+    "UpdateSsOsResponse": ".update_ss_os_response",
+    "UpdateSsOsResponseData": ".update_ss_os_response_data",
+    "UpdateSsOsResponseDataProvider": ".update_ss_os_response_data_provider",
 }
 
 
@@ -60,18 +42,9 @@ def __dir__():
 
 
 __all__ = [
-    "DeleteSsoIdResponse",
-    "GetSsoIdResponse",
-    "GetSsoIdResponseData",
-    "GetSsoIdResponseDataProvider",
-    "GetSsoResponse",
-    "GetSsoResponseDataItem",
-    "GetSsoResponseDataItemProvider",
-    "GetSsoResponseMeta",
-    "PatchSsoIdResponse",
-    "PatchSsoIdResponseData",
-    "PatchSsoIdResponseDataProvider",
-    "PostSsoResponse",
-    "PostSsoResponseData",
-    "PostSsoResponseDataProvider",
+    "CreateSsOsRequestProvider",
+    "UpdateSsOsRequestProvider",
+    "UpdateSsOsResponse",
+    "UpdateSsOsResponseData",
+    "UpdateSsOsResponseDataProvider",
 ]

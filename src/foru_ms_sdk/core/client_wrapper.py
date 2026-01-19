@@ -22,9 +22,10 @@ class BaseClientWrapper:
 
     def get_headers(self) -> typing.Dict[str, str]:
         headers: typing.Dict[str, str] = {
+            "User-Agent": "foru-ms-sdk/0.0.24",
             "X-Fern-Language": "Python",
             "X-Fern-SDK-Name": "foru-ms-sdk",
-            "X-Fern-SDK-Version": "0.0.23",
+            "X-Fern-SDK-Version": "0.0.24",
             **(self.get_custom_headers() or {}),
         }
         headers["x-api-key"] = self.api_key

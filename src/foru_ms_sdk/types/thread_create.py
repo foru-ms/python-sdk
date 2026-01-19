@@ -37,6 +37,23 @@ class ThreadCreate(UniversalBaseModel):
     Poll data
     """
 
+    locked: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Lock thread on creation
+    """
+
+    pinned: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Pin thread on creation
+    """
+
+    extended_data: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Any]], FieldMetadata(alias="extendedData")
+    ] = pydantic.Field(alias="extendedData", default=None)
+    """
+    Custom extended data
+    """
+
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
     else:

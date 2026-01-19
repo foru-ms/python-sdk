@@ -4,12 +4,12 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.role_list_response import RoleListResponse
+from ..types.role_response import RoleResponse
+from ..types.success_response import SuccessResponse
 from .raw_client import AsyncRawRolesClient, RawRolesClient
-from .types.delete_roles_id_response import DeleteRolesIdResponse
-from .types.get_roles_id_response import GetRolesIdResponse
-from .types.get_roles_response import GetRolesResponse
-from .types.patch_roles_id_response import PatchRolesIdResponse
-from .types.post_roles_response import PostRolesResponse
+from .types.list_roles_request_sort import ListRolesRequestSort
+from .types.update_roles_response import UpdateRolesResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -30,29 +30,38 @@ class RolesClient:
         """
         return self._raw_client
 
-    def list_all_roles(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        sort: typing.Optional[ListRolesRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetRolesResponse:
+    ) -> RoleListResponse:
         """
+        Retrieve a paginated list of roles. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search by name or slug
+
+        sort : typing.Optional[ListRolesRequestSort]
+            Sort order
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetRolesResponse
+        RoleListResponse
             Success
 
         Examples
@@ -62,14 +71,14 @@ class RolesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.roles.list_all_roles()
+        client.roles.list()
         """
-        _response = self._raw_client.list_all_roles(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = self._raw_client.list(
+            limit=limit, cursor=cursor, search=search, sort=sort, request_options=request_options
         )
         return _response.data
 
-    def create_a_role(
+    def create(
         self,
         *,
         name: str,
@@ -78,8 +87,10 @@ class RolesClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostRolesResponse:
+    ) -> RoleResponse:
         """
+        Create a new role.
+
         Parameters
         ----------
         name : str
@@ -102,7 +113,7 @@ class RolesClient:
 
         Returns
         -------
-        PostRolesResponse
+        RoleResponse
             Created
 
         Examples
@@ -112,11 +123,11 @@ class RolesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.roles.create_a_role(
+        client.roles.create(
             name="name",
         )
         """
-        _response = self._raw_client.create_a_role(
+        _response = self._raw_client.create(
             name=name,
             slug=slug,
             description=description,
@@ -126,18 +137,21 @@ class RolesClient:
         )
         return _response.data
 
-    def get_a_role(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetRolesIdResponse:
+    def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> RoleResponse:
         """
+        Retrieve a role by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Role ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetRolesIdResponse
+        RoleResponse
             Success
 
         Examples
@@ -147,27 +161,28 @@ class RolesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.roles.get_a_role(
+        client.roles.retrieve(
             id="id",
         )
         """
-        _response = self._raw_client.get_a_role(id, request_options=request_options)
+        _response = self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    def delete_a_role(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteRolesIdResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a role.
+
         Parameters
         ----------
         id : str
+            Role ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteRolesIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -177,14 +192,14 @@ class RolesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.roles.delete_a_role(
+        client.roles.delete(
             id="id",
         )
         """
-        _response = self._raw_client.delete_a_role(id, request_options=request_options)
+        _response = self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    def update_a_role(
+    def update(
         self,
         id: str,
         *,
@@ -194,11 +209,14 @@ class RolesClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchRolesIdResponse:
+    ) -> UpdateRolesResponse:
         """
+        Update an existing role. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Role ID
 
         name : typing.Optional[str]
             Role name
@@ -220,7 +238,7 @@ class RolesClient:
 
         Returns
         -------
-        PatchRolesIdResponse
+        UpdateRolesResponse
             Updated
 
         Examples
@@ -230,11 +248,11 @@ class RolesClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.roles.update_a_role(
+        client.roles.update(
             id="id",
         )
         """
-        _response = self._raw_client.update_a_role(
+        _response = self._raw_client.update(
             id,
             name=name,
             slug=slug,
@@ -261,29 +279,38 @@ class AsyncRolesClient:
         """
         return self._raw_client
 
-    async def list_all_roles(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         search: typing.Optional[str] = None,
+        sort: typing.Optional[ListRolesRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetRolesResponse:
+    ) -> RoleListResponse:
         """
+        Retrieve a paginated list of roles. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         search : typing.Optional[str]
+            Search by name or slug
+
+        sort : typing.Optional[ListRolesRequestSort]
+            Sort order
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetRolesResponse
+        RoleListResponse
             Success
 
         Examples
@@ -298,17 +325,17 @@ class AsyncRolesClient:
 
 
         async def main() -> None:
-            await client.roles.list_all_roles()
+            await client.roles.list()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_all_roles(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = await self._raw_client.list(
+            limit=limit, cursor=cursor, search=search, sort=sort, request_options=request_options
         )
         return _response.data
 
-    async def create_a_role(
+    async def create(
         self,
         *,
         name: str,
@@ -317,8 +344,10 @@ class AsyncRolesClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostRolesResponse:
+    ) -> RoleResponse:
         """
+        Create a new role.
+
         Parameters
         ----------
         name : str
@@ -341,7 +370,7 @@ class AsyncRolesClient:
 
         Returns
         -------
-        PostRolesResponse
+        RoleResponse
             Created
 
         Examples
@@ -356,14 +385,14 @@ class AsyncRolesClient:
 
 
         async def main() -> None:
-            await client.roles.create_a_role(
+            await client.roles.create(
                 name="name",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_role(
+        _response = await self._raw_client.create(
             name=name,
             slug=slug,
             description=description,
@@ -373,20 +402,21 @@ class AsyncRolesClient:
         )
         return _response.data
 
-    async def get_a_role(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetRolesIdResponse:
+    async def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> RoleResponse:
         """
+        Retrieve a role by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Role ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetRolesIdResponse
+        RoleResponse
             Success
 
         Examples
@@ -401,30 +431,31 @@ class AsyncRolesClient:
 
 
         async def main() -> None:
-            await client.roles.get_a_role(
+            await client.roles.retrieve(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_role(id, request_options=request_options)
+        _response = await self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    async def delete_a_role(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteRolesIdResponse:
+    async def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a role.
+
         Parameters
         ----------
         id : str
+            Role ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteRolesIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -439,17 +470,17 @@ class AsyncRolesClient:
 
 
         async def main() -> None:
-            await client.roles.delete_a_role(
+            await client.roles.delete(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_role(id, request_options=request_options)
+        _response = await self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    async def update_a_role(
+    async def update(
         self,
         id: str,
         *,
@@ -459,11 +490,14 @@ class AsyncRolesClient:
         color: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchRolesIdResponse:
+    ) -> UpdateRolesResponse:
         """
+        Update an existing role. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Role ID
 
         name : typing.Optional[str]
             Role name
@@ -485,7 +519,7 @@ class AsyncRolesClient:
 
         Returns
         -------
-        PatchRolesIdResponse
+        UpdateRolesResponse
             Updated
 
         Examples
@@ -500,14 +534,14 @@ class AsyncRolesClient:
 
 
         async def main() -> None:
-            await client.roles.update_a_role(
+            await client.roles.update(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_a_role(
+        _response = await self._raw_client.update(
             id,
             name=name,
             slug=slug,

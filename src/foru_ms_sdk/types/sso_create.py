@@ -6,32 +6,36 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .sso_create_provider import SsoCreateProvider
 
 
 class SsoCreate(UniversalBaseModel):
+    provider: SsoCreateProvider = pydantic.Field()
     """
-    OIDC provider config
-    """
-
-    name: str = pydantic.Field()
-    """
-    Provider name (e.g. Google)
+    SSO provider type
     """
 
-    client_id: typing_extensions.Annotated[str, FieldMetadata(alias="clientId")] = pydantic.Field(alias="clientId")
-    client_secret: typing_extensions.Annotated[str, FieldMetadata(alias="clientSecret")] = pydantic.Field(
-        alias="clientSecret"
-    )
-    issuer: str
-    authorization_endpoint: typing_extensions.Annotated[str, FieldMetadata(alias="authorizationEndpoint")] = (
-        pydantic.Field(alias="authorizationEndpoint")
-    )
-    token_endpoint: typing_extensions.Annotated[str, FieldMetadata(alias="tokenEndpoint")] = pydantic.Field(
-        alias="tokenEndpoint"
-    )
-    user_info_endpoint: typing_extensions.Annotated[str, FieldMetadata(alias="userInfoEndpoint")] = pydantic.Field(
-        alias="userInfoEndpoint"
-    )
+    domain: str = pydantic.Field()
+    """
+    Email domain to match (e.g. 'acme.com')
+    """
+
+    config: typing.Dict[str, typing.Any] = pydantic.Field()
+    """
+    Provider configuration (clientId, issuer, etc.)
+    """
+
+    active: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Whether SSO is active
+    """
+
+    extended_data: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Any]], FieldMetadata(alias="extendedData")
+    ] = pydantic.Field(alias="extendedData", default=None)
+    """
+    Custom extended data
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

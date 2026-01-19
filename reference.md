@@ -1,8 +1,22 @@
 # Reference
 ## Auth
-<details><summary><code>client.auth.<a href="src/foru_ms_sdk/auth/client.py">register</a>(...) -> AsyncHttpResponse[PostAuthRegisterResponse]</code></summary>
+<details><summary><code>client.auth.<a href="src/foru_ms_sdk/auth/client.py">register</a>(...) -> AsyncHttpResponse[RegisterResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Register a new user in your forum instance. Requires API key for instance identification. Returns a JWT token for subsequent authenticated requests.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -106,9 +120,23 @@ client.auth.register(
 </dl>
 </details>
 
-<details><summary><code>client.auth.<a href="src/foru_ms_sdk/auth/client.py">login</a>(...) -> AsyncHttpResponse[PostAuthLoginResponse]</code></summary>
+<details><summary><code>client.auth.<a href="src/foru_ms_sdk/auth/client.py">login</a>(...) -> AsyncHttpResponse[LoginResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Authenticate an existing user. Requires API key for instance identification. Returns a JWT token for subsequent authenticated requests.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -171,7 +199,7 @@ client.auth.login(
 </dl>
 </details>
 
-<details><summary><code>client.auth.<a href="src/foru_ms_sdk/auth/client.py">get_current_user</a>() -> AsyncHttpResponse[GetAuthMeResponse]</code></summary>
+<details><summary><code>client.auth.<a href="src/foru_ms_sdk/auth/client.py">me</a>() -> AsyncHttpResponse[MeResponse]</code></summary>
 <dl>
 <dd>
 
@@ -189,7 +217,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.auth.get_current_user()
+client.auth.me()
 
 ```
 </dd>
@@ -217,9 +245,23 @@ client.auth.get_current_user()
 </dl>
 </details>
 
-<details><summary><code>client.auth.<a href="src/foru_ms_sdk/auth/client.py">request_password_reset</a>(...) -> AsyncHttpResponse[PostAuthForgotPasswordResponse]</code></summary>
+<details><summary><code>client.auth.<a href="src/foru_ms_sdk/auth/client.py">forgot_password</a>(...) -> AsyncHttpResponse[ForgotPasswordResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Request a password reset email. Requires API key for instance identification.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -235,7 +277,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.auth.request_password_reset(
+client.auth.forgot_password(
     email="email",
 )
 
@@ -273,9 +315,23 @@ client.auth.request_password_reset(
 </dl>
 </details>
 
-<details><summary><code>client.auth.<a href="src/foru_ms_sdk/auth/client.py">reset_password</a>(...) -> AsyncHttpResponse[PostAuthResetPasswordResponse]</code></summary>
+<details><summary><code>client.auth.<a href="src/foru_ms_sdk/auth/client.py">reset_password</a>(...) -> AsyncHttpResponse[ResetPasswordResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Reset password using a reset token. Requires API key for instance identification.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -353,8 +409,8 @@ client.auth.reset_password(
 </dl>
 </details>
 
-## Tags
-<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">list_all_tags</a>(...) -> AsyncHttpResponse[GetTagsResponse]</code></summary>
+## Search
+<details><summary><code>client.search.<a href="src/foru_ms_sdk/search/client.py">search</a>() -> AsyncHttpResponse[SearchSearchResponse]</code></summary>
 <dl>
 <dd>
 
@@ -372,7 +428,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.tags.list_all_tags()
+client.search.search()
 
 ```
 </dd>
@@ -388,7 +444,68 @@ client.tags.list_all_tags()
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Tags
+<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">list</a>(...) -> AsyncHttpResponse[TagListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of tags. Use cursor for pagination.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.tags.list()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -396,7 +513,7 @@ client.tags.list_all_tags()
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` 
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -404,7 +521,7 @@ client.tags.list_all_tags()
 <dl>
 <dd>
 
-**search:** `typing.Optional[str]` 
+**search:** `typing.Optional[str]` — Search tags by name or description
     
 </dd>
 </dl>
@@ -424,9 +541,23 @@ client.tags.list_all_tags()
 </dl>
 </details>
 
-<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">create_a_tag</a>(...) -> AsyncHttpResponse[PostTagsResponse]</code></summary>
+<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">create</a>(...) -> AsyncHttpResponse[TagResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new tag.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -442,7 +573,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.tags.create_a_tag(
+client.tags.create(
     name="name",
 )
 
@@ -512,9 +643,23 @@ client.tags.create_a_tag(
 </dl>
 </details>
 
-<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">get_a_tag</a>(...) -> AsyncHttpResponse[GetTagsIdResponse]</code></summary>
+<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">retrieve</a>(...) -> AsyncHttpResponse[TagResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a tag by ID or slug (if supported).
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -530,7 +675,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.tags.get_a_tag(
+client.tags.retrieve(
     id="id",
 )
 
@@ -548,7 +693,7 @@ client.tags.get_a_tag(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Tag ID
     
 </dd>
 </dl>
@@ -568,9 +713,23 @@ client.tags.get_a_tag(
 </dl>
 </details>
 
-<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">delete_a_tag</a>(...) -> AsyncHttpResponse[DeleteTagsIdResponse]</code></summary>
+<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">delete</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete a tag.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -586,7 +745,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.tags.delete_a_tag(
+client.tags.delete(
     id="id",
 )
 
@@ -604,7 +763,7 @@ client.tags.delete_a_tag(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Tag ID
     
 </dd>
 </dl>
@@ -624,9 +783,23 @@ client.tags.delete_a_tag(
 </dl>
 </details>
 
-<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">update_a_tag</a>(...) -> AsyncHttpResponse[PatchTagsIdResponse]</code></summary>
+<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">update</a>(...) -> AsyncHttpResponse[UpdateTagsResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing tag. Only provided fields will be modified.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -642,7 +815,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.tags.update_a_tag(
+client.tags.update(
     id="id",
 )
 
@@ -660,7 +833,7 @@ client.tags.update_a_tag(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Tag ID
     
 </dd>
 </dl>
@@ -720,9 +893,23 @@ client.tags.update_a_tag(
 </dl>
 </details>
 
-<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">list_tag_subscribers</a>(...) -> AsyncHttpResponse[GetTagsIdSubscribersResponse]</code></summary>
+<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">list_subscribers</a>(...) -> AsyncHttpResponse[TagSubscriberListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of subscribers for Tag.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -738,7 +925,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.tags.list_tag_subscribers(
+client.tags.list_subscribers(
     id="id",
 )
 
@@ -764,7 +951,7 @@ client.tags.list_tag_subscribers(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Pagination cursor
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -772,7 +959,7 @@ client.tags.list_tag_subscribers(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Items per page
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -792,7 +979,7 @@ client.tags.list_tag_subscribers(
 </dl>
 </details>
 
-<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">get_a_subscriber_from_tag</a>(...) -> AsyncHttpResponse[GetTagsIdSubscribersSubIdResponse]</code></summary>
+<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">retrieve_subscriber</a>(...) -> AsyncHttpResponse[RetrieveSubscriberTagsResponse]</code></summary>
 <dl>
 <dd>
 
@@ -810,7 +997,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.tags.get_a_subscriber_from_tag(
+client.tags.retrieve_subscriber(
     id="id",
     sub_id="subId",
 )
@@ -857,7 +1044,7 @@ client.tags.get_a_subscriber_from_tag(
 </dl>
 </details>
 
-<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">delete_a_subscriber_from_tag</a>(...) -> AsyncHttpResponse[DeleteTagsIdSubscribersSubIdResponse]</code></summary>
+<details><summary><code>client.tags.<a href="src/foru_ms_sdk/tags/client.py">delete_subscriber</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
 
@@ -875,7 +1062,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.tags.delete_a_subscriber_from_tag(
+client.tags.delete_subscriber(
     id="id",
     sub_id="subId",
 )
@@ -923,9 +1110,23 @@ client.tags.delete_a_subscriber_from_tag(
 </details>
 
 ## Threads
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">list_all_threads</a>(...) -> AsyncHttpResponse[GetThreadsResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">list</a>(...) -> AsyncHttpResponse[ThreadListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of threads. Use cursor for pagination.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -941,7 +1142,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.list_all_threads()
+client.threads.list()
 
 ```
 </dd>
@@ -957,7 +1158,7 @@ client.threads.list_all_threads()
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -965,7 +1166,7 @@ client.threads.list_all_threads()
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` 
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -973,7 +1174,31 @@ client.threads.list_all_threads()
 <dl>
 <dd>
 
-**search:** `typing.Optional[str]` 
+**search:** `typing.Optional[str]` — Search term for title
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**tag_id:** `typing.Optional[str]` — Filter by tag ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**user_id:** `typing.Optional[str]` — Filter by author ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sort:** `typing.Optional[ListThreadsRequestSort]` — Sort criteria
     
 </dd>
 </dl>
@@ -993,9 +1218,23 @@ client.threads.list_all_threads()
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">create_a_thread</a>(...) -> AsyncHttpResponse[PostThreadsResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">create</a>(...) -> AsyncHttpResponse[ThreadResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new thread.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -1011,7 +1250,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.create_a_thread(
+client.threads.create(
     title="title",
     body="body",
 )
@@ -1062,7 +1301,31 @@ client.threads.create_a_thread(
 <dl>
 <dd>
 
-**poll:** `typing.Optional[PostThreadsRequestPoll]` — Poll data
+**poll:** `typing.Optional[CreateThreadsRequestPoll]` — Poll data
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**locked:** `typing.Optional[bool]` — Lock thread on creation
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**pinned:** `typing.Optional[bool]` — Pin thread on creation
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**extended_data:** `typing.Optional[typing.Dict[str, typing.Any]]` — Custom extended data
     
 </dd>
 </dl>
@@ -1082,9 +1345,23 @@ client.threads.create_a_thread(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">get_a_thread</a>(...) -> AsyncHttpResponse[GetThreadsIdResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">retrieve</a>(...) -> AsyncHttpResponse[ThreadResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a thread by ID or slug (if supported).
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -1100,7 +1377,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.get_a_thread(
+client.threads.retrieve(
     id="id",
 )
 
@@ -1118,7 +1395,7 @@ client.threads.get_a_thread(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Thread ID
     
 </dd>
 </dl>
@@ -1138,9 +1415,23 @@ client.threads.get_a_thread(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">delete_a_thread</a>(...) -> AsyncHttpResponse[DeleteThreadsIdResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">delete</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete a thread.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -1156,7 +1447,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.delete_a_thread(
+client.threads.delete(
     id="id",
 )
 
@@ -1174,7 +1465,7 @@ client.threads.delete_a_thread(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Thread ID
     
 </dd>
 </dl>
@@ -1194,9 +1485,23 @@ client.threads.delete_a_thread(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">update_a_thread</a>(...) -> AsyncHttpResponse[PatchThreadsIdResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">update</a>(...) -> AsyncHttpResponse[UpdateThreadsResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing thread. Only provided fields will be modified.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -1212,7 +1517,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.update_a_thread(
+client.threads.update(
     id="id",
 )
 
@@ -1230,7 +1535,7 @@ client.threads.update_a_thread(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Thread ID
     
 </dd>
 </dl>
@@ -1298,9 +1603,23 @@ client.threads.update_a_thread(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">list_thread_posts</a>(...) -> AsyncHttpResponse[GetThreadsIdPostsResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">list_posts</a>(...) -> AsyncHttpResponse[ThreadPostListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of posts for Thread.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -1316,7 +1635,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.list_thread_posts(
+client.threads.list_posts(
     id="id",
 )
 
@@ -1342,7 +1661,7 @@ client.threads.list_thread_posts(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Pagination cursor
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -1350,7 +1669,7 @@ client.threads.list_thread_posts(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Items per page
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -1358,56 +1677,7 @@ client.threads.list_thread_posts(
 <dl>
 <dd>
 
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">get_a_post_from_thread</a>(...) -> AsyncHttpResponse[GetThreadsIdPostsSubIdResponse]</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from foru_ms_sdk import ForumClient
-
-client = ForumClient(
-    api_key="YOUR_API_KEY",
-)
-client.threads.get_a_post_from_thread(
-    id="id",
-    sub_id="subId",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — Thread ID
+**user_id:** `typing.Optional[str]` — Filter posts by author ID
     
 </dd>
 </dl>
@@ -1415,7 +1685,23 @@ client.threads.get_a_post_from_thread(
 <dl>
 <dd>
 
-**sub_id:** `str` — Post ID
+**sort:** `typing.Optional[ListPostsThreadsRequestSort]` — Sort posts by creation time
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**search:** `typing.Optional[str]` — Search within post body
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**type:** `typing.Optional[ListPostsThreadsRequestType]` — Filter by interaction type
     
 </dd>
 </dl>
@@ -1435,7 +1721,7 @@ client.threads.get_a_post_from_thread(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">delete_a_post_from_thread</a>(...) -> AsyncHttpResponse[DeleteThreadsIdPostsSubIdResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">retrieve_post</a>(...) -> AsyncHttpResponse[RetrievePostThreadsResponse]</code></summary>
 <dl>
 <dd>
 
@@ -1453,7 +1739,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.delete_a_post_from_thread(
+client.threads.retrieve_post(
     id="id",
     sub_id="subId",
 )
@@ -1500,7 +1786,7 @@ client.threads.delete_a_post_from_thread(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">list_thread_reactions</a>(...) -> AsyncHttpResponse[GetThreadsIdReactionsResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">delete_post</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
 
@@ -1518,7 +1804,86 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.list_thread_reactions(
+client.threads.delete_post(
+    id="id",
+    sub_id="subId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Thread ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sub_id:** `str` — Post ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">list_reactions</a>(...) -> AsyncHttpResponse[ThreadReactionListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of reactions for Thread.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.threads.list_reactions(
     id="id",
 )
 
@@ -1544,7 +1909,7 @@ client.threads.list_thread_reactions(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Pagination cursor
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -1552,7 +1917,15 @@ client.threads.list_thread_reactions(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Items per page
+**cursor:** `typing.Optional[str]` — Cursor for pagination
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**type:** `typing.Optional[ListReactionsThreadsRequestType]` — Filter by reaction type
     
 </dd>
 </dl>
@@ -1572,9 +1945,23 @@ client.threads.list_thread_reactions(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">create_a_reaction_in_thread</a>(...) -> AsyncHttpResponse[PostThreadsIdReactionsResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">create_reaction</a>(...) -> AsyncHttpResponse[ThreadReactionResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a Reaction in Thread.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -1590,7 +1977,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.create_a_reaction_in_thread(
+client.threads.create_reaction(
     id="id",
     type="LIKE",
 )
@@ -1617,7 +2004,7 @@ client.threads.create_a_reaction_in_thread(
 <dl>
 <dd>
 
-**type:** `PostThreadsIdReactionsRequestType` — Type of reaction
+**type:** `CreateReactionThreadsRequestType` — Type of reaction
     
 </dd>
 </dl>
@@ -1653,7 +2040,137 @@ client.threads.create_a_reaction_in_thread(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">remove_your_reaction_from_thread</a>(...) -> AsyncHttpResponse[DeleteThreadsIdReactionsResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">delete_reaction</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.threads.delete_reaction(
+    id="id",
+    sub_id="subId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Thread ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sub_id:** `str` — Reaction ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">retrieve_reaction</a>(...) -> AsyncHttpResponse[RetrieveReactionThreadsResponse]</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.threads.retrieve_reaction(
+    id="id",
+    sub_id="subId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Thread ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sub_id:** `str` — Reaction ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">list_subscribers</a>(...) -> AsyncHttpResponse[ThreadSubscriberListResponse]</code></summary>
 <dl>
 <dd>
 
@@ -1665,7 +2182,7 @@ client.threads.create_a_reaction_in_thread(
 <dl>
 <dd>
 
-Removes the authenticated user's reaction. No subId needed.
+Retrieve a paginated list of subscribers for Thread.
 </dd>
 </dl>
 </dd>
@@ -1685,7 +2202,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.remove_your_reaction_from_thread(
+client.threads.list_subscribers(
     id="id",
 )
 
@@ -1711,56 +2228,7 @@ client.threads.remove_your_reaction_from_thread(
 <dl>
 <dd>
 
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">get_a_reaction_from_thread</a>(...) -> AsyncHttpResponse[GetThreadsIdReactionsSubIdResponse]</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from foru_ms_sdk import ForumClient
-
-client = ForumClient(
-    api_key="YOUR_API_KEY",
-)
-client.threads.get_a_reaction_from_thread(
-    id="id",
-    sub_id="subId",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — Thread ID
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -1768,7 +2236,7 @@ client.threads.get_a_reaction_from_thread(
 <dl>
 <dd>
 
-**sub_id:** `str` — Reaction ID
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -1788,7 +2256,7 @@ client.threads.get_a_reaction_from_thread(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">delete_a_reaction_from_thread</a>(...) -> AsyncHttpResponse[DeleteThreadsIdReactionsSubIdResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">retrieve_subscriber</a>(...) -> AsyncHttpResponse[RetrieveSubscriberThreadsResponse]</code></summary>
 <dl>
 <dd>
 
@@ -1806,144 +2274,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.delete_a_reaction_from_thread(
-    id="id",
-    sub_id="subId",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — Thread ID
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**sub_id:** `str` — Reaction ID
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">list_thread_subscribers</a>(...) -> AsyncHttpResponse[GetThreadsIdSubscribersResponse]</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from foru_ms_sdk import ForumClient
-
-client = ForumClient(
-    api_key="YOUR_API_KEY",
-)
-client.threads.list_thread_subscribers(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — Thread ID
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**cursor:** `typing.Optional[str]` — Pagination cursor
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**limit:** `typing.Optional[int]` — Items per page
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">get_a_subscriber_from_thread</a>(...) -> AsyncHttpResponse[GetThreadsIdSubscribersSubIdResponse]</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from foru_ms_sdk import ForumClient
-
-client = ForumClient(
-    api_key="YOUR_API_KEY",
-)
-client.threads.get_a_subscriber_from_thread(
+client.threads.retrieve_subscriber(
     id="id",
     sub_id="subId",
 )
@@ -1990,7 +2321,7 @@ client.threads.get_a_subscriber_from_thread(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">delete_a_subscriber_from_thread</a>(...) -> AsyncHttpResponse[DeleteThreadsIdSubscribersSubIdResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">delete_subscriber</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
 
@@ -2008,7 +2339,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.delete_a_subscriber_from_thread(
+client.threads.delete_subscriber(
     id="id",
     sub_id="subId",
 )
@@ -2055,7 +2386,7 @@ client.threads.delete_a_subscriber_from_thread(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">get_thread_poll</a>(...) -> AsyncHttpResponse[GetThreadsIdPollResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">retrieve_poll</a>(...) -> AsyncHttpResponse[ThreadPollResponse]</code></summary>
 <dl>
 <dd>
 
@@ -2073,7 +2404,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.get_thread_poll(
+client.threads.retrieve_poll(
     id="id",
 )
 
@@ -2111,7 +2442,7 @@ client.threads.get_thread_poll(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">create_thread_poll</a>(...) -> AsyncHttpResponse[PostThreadsIdPollResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">create_poll</a>(...) -> AsyncHttpResponse[ThreadPollResponse]</code></summary>
 <dl>
 <dd>
 
@@ -2125,16 +2456,16 @@ client.threads.get_thread_poll(
 
 ```python
 from foru_ms_sdk import ForumClient
-from foru_ms_sdk.threads import PostThreadsIdPollRequestOptionsItem
+from foru_ms_sdk.threads import CreatePollThreadsRequestOptionsItem
 
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.create_thread_poll(
+client.threads.create_poll(
     id="id",
     title="title",
     options=[
-        PostThreadsIdPollRequestOptionsItem(
+        CreatePollThreadsRequestOptionsItem(
             title="title",
         )
     ],
@@ -2170,7 +2501,7 @@ client.threads.create_thread_poll(
 <dl>
 <dd>
 
-**options:** `typing.Sequence[PostThreadsIdPollRequestOptionsItem]` — Poll options (2-20)
+**options:** `typing.Sequence[CreatePollThreadsRequestOptionsItem]` — Poll options (2-20)
     
 </dd>
 </dl>
@@ -2206,7 +2537,7 @@ client.threads.create_thread_poll(
 </dl>
 </details>
 
-<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">update_thread_poll</a>(...) -> AsyncHttpResponse[PatchThreadsIdPollResponse]</code></summary>
+<details><summary><code>client.threads.<a href="src/foru_ms_sdk/threads/client.py">update_poll</a>(...) -> AsyncHttpResponse[ThreadPollResponse]</code></summary>
 <dl>
 <dd>
 
@@ -2224,7 +2555,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.threads.update_thread_poll(
+client.threads.update_poll(
     id="id",
 )
 
@@ -2295,9 +2626,23 @@ client.threads.update_thread_poll(
 </details>
 
 ## Posts
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">list_all_posts</a>(...) -> AsyncHttpResponse[GetPostsResponse]</code></summary>
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">list</a>(...) -> AsyncHttpResponse[PostListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of posts. Use cursor for pagination.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -2313,7 +2658,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.posts.list_all_posts()
+client.posts.list()
 
 ```
 </dd>
@@ -2329,7 +2674,7 @@ client.posts.list_all_posts()
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -2337,7 +2682,7 @@ client.posts.list_all_posts()
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` 
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -2345,7 +2690,31 @@ client.posts.list_all_posts()
 <dl>
 <dd>
 
-**search:** `typing.Optional[str]` 
+**user_id:** `typing.Optional[str]` — Filter posts by author ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sort:** `typing.Optional[ListPostsRequestSort]` — Sort posts by creation time
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**search:** `typing.Optional[str]` — Search within post body
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**type:** `typing.Optional[ListPostsRequestType]` — Filter by interaction type
     
 </dd>
 </dl>
@@ -2365,9 +2734,23 @@ client.posts.list_all_posts()
 </dl>
 </details>
 
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">create_a_post</a>(...) -> AsyncHttpResponse[PostPostsResponse]</code></summary>
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">create</a>(...) -> AsyncHttpResponse[PostResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new post.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -2383,7 +2766,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.posts.create_a_post(
+client.posts.create(
     thread_id="threadId",
     body="body",
 )
@@ -2454,9 +2837,23 @@ client.posts.create_a_post(
 </dl>
 </details>
 
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">get_a_post</a>(...) -> AsyncHttpResponse[GetPostsIdResponse]</code></summary>
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">retrieve</a>(...) -> AsyncHttpResponse[PostResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a post by ID or slug (if supported).
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -2472,7 +2869,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.posts.get_a_post(
+client.posts.retrieve(
     id="id",
 )
 
@@ -2490,7 +2887,7 @@ client.posts.get_a_post(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Post ID
     
 </dd>
 </dl>
@@ -2510,9 +2907,23 @@ client.posts.get_a_post(
 </dl>
 </details>
 
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">delete_a_post</a>(...) -> AsyncHttpResponse[DeletePostsIdResponse]</code></summary>
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">delete</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete a post.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -2528,7 +2939,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.posts.delete_a_post(
+client.posts.delete(
     id="id",
 )
 
@@ -2546,7 +2957,7 @@ client.posts.delete_a_post(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Post ID
     
 </dd>
 </dl>
@@ -2566,9 +2977,23 @@ client.posts.delete_a_post(
 </dl>
 </details>
 
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">update_a_post</a>(...) -> AsyncHttpResponse[PatchPostsIdResponse]</code></summary>
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">update</a>(...) -> AsyncHttpResponse[UpdatePostsResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing post. Only provided fields will be modified.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -2584,7 +3009,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.posts.update_a_post(
+client.posts.update(
     id="id",
 )
 
@@ -2602,7 +3027,7 @@ client.posts.update_a_post(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Post ID
     
 </dd>
 </dl>
@@ -2654,9 +3079,23 @@ client.posts.update_a_post(
 </dl>
 </details>
 
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">list_post_reactions</a>(...) -> AsyncHttpResponse[GetPostsIdReactionsResponse]</code></summary>
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">list_reactions</a>(...) -> AsyncHttpResponse[PostReactionListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of reactions for Post.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -2672,7 +3111,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.posts.list_post_reactions(
+client.posts.list_reactions(
     id="id",
 )
 
@@ -2698,7 +3137,7 @@ client.posts.list_post_reactions(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Pagination cursor
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -2706,7 +3145,15 @@ client.posts.list_post_reactions(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Items per page
+**cursor:** `typing.Optional[str]` — Cursor for pagination
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**type:** `typing.Optional[ListReactionsPostsRequestType]` — Filter by reaction type
     
 </dd>
 </dl>
@@ -2726,9 +3173,23 @@ client.posts.list_post_reactions(
 </dl>
 </details>
 
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">create_a_reaction_in_post</a>(...) -> AsyncHttpResponse[PostPostsIdReactionsResponse]</code></summary>
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">create_reaction</a>(...) -> AsyncHttpResponse[PostReactionResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a Reaction in Post.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -2744,7 +3205,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.posts.create_a_reaction_in_post(
+client.posts.create_reaction(
     id="id",
     type="LIKE",
 )
@@ -2771,7 +3232,7 @@ client.posts.create_a_reaction_in_post(
 <dl>
 <dd>
 
-**type:** `PostPostsIdReactionsRequestType` — Type of reaction
+**type:** `CreateReactionPostsRequestType` — Type of reaction
     
 </dd>
 </dl>
@@ -2807,7 +3268,137 @@ client.posts.create_a_reaction_in_post(
 </dl>
 </details>
 
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">remove_your_reaction_from_post</a>(...) -> AsyncHttpResponse[DeletePostsIdReactionsResponse]</code></summary>
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">delete_reaction</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.posts.delete_reaction(
+    id="id",
+    sub_id="subId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Post ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sub_id:** `str` — Reaction ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">retrieve_reaction</a>(...) -> AsyncHttpResponse[RetrieveReactionPostsResponse]</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.posts.retrieve_reaction(
+    id="id",
+    sub_id="subId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Post ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sub_id:** `str` — Reaction ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">list_posts</a>(...) -> AsyncHttpResponse[PostPostListResponse]</code></summary>
 <dl>
 <dd>
 
@@ -2819,7 +3410,7 @@ client.posts.create_a_reaction_in_post(
 <dl>
 <dd>
 
-Removes the authenticated user's reaction. No subId needed.
+Retrieve a paginated list of posts for Post.
 </dd>
 </dl>
 </dd>
@@ -2839,7 +3430,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.posts.remove_your_reaction_from_post(
+client.posts.list_posts(
     id="id",
 )
 
@@ -2865,56 +3456,7 @@ client.posts.remove_your_reaction_from_post(
 <dl>
 <dd>
 
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">get_a_reaction_from_post</a>(...) -> AsyncHttpResponse[GetPostsIdReactionsSubIdResponse]</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from foru_ms_sdk import ForumClient
-
-client = ForumClient(
-    api_key="YOUR_API_KEY",
-)
-client.posts.get_a_reaction_from_post(
-    id="id",
-    sub_id="subId",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — Post ID
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -2922,7 +3464,39 @@ client.posts.get_a_reaction_from_post(
 <dl>
 <dd>
 
-**sub_id:** `str` — Reaction ID
+**cursor:** `typing.Optional[str]` — Cursor for pagination
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**user_id:** `typing.Optional[str]` — Filter posts by author ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sort:** `typing.Optional[ListPostsPostsRequestSort]` — Sort posts by creation time
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**search:** `typing.Optional[str]` — Search within post body
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**type:** `typing.Optional[ListPostsPostsRequestType]` — Filter by interaction type
     
 </dd>
 </dl>
@@ -2942,7 +3516,7 @@ client.posts.get_a_reaction_from_post(
 </dl>
 </details>
 
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">delete_a_reaction_from_post</a>(...) -> AsyncHttpResponse[DeletePostsIdReactionsSubIdResponse]</code></summary>
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">retrieve_post</a>(...) -> AsyncHttpResponse[RetrievePostPostsResponse]</code></summary>
 <dl>
 <dd>
 
@@ -2960,144 +3534,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.posts.delete_a_reaction_from_post(
-    id="id",
-    sub_id="subId",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — Post ID
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**sub_id:** `str` — Reaction ID
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">list_post_posts</a>(...) -> AsyncHttpResponse[GetPostsIdPostsResponse]</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from foru_ms_sdk import ForumClient
-
-client = ForumClient(
-    api_key="YOUR_API_KEY",
-)
-client.posts.list_post_posts(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — Post ID
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**cursor:** `typing.Optional[str]` — Pagination cursor
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**limit:** `typing.Optional[int]` — Items per page
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">get_a_post_from_post</a>(...) -> AsyncHttpResponse[GetPostsIdPostsSubIdResponse]</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from foru_ms_sdk import ForumClient
-
-client = ForumClient(
-    api_key="YOUR_API_KEY",
-)
-client.posts.get_a_post_from_post(
+client.posts.retrieve_post(
     id="id",
     sub_id="subId",
 )
@@ -3144,7 +3581,7 @@ client.posts.get_a_post_from_post(
 </dl>
 </details>
 
-<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">delete_a_post_from_post</a>(...) -> AsyncHttpResponse[DeletePostsIdPostsSubIdResponse]</code></summary>
+<details><summary><code>client.posts.<a href="src/foru_ms_sdk/posts/client.py">delete_post</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
 
@@ -3162,7 +3599,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.posts.delete_a_post_from_post(
+client.posts.delete_post(
     id="id",
     sub_id="subId",
 )
@@ -3209,10 +3646,24 @@ client.posts.delete_a_post_from_post(
 </dl>
 </details>
 
-## PrivateMessages
-<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">list_all_private_messages</a>(...) -> AsyncHttpResponse[GetPrivateMessagesResponse]</code></summary>
+## Private Messages
+<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">list</a>(...) -> AsyncHttpResponse[PrivateMessageListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of private messages. Use cursor for pagination.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -3228,7 +3679,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.private_messages.list_all_private_messages()
+client.private_messages.list()
 
 ```
 </dd>
@@ -3244,7 +3695,7 @@ client.private_messages.list_all_private_messages()
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -3252,7 +3703,7 @@ client.private_messages.list_all_private_messages()
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` 
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -3260,7 +3711,7 @@ client.private_messages.list_all_private_messages()
 <dl>
 <dd>
 
-**search:** `typing.Optional[str]` 
+**query:** `typing.Optional[str]` — Search query (title or body)
     
 </dd>
 </dl>
@@ -3280,9 +3731,23 @@ client.private_messages.list_all_private_messages()
 </dl>
 </details>
 
-<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">create_a_private_message</a>(...) -> AsyncHttpResponse[PostPrivateMessagesResponse]</code></summary>
+<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">create</a>(...) -> AsyncHttpResponse[PrivateMessageResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new private message.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -3298,7 +3763,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.private_messages.create_a_private_message(
+client.private_messages.create(
     recipient_id="recipientId",
     body="body",
 )
@@ -3377,9 +3842,23 @@ client.private_messages.create_a_private_message(
 </dl>
 </details>
 
-<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">get_a_private_message</a>(...) -> AsyncHttpResponse[GetPrivateMessagesIdResponse]</code></summary>
+<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">retrieve</a>(...) -> AsyncHttpResponse[PrivateMessageResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a private message by ID or slug (if supported).
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -3395,7 +3874,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.private_messages.get_a_private_message(
+client.private_messages.retrieve(
     id="id",
 )
 
@@ -3413,7 +3892,7 @@ client.private_messages.get_a_private_message(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Private Message ID
     
 </dd>
 </dl>
@@ -3433,9 +3912,23 @@ client.private_messages.get_a_private_message(
 </dl>
 </details>
 
-<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">delete_a_private_message</a>(...) -> AsyncHttpResponse[DeletePrivateMessagesIdResponse]</code></summary>
+<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">delete</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete a private message.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -3451,7 +3944,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.private_messages.delete_a_private_message(
+client.private_messages.delete(
     id="id",
 )
 
@@ -3469,7 +3962,7 @@ client.private_messages.delete_a_private_message(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Private Message ID
     
 </dd>
 </dl>
@@ -3489,9 +3982,23 @@ client.private_messages.delete_a_private_message(
 </dl>
 </details>
 
-<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">list_private_message_replies</a>(...) -> AsyncHttpResponse[GetPrivateMessagesIdRepliesResponse]</code></summary>
+<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">update</a>(...) -> AsyncHttpResponse[UpdatePrivateMessagesResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing private message. Only provided fields will be modified.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -3507,7 +4014,101 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.private_messages.list_private_message_replies(
+client.private_messages.update(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Private Message ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**body:** `typing.Optional[str]` — Message content
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[str]` — Message status (read, unread, archived)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**extended_data:** `typing.Optional[typing.Dict[str, typing.Any]]` — Extended data
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">list_replies</a>(...) -> AsyncHttpResponse[PrivateMessageReplyListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of replies for Private Message.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.private_messages.list_replies(
     id="id",
 )
 
@@ -3541,7 +4142,7 @@ client.private_messages.list_private_message_replies(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Items per page
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -3561,9 +4162,23 @@ client.private_messages.list_private_message_replies(
 </dl>
 </details>
 
-<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">create_a_reply_in_private_message</a>(...) -> AsyncHttpResponse[PostPrivateMessagesIdRepliesResponse]</code></summary>
+<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">create_reply</a>(...) -> AsyncHttpResponse[PrivateMessageReplyResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a Reply in Private Message.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -3579,7 +4194,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.private_messages.create_a_reply_in_private_message(
+client.private_messages.create_reply(
     id="id",
     recipient_id="recipientId",
     body="body",
@@ -3667,7 +4282,7 @@ client.private_messages.create_a_reply_in_private_message(
 </dl>
 </details>
 
-<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">get_a_reply_from_private_message</a>(...) -> AsyncHttpResponse[GetPrivateMessagesIdRepliesSubIdResponse]</code></summary>
+<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">retrieve_reply</a>(...) -> AsyncHttpResponse[RetrieveReplyPrivateMessagesResponse]</code></summary>
 <dl>
 <dd>
 
@@ -3685,7 +4300,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.private_messages.get_a_reply_from_private_message(
+client.private_messages.retrieve_reply(
     id="id",
     sub_id="subId",
 )
@@ -3732,7 +4347,7 @@ client.private_messages.get_a_reply_from_private_message(
 </dl>
 </details>
 
-<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">delete_a_reply_from_private_message</a>(...) -> AsyncHttpResponse[DeletePrivateMessagesIdRepliesSubIdResponse]</code></summary>
+<details><summary><code>client.private_messages.<a href="src/foru_ms_sdk/private_messages/client.py">delete_reply</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
 
@@ -3750,7 +4365,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.private_messages.delete_a_reply_from_private_message(
+client.private_messages.delete_reply(
     id="id",
     sub_id="subId",
 )
@@ -3798,9 +4413,23 @@ client.private_messages.delete_a_reply_from_private_message(
 </details>
 
 ## Users
-<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">list_all_users</a>(...) -> AsyncHttpResponse[GetUsersResponse]</code></summary>
+<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">list</a>(...) -> AsyncHttpResponse[UserListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of users. Use cursor for pagination.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -3816,7 +4445,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.users.list_all_users()
+client.users.list()
 
 ```
 </dd>
@@ -3832,7 +4461,7 @@ client.users.list_all_users()
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -3840,7 +4469,7 @@ client.users.list_all_users()
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` 
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -3848,7 +4477,15 @@ client.users.list_all_users()
 <dl>
 <dd>
 
-**search:** `typing.Optional[str]` 
+**search:** `typing.Optional[str]` — Search by username or display name
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sort:** `typing.Optional[ListUsersRequestSort]` — Sort by creation date
     
 </dd>
 </dl>
@@ -3868,9 +4505,23 @@ client.users.list_all_users()
 </dl>
 </details>
 
-<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">get_a_user</a>(...) -> AsyncHttpResponse[GetUsersIdResponse]</code></summary>
+<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">create</a>(...) -> AsyncHttpResponse[UserResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new user.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -3886,8 +4537,8 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.users.get_a_user(
-    id="id",
+client.users.create(
+    username="username",
 )
 
 ```
@@ -3904,7 +4555,71 @@ client.users.get_a_user(
 <dl>
 <dd>
 
-**id:** `str` 
+**username:** `str` — Username (letters, numbers, underscores, hyphens)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**email:** `typing.Optional[str]` — Email address
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**password:** `typing.Optional[str]` — Password (min 8 chars)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**display_name:** `typing.Optional[str]` — Display name
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**bio:** `typing.Optional[str]` — User bio
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**signature:** `typing.Optional[str]` — Forum signature
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**url:** `typing.Optional[str]` — Website URL
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**roles:** `typing.Optional[typing.Sequence[str]]` — Role slugs to assign
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**extended_data:** `typing.Optional[typing.Dict[str, typing.Any]]` — Custom extended data
     
 </dd>
 </dl>
@@ -3924,9 +4639,23 @@ client.users.get_a_user(
 </dl>
 </details>
 
-<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">delete_a_user</a>(...) -> AsyncHttpResponse[DeleteUsersIdResponse]</code></summary>
+<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">retrieve</a>(...) -> AsyncHttpResponse[UserResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a user by ID or slug (if supported).
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -3942,7 +4671,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.users.delete_a_user(
+client.users.retrieve(
     id="id",
 )
 
@@ -3960,7 +4689,7 @@ client.users.delete_a_user(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — User ID
     
 </dd>
 </dl>
@@ -3980,9 +4709,23 @@ client.users.delete_a_user(
 </dl>
 </details>
 
-<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">update_a_user</a>(...) -> AsyncHttpResponse[PatchUsersIdResponse]</code></summary>
+<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">delete</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete a user.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -3998,7 +4741,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.users.update_a_user(
+client.users.delete(
     id="id",
 )
 
@@ -4016,7 +4759,77 @@ client.users.update_a_user(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — User ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">update</a>(...) -> AsyncHttpResponse[UpdateUsersResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing user. Only provided fields will be modified.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.users.update(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — User ID
     
 </dd>
 </dl>
@@ -4108,9 +4921,23 @@ client.users.update_a_user(
 </dl>
 </details>
 
-<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">list_user_followers</a>(...) -> AsyncHttpResponse[GetUsersIdFollowersResponse]</code></summary>
+<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">list_followers</a>(...) -> AsyncHttpResponse[UserFollowerListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of followers for User.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -4126,7 +4953,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.users.list_user_followers(
+client.users.list_followers(
     id="id",
 )
 
@@ -4152,7 +4979,7 @@ client.users.list_user_followers(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Pagination cursor
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -4160,72 +4987,7 @@ client.users.list_user_followers(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Items per page
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">get_a_follower_from_user</a>(...) -> AsyncHttpResponse[GetUsersIdFollowersSubIdResponse]</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from foru_ms_sdk import ForumClient
-
-client = ForumClient(
-    api_key="YOUR_API_KEY",
-)
-client.users.get_a_follower_from_user(
-    id="id",
-    sub_id="subId",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — User ID
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**sub_id:** `str` — Follower ID
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -4245,7 +5007,7 @@ client.users.get_a_follower_from_user(
 </dl>
 </details>
 
-<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">delete_a_follower_from_user</a>(...) -> AsyncHttpResponse[DeleteUsersIdFollowersSubIdResponse]</code></summary>
+<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">retrieve_follower</a>(...) -> AsyncHttpResponse[RetrieveFollowerUsersResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4263,7 +5025,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.users.delete_a_follower_from_user(
+client.users.retrieve_follower(
     id="id",
     sub_id="subId",
 )
@@ -4310,7 +5072,7 @@ client.users.delete_a_follower_from_user(
 </dl>
 </details>
 
-<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">list_user_following</a>(...) -> AsyncHttpResponse[GetUsersIdFollowingResponse]</code></summary>
+<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">delete_follower</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4328,7 +5090,86 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.users.list_user_following(
+client.users.delete_follower(
+    id="id",
+    sub_id="subId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — User ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sub_id:** `str` — Follower ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">list_following</a>(...) -> AsyncHttpResponse[UserFollowingListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of following for User.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.users.list_following(
     id="id",
 )
 
@@ -4354,7 +5195,7 @@ client.users.list_user_following(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Pagination cursor
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -4362,7 +5203,7 @@ client.users.list_user_following(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Items per page
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -4382,7 +5223,7 @@ client.users.list_user_following(
 </dl>
 </details>
 
-<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">get_a_following_from_user</a>(...) -> AsyncHttpResponse[GetUsersIdFollowingSubIdResponse]</code></summary>
+<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">retrieve_following</a>(...) -> AsyncHttpResponse[RetrieveFollowingUsersResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4400,7 +5241,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.users.get_a_following_from_user(
+client.users.retrieve_following(
     id="id",
     sub_id="subId",
 )
@@ -4447,7 +5288,7 @@ client.users.get_a_following_from_user(
 </dl>
 </details>
 
-<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">delete_a_following_from_user</a>(...) -> AsyncHttpResponse[DeleteUsersIdFollowingSubIdResponse]</code></summary>
+<details><summary><code>client.users.<a href="src/foru_ms_sdk/users/client.py">delete_following</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4465,7 +5306,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.users.delete_a_following_from_user(
+client.users.delete_following(
     id="id",
     sub_id="subId",
 )
@@ -4513,9 +5354,23 @@ client.users.delete_a_following_from_user(
 </details>
 
 ## Roles
-<details><summary><code>client.roles.<a href="src/foru_ms_sdk/roles/client.py">list_all_roles</a>(...) -> AsyncHttpResponse[GetRolesResponse]</code></summary>
+<details><summary><code>client.roles.<a href="src/foru_ms_sdk/roles/client.py">list</a>(...) -> AsyncHttpResponse[RoleListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of roles. Use cursor for pagination.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -4531,7 +5386,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.roles.list_all_roles()
+client.roles.list()
 
 ```
 </dd>
@@ -4547,7 +5402,7 @@ client.roles.list_all_roles()
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -4555,7 +5410,7 @@ client.roles.list_all_roles()
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` 
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -4563,7 +5418,15 @@ client.roles.list_all_roles()
 <dl>
 <dd>
 
-**search:** `typing.Optional[str]` 
+**search:** `typing.Optional[str]` — Search by name or slug
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sort:** `typing.Optional[ListRolesRequestSort]` — Sort order
     
 </dd>
 </dl>
@@ -4583,9 +5446,23 @@ client.roles.list_all_roles()
 </dl>
 </details>
 
-<details><summary><code>client.roles.<a href="src/foru_ms_sdk/roles/client.py">create_a_role</a>(...) -> AsyncHttpResponse[PostRolesResponse]</code></summary>
+<details><summary><code>client.roles.<a href="src/foru_ms_sdk/roles/client.py">create</a>(...) -> AsyncHttpResponse[RoleResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new role.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -4601,7 +5478,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.roles.create_a_role(
+client.roles.create(
     name="name",
 )
 
@@ -4671,9 +5548,23 @@ client.roles.create_a_role(
 </dl>
 </details>
 
-<details><summary><code>client.roles.<a href="src/foru_ms_sdk/roles/client.py">get_a_role</a>(...) -> AsyncHttpResponse[GetRolesIdResponse]</code></summary>
+<details><summary><code>client.roles.<a href="src/foru_ms_sdk/roles/client.py">retrieve</a>(...) -> AsyncHttpResponse[RoleResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a role by ID or slug (if supported).
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -4689,7 +5580,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.roles.get_a_role(
+client.roles.retrieve(
     id="id",
 )
 
@@ -4707,7 +5598,7 @@ client.roles.get_a_role(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Role ID
     
 </dd>
 </dl>
@@ -4727,9 +5618,23 @@ client.roles.get_a_role(
 </dl>
 </details>
 
-<details><summary><code>client.roles.<a href="src/foru_ms_sdk/roles/client.py">delete_a_role</a>(...) -> AsyncHttpResponse[DeleteRolesIdResponse]</code></summary>
+<details><summary><code>client.roles.<a href="src/foru_ms_sdk/roles/client.py">delete</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete a role.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -4745,7 +5650,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.roles.delete_a_role(
+client.roles.delete(
     id="id",
 )
 
@@ -4763,7 +5668,7 @@ client.roles.delete_a_role(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Role ID
     
 </dd>
 </dl>
@@ -4783,9 +5688,23 @@ client.roles.delete_a_role(
 </dl>
 </details>
 
-<details><summary><code>client.roles.<a href="src/foru_ms_sdk/roles/client.py">update_a_role</a>(...) -> AsyncHttpResponse[PatchRolesIdResponse]</code></summary>
+<details><summary><code>client.roles.<a href="src/foru_ms_sdk/roles/client.py">update</a>(...) -> AsyncHttpResponse[UpdateRolesResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing role. Only provided fields will be modified.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -4801,7 +5720,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.roles.update_a_role(
+client.roles.update(
     id="id",
 )
 
@@ -4819,7 +5738,7 @@ client.roles.update_a_role(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Role ID
     
 </dd>
 </dl>
@@ -4880,9 +5799,23 @@ client.roles.update_a_role(
 </details>
 
 ## Reports
-<details><summary><code>client.reports.<a href="src/foru_ms_sdk/reports/client.py">list_all_reports</a>(...) -> AsyncHttpResponse[GetReportsResponse]</code></summary>
+<details><summary><code>client.reports.<a href="src/foru_ms_sdk/reports/client.py">list</a>(...) -> AsyncHttpResponse[ReportListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of reports. Use cursor for pagination.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -4898,7 +5831,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.reports.list_all_reports()
+client.reports.list()
 
 ```
 </dd>
@@ -4914,7 +5847,7 @@ client.reports.list_all_reports()
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -4922,7 +5855,7 @@ client.reports.list_all_reports()
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` 
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -4930,7 +5863,23 @@ client.reports.list_all_reports()
 <dl>
 <dd>
 
-**search:** `typing.Optional[str]` 
+**status:** `typing.Optional[str]` — Filter by status
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**reporter_id:** `typing.Optional[str]` — Filter by reporter ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**reported_id:** `typing.Optional[str]` — Filter by reported user ID
     
 </dd>
 </dl>
@@ -4950,9 +5899,23 @@ client.reports.list_all_reports()
 </dl>
 </details>
 
-<details><summary><code>client.reports.<a href="src/foru_ms_sdk/reports/client.py">create_a_report</a>(...) -> AsyncHttpResponse[PostReportsResponse]</code></summary>
+<details><summary><code>client.reports.<a href="src/foru_ms_sdk/reports/client.py">create</a>(...) -> AsyncHttpResponse[ReportResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new report.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -4968,7 +5931,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.reports.create_a_report(
+client.reports.create(
     type="type",
 )
 
@@ -4987,6 +5950,14 @@ client.reports.create_a_report(
 <dd>
 
 **type:** `str` — Report type (e.g. spam, abuse)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[str]` — Report status (default: pending)
     
 </dd>
 </dl>
@@ -5042,55 +6013,7 @@ client.reports.create_a_report(
 <dl>
 <dd>
 
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.reports.<a href="src/foru_ms_sdk/reports/client.py">get_a_report</a>(...) -> AsyncHttpResponse[GetReportsIdResponse]</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from foru_ms_sdk import ForumClient
-
-client = ForumClient(
-    api_key="YOUR_API_KEY",
-)
-client.reports.get_a_report(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` 
+**extended_data:** `typing.Optional[typing.Dict[str, typing.Any]]` — Custom extended data
     
 </dd>
 </dl>
@@ -5110,9 +6033,23 @@ client.reports.get_a_report(
 </dl>
 </details>
 
-<details><summary><code>client.reports.<a href="src/foru_ms_sdk/reports/client.py">delete_a_report</a>(...) -> AsyncHttpResponse[DeleteReportsIdResponse]</code></summary>
+<details><summary><code>client.reports.<a href="src/foru_ms_sdk/reports/client.py">retrieve</a>(...) -> AsyncHttpResponse[ReportResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a report by ID or slug (if supported).
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -5128,7 +6065,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.reports.delete_a_report(
+client.reports.retrieve(
     id="id",
 )
 
@@ -5146,7 +6083,171 @@ client.reports.delete_a_report(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Report ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.reports.<a href="src/foru_ms_sdk/reports/client.py">delete</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete a report.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.reports.delete(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Report ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.reports.<a href="src/foru_ms_sdk/reports/client.py">update</a>(...) -> AsyncHttpResponse[UpdateReportsResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing report. Only provided fields will be modified.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.reports.update(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Report ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[str]` — Report status (pending, reviewed, resolved, dismissed)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**description:** `typing.Optional[str]` — Updated description or admin notes
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**extended_data:** `typing.Optional[typing.Dict[str, typing.Any]]` — Custom extended data
     
 </dd>
 </dl>
@@ -5167,9 +6268,23 @@ client.reports.delete_a_report(
 </details>
 
 ## Notifications
-<details><summary><code>client.notifications.<a href="src/foru_ms_sdk/notifications/client.py">list_all_notifications</a>(...) -> AsyncHttpResponse[GetNotificationsResponse]</code></summary>
+<details><summary><code>client.notifications.<a href="src/foru_ms_sdk/notifications/client.py">list</a>(...) -> AsyncHttpResponse[NotificationListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of notifications. Use cursor for pagination.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -5185,7 +6300,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.notifications.list_all_notifications()
+client.notifications.list()
 
 ```
 </dd>
@@ -5201,7 +6316,7 @@ client.notifications.list_all_notifications()
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -5209,7 +6324,7 @@ client.notifications.list_all_notifications()
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` 
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -5217,7 +6332,15 @@ client.notifications.list_all_notifications()
 <dl>
 <dd>
 
-**search:** `typing.Optional[str]` 
+**status:** `typing.Optional[ListNotificationsRequestStatus]` — Filter by notification status
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**user_id:** `typing.Optional[str]` — Filter by recipient user ID (admin only)
     
 </dd>
 </dl>
@@ -5237,9 +6360,23 @@ client.notifications.list_all_notifications()
 </dl>
 </details>
 
-<details><summary><code>client.notifications.<a href="src/foru_ms_sdk/notifications/client.py">create_a_notification</a>(...) -> AsyncHttpResponse[PostNotificationsResponse]</code></summary>
+<details><summary><code>client.notifications.<a href="src/foru_ms_sdk/notifications/client.py">create</a>(...) -> AsyncHttpResponse[NotificationResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new notification.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -5255,7 +6392,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.notifications.create_a_notification(
+client.notifications.create(
     user_id="userId",
     type="type",
 )
@@ -5330,7 +6467,7 @@ client.notifications.create_a_notification(
 <dl>
 <dd>
 
-**status:** `typing.Optional[PostNotificationsRequestStatus]` — Initial notification status
+**status:** `typing.Optional[CreateNotificationsRequestStatus]` — Initial notification status
     
 </dd>
 </dl>
@@ -5358,9 +6495,23 @@ client.notifications.create_a_notification(
 </dl>
 </details>
 
-<details><summary><code>client.notifications.<a href="src/foru_ms_sdk/notifications/client.py">get_a_notification</a>(...) -> AsyncHttpResponse[GetNotificationsIdResponse]</code></summary>
+<details><summary><code>client.notifications.<a href="src/foru_ms_sdk/notifications/client.py">retrieve</a>(...) -> AsyncHttpResponse[NotificationResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a notification by ID or slug (if supported).
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -5376,7 +6527,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.notifications.get_a_notification(
+client.notifications.retrieve(
     id="id",
 )
 
@@ -5394,7 +6545,7 @@ client.notifications.get_a_notification(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Notification ID
     
 </dd>
 </dl>
@@ -5414,9 +6565,23 @@ client.notifications.get_a_notification(
 </dl>
 </details>
 
-<details><summary><code>client.notifications.<a href="src/foru_ms_sdk/notifications/client.py">delete_a_notification</a>(...) -> AsyncHttpResponse[DeleteNotificationsIdResponse]</code></summary>
+<details><summary><code>client.notifications.<a href="src/foru_ms_sdk/notifications/client.py">delete</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete a notification.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -5432,7 +6597,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.notifications.delete_a_notification(
+client.notifications.delete(
     id="id",
 )
 
@@ -5450,7 +6615,7 @@ client.notifications.delete_a_notification(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Notification ID
     
 </dd>
 </dl>
@@ -5470,9 +6635,23 @@ client.notifications.delete_a_notification(
 </dl>
 </details>
 
-<details><summary><code>client.notifications.<a href="src/foru_ms_sdk/notifications/client.py">update_a_notification</a>(...) -> AsyncHttpResponse[PatchNotificationsIdResponse]</code></summary>
+<details><summary><code>client.notifications.<a href="src/foru_ms_sdk/notifications/client.py">update</a>(...) -> AsyncHttpResponse[UpdateNotificationsResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing notification. Only provided fields will be modified.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -5488,7 +6667,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.notifications.update_a_notification(
+client.notifications.update(
     id="id",
 )
 
@@ -5506,7 +6685,7 @@ client.notifications.update_a_notification(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Notification ID
     
 </dd>
 </dl>
@@ -5514,7 +6693,7 @@ client.notifications.update_a_notification(
 <dl>
 <dd>
 
-**status:** `typing.Optional[PatchNotificationsIdRequestStatus]` — Notification status
+**status:** `typing.Optional[UpdateNotificationsRequestStatus]` — Notification status
     
 </dd>
 </dl>
@@ -5543,9 +6722,25 @@ client.notifications.update_a_notification(
 </details>
 
 ## Webhooks
-<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">list_all_webhooks</a>(...) -> AsyncHttpResponse[GetWebhooksResponse]</code></summary>
+<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">list</a>(...) -> AsyncHttpResponse[WebhookListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of webhooks. Use cursor for pagination.
+
+**Requires feature: webhooks**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -5561,7 +6756,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.webhooks.list_all_webhooks()
+client.webhooks.list()
 
 ```
 </dd>
@@ -5577,7 +6772,7 @@ client.webhooks.list_all_webhooks()
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -5585,15 +6780,7 @@ client.webhooks.list_all_webhooks()
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**search:** `typing.Optional[str]` 
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -5613,9 +6800,25 @@ client.webhooks.list_all_webhooks()
 </dl>
 </details>
 
-<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">create_a_webhook</a>(...) -> AsyncHttpResponse[PostWebhooksResponse]</code></summary>
+<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">create</a>(...) -> AsyncHttpResponse[WebhookResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new webhook.
+
+**Requires feature: webhooks**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -5631,7 +6834,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.webhooks.create_a_webhook(
+client.webhooks.create(
     name="name",
     url="url",
     events=["events"],
@@ -5683,6 +6886,22 @@ client.webhooks.create_a_webhook(
 <dl>
 <dd>
 
+**active:** `typing.Optional[bool]` — Whether webhook is active
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**extended_data:** `typing.Optional[typing.Dict[str, typing.Any]]` — Custom extended data
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -5695,9 +6914,25 @@ client.webhooks.create_a_webhook(
 </dl>
 </details>
 
-<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">get_a_webhook</a>(...) -> AsyncHttpResponse[GetWebhooksIdResponse]</code></summary>
+<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">retrieve</a>(...) -> AsyncHttpResponse[WebhookResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a webhook by ID or slug (if supported).
+
+**Requires feature: webhooks**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -5713,7 +6948,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.webhooks.get_a_webhook(
+client.webhooks.retrieve(
     id="id",
 )
 
@@ -5731,7 +6966,7 @@ client.webhooks.get_a_webhook(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Webhook ID
     
 </dd>
 </dl>
@@ -5751,9 +6986,25 @@ client.webhooks.get_a_webhook(
 </dl>
 </details>
 
-<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">delete_a_webhook</a>(...) -> AsyncHttpResponse[DeleteWebhooksIdResponse]</code></summary>
+<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">delete</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete a webhook.
+
+**Requires feature: webhooks**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -5769,7 +7020,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.webhooks.delete_a_webhook(
+client.webhooks.delete(
     id="id",
 )
 
@@ -5787,7 +7038,7 @@ client.webhooks.delete_a_webhook(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Webhook ID
     
 </dd>
 </dl>
@@ -5807,9 +7058,25 @@ client.webhooks.delete_a_webhook(
 </dl>
 </details>
 
-<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">list_webhook_deliveries</a>(...) -> AsyncHttpResponse[GetWebhooksIdDeliveriesResponse]</code></summary>
+<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">update</a>(...) -> AsyncHttpResponse[UpdateWebhooksResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing webhook. Only provided fields will be modified.
+
+**Requires feature: webhooks**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -5825,7 +7092,127 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.webhooks.list_webhook_deliveries(
+client.webhooks.update(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Webhook ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` — Webhook name
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**url:** `typing.Optional[str]` — Target URL
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**events:** `typing.Optional[typing.Sequence[str]]` — Event types to trigger on
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**secret:** `typing.Optional[str]` — New secret
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**active:** `typing.Optional[bool]` — Enable/disable webhook
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**extended_data:** `typing.Optional[typing.Dict[str, typing.Any]]` — Custom extended data
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">list_deliveries</a>(...) -> AsyncHttpResponse[WebhookDeliveryListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of deliveries for Webhook.
+
+**Requires feature: webhooks**
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.webhooks.list_deliveries(
     id="id",
 )
 
@@ -5859,7 +7246,7 @@ client.webhooks.list_webhook_deliveries(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Items per page
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -5879,7 +7266,7 @@ client.webhooks.list_webhook_deliveries(
 </dl>
 </details>
 
-<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">get_a_delivery_from_webhook</a>(...) -> AsyncHttpResponse[GetWebhooksIdDeliveriesSubIdResponse]</code></summary>
+<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">retrieve_delivery</a>(...) -> AsyncHttpResponse[RetrieveDeliveryWebhooksResponse]</code></summary>
 <dl>
 <dd>
 
@@ -5897,7 +7284,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.webhooks.get_a_delivery_from_webhook(
+client.webhooks.retrieve_delivery(
     id="id",
     sub_id="subId",
 )
@@ -5944,7 +7331,7 @@ client.webhooks.get_a_delivery_from_webhook(
 </dl>
 </details>
 
-<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">delete_a_delivery_from_webhook</a>(...) -> AsyncHttpResponse[DeleteWebhooksIdDeliveriesSubIdResponse]</code></summary>
+<details><summary><code>client.webhooks.<a href="src/foru_ms_sdk/webhooks/client.py">delete_delivery</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
 
@@ -5962,7 +7349,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.webhooks.delete_a_delivery_from_webhook(
+client.webhooks.delete_delivery(
     id="id",
     sub_id="subId",
 )
@@ -6010,9 +7397,25 @@ client.webhooks.delete_a_delivery_from_webhook(
 </details>
 
 ## Integrations
-<details><summary><code>client.integrations.<a href="src/foru_ms_sdk/integrations/client.py">list_all_integrations</a>(...) -> AsyncHttpResponse[GetIntegrationsResponse]</code></summary>
+<details><summary><code>client.integrations.<a href="src/foru_ms_sdk/integrations/client.py">list</a>(...) -> AsyncHttpResponse[IntegrationListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of integrations. Use cursor for pagination.
+
+**Requires feature: integrations**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -6028,7 +7431,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.integrations.list_all_integrations()
+client.integrations.list()
 
 ```
 </dd>
@@ -6044,7 +7447,7 @@ client.integrations.list_all_integrations()
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -6052,15 +7455,7 @@ client.integrations.list_all_integrations()
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**search:** `typing.Optional[str]` 
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -6080,9 +7475,25 @@ client.integrations.list_all_integrations()
 </dl>
 </details>
 
-<details><summary><code>client.integrations.<a href="src/foru_ms_sdk/integrations/client.py">create_an_integration</a>(...) -> AsyncHttpResponse[PostIntegrationsResponse]</code></summary>
+<details><summary><code>client.integrations.<a href="src/foru_ms_sdk/integrations/client.py">create</a>(...) -> AsyncHttpResponse[IntegrationResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create an new integration.
+
+**Requires feature: integrations**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -6098,8 +7509,9 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.integrations.create_an_integration(
+client.integrations.create(
     type="type",
+    name="name",
     config={"key": "value"},
 )
 
@@ -6117,7 +7529,15 @@ client.integrations.create_an_integration(
 <dl>
 <dd>
 
-**type:** `str` — Integration type (e.g. slack, discord)
+**type:** `str` — Integration type (e.g. SLACK, DISCORD)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `str` — Integration name
     
 </dd>
 </dl>
@@ -6133,7 +7553,15 @@ client.integrations.create_an_integration(
 <dl>
 <dd>
 
-**enabled:** `typing.Optional[bool]` 
+**active:** `typing.Optional[bool]` — Whether integration is active
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**extended_data:** `typing.Optional[typing.Dict[str, typing.Any]]` — Custom extended data
     
 </dd>
 </dl>
@@ -6153,9 +7581,25 @@ client.integrations.create_an_integration(
 </dl>
 </details>
 
-<details><summary><code>client.integrations.<a href="src/foru_ms_sdk/integrations/client.py">get_an_integration</a>(...) -> AsyncHttpResponse[GetIntegrationsIdResponse]</code></summary>
+<details><summary><code>client.integrations.<a href="src/foru_ms_sdk/integrations/client.py">retrieve</a>(...) -> AsyncHttpResponse[IntegrationResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve an integration by ID or slug (if supported).
+
+**Requires feature: integrations**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -6171,7 +7615,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.integrations.get_an_integration(
+client.integrations.retrieve(
     id="id",
 )
 
@@ -6189,7 +7633,7 @@ client.integrations.get_an_integration(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Integration ID
     
 </dd>
 </dl>
@@ -6209,9 +7653,25 @@ client.integrations.get_an_integration(
 </dl>
 </details>
 
-<details><summary><code>client.integrations.<a href="src/foru_ms_sdk/integrations/client.py">delete_an_integration</a>(...) -> AsyncHttpResponse[DeleteIntegrationsIdResponse]</code></summary>
+<details><summary><code>client.integrations.<a href="src/foru_ms_sdk/integrations/client.py">delete</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete an integration.
+
+**Requires feature: integrations**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -6227,7 +7687,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.integrations.delete_an_integration(
+client.integrations.delete(
     id="id",
 )
 
@@ -6245,7 +7705,7 @@ client.integrations.delete_an_integration(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Integration ID
     
 </dd>
 </dl>
@@ -6265,9 +7725,25 @@ client.integrations.delete_an_integration(
 </dl>
 </details>
 
-<details><summary><code>client.integrations.<a href="src/foru_ms_sdk/integrations/client.py">update_an_integration</a>(...) -> AsyncHttpResponse[PatchIntegrationsIdResponse]</code></summary>
+<details><summary><code>client.integrations.<a href="src/foru_ms_sdk/integrations/client.py">update</a>(...) -> AsyncHttpResponse[UpdateIntegrationsResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing integration. Only provided fields will be modified.
+
+**Requires feature: integrations**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -6283,7 +7759,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.integrations.update_an_integration(
+client.integrations.update(
     id="id",
 )
 
@@ -6301,7 +7777,7 @@ client.integrations.update_an_integration(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Integration ID
     
 </dd>
 </dl>
@@ -6333,6 +7809,14 @@ client.integrations.update_an_integration(
 <dl>
 <dd>
 
+**extended_data:** `typing.Optional[typing.Dict[str, typing.Any]]` — Custom extended data
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -6345,10 +7829,26 @@ client.integrations.update_an_integration(
 </dl>
 </details>
 
-## SsOs
-<details><summary><code>client.ss_os.<a href="src/foru_ms_sdk/ss_os/client.py">list_all_ss_os</a>(...) -> AsyncHttpResponse[GetSsoResponse]</code></summary>
+## SSOs
+<details><summary><code>client.ss_os.<a href="src/foru_ms_sdk/ss_os/client.py">list</a>(...) -> AsyncHttpResponse[SsoListResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve a paginated list of ssos. Use cursor for pagination.
+
+**Requires feature: sso**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -6364,7 +7864,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.ss_os.list_all_ss_os()
+client.ss_os.list()
 
 ```
 </dd>
@@ -6380,7 +7880,7 @@ client.ss_os.list_all_ss_os()
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
+**limit:** `typing.Optional[int]` — Items per page (max 75)
     
 </dd>
 </dl>
@@ -6388,15 +7888,7 @@ client.ss_os.list_all_ss_os()
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**search:** `typing.Optional[str]` 
+**cursor:** `typing.Optional[str]` — Cursor for pagination
     
 </dd>
 </dl>
@@ -6416,9 +7908,25 @@ client.ss_os.list_all_ss_os()
 </dl>
 </details>
 
-<details><summary><code>client.ss_os.<a href="src/foru_ms_sdk/ss_os/client.py">create_an_sso</a>(...) -> AsyncHttpResponse[PostSsoResponse]</code></summary>
+<details><summary><code>client.ss_os.<a href="src/foru_ms_sdk/ss_os/client.py">create</a>(...) -> AsyncHttpResponse[SsoResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create an new sso.
+
+**Requires feature: sso**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -6434,14 +7942,10 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.ss_os.create_an_sso(
-    name="name",
-    client_id="clientId",
-    client_secret="clientSecret",
-    issuer="issuer",
-    authorization_endpoint="authorizationEndpoint",
-    token_endpoint="tokenEndpoint",
-    user_info_endpoint="userInfoEndpoint",
+client.ss_os.create(
+    provider="OKTA",
+    domain="domain",
+    config={"key": "value"},
 )
 
 ```
@@ -6458,7 +7962,7 @@ client.ss_os.create_an_sso(
 <dl>
 <dd>
 
-**name:** `str` — Provider name (e.g. Google)
+**provider:** `CreateSsOsRequestProvider` — SSO provider type
     
 </dd>
 </dl>
@@ -6466,7 +7970,7 @@ client.ss_os.create_an_sso(
 <dl>
 <dd>
 
-**client_id:** `str` 
+**domain:** `str` — Email domain to match (e.g. 'acme.com')
     
 </dd>
 </dl>
@@ -6474,7 +7978,7 @@ client.ss_os.create_an_sso(
 <dl>
 <dd>
 
-**client_secret:** `str` 
+**config:** `typing.Dict[str, typing.Any]` — Provider configuration (clientId, issuer, etc.)
     
 </dd>
 </dl>
@@ -6482,7 +7986,7 @@ client.ss_os.create_an_sso(
 <dl>
 <dd>
 
-**issuer:** `str` 
+**active:** `typing.Optional[bool]` — Whether SSO is active
     
 </dd>
 </dl>
@@ -6490,23 +7994,7 @@ client.ss_os.create_an_sso(
 <dl>
 <dd>
 
-**authorization_endpoint:** `str` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**token_endpoint:** `str` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**user_info_endpoint:** `str` 
+**extended_data:** `typing.Optional[typing.Dict[str, typing.Any]]` — Custom extended data
     
 </dd>
 </dl>
@@ -6526,9 +8014,25 @@ client.ss_os.create_an_sso(
 </dl>
 </details>
 
-<details><summary><code>client.ss_os.<a href="src/foru_ms_sdk/ss_os/client.py">get_an_sso</a>(...) -> AsyncHttpResponse[GetSsoIdResponse]</code></summary>
+<details><summary><code>client.ss_os.<a href="src/foru_ms_sdk/ss_os/client.py">retrieve</a>(...) -> AsyncHttpResponse[SsoResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve an sso by ID or slug (if supported).
+
+**Requires feature: sso**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -6544,7 +8048,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.ss_os.get_an_sso(
+client.ss_os.retrieve(
     id="id",
 )
 
@@ -6562,7 +8066,7 @@ client.ss_os.get_an_sso(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — SSO ID
     
 </dd>
 </dl>
@@ -6582,9 +8086,25 @@ client.ss_os.get_an_sso(
 </dl>
 </details>
 
-<details><summary><code>client.ss_os.<a href="src/foru_ms_sdk/ss_os/client.py">delete_an_sso</a>(...) -> AsyncHttpResponse[DeleteSsoIdResponse]</code></summary>
+<details><summary><code>client.ss_os.<a href="src/foru_ms_sdk/ss_os/client.py">delete</a>(...) -> AsyncHttpResponse[SuccessResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete an sso.
+
+**Requires feature: sso**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -6600,7 +8120,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.ss_os.delete_an_sso(
+client.ss_os.delete(
     id="id",
 )
 
@@ -6618,7 +8138,7 @@ client.ss_os.delete_an_sso(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — SSO ID
     
 </dd>
 </dl>
@@ -6638,9 +8158,25 @@ client.ss_os.delete_an_sso(
 </dl>
 </details>
 
-<details><summary><code>client.ss_os.<a href="src/foru_ms_sdk/ss_os/client.py">update_an_sso</a>(...) -> AsyncHttpResponse[PatchSsoIdResponse]</code></summary>
+<details><summary><code>client.ss_os.<a href="src/foru_ms_sdk/ss_os/client.py">update</a>(...) -> AsyncHttpResponse[UpdateSsOsResponse]</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing sso. Only provided fields will be modified.
+
+**Requires feature: sso**
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -6656,7 +8192,7 @@ from foru_ms_sdk import ForumClient
 client = ForumClient(
     api_key="YOUR_API_KEY",
 )
-client.ss_os.update_an_sso(
+client.ss_os.update(
     id="id",
 )
 
@@ -6674,7 +8210,7 @@ client.ss_os.update_an_sso(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — SSO ID
     
 </dd>
 </dl>
@@ -6682,7 +8218,7 @@ client.ss_os.update_an_sso(
 <dl>
 <dd>
 
-**name:** `typing.Optional[str]` — Provider name
+**provider:** `typing.Optional[UpdateSsOsRequestProvider]` — SSO provider type
     
 </dd>
 </dl>
@@ -6698,47 +8234,7 @@ client.ss_os.update_an_sso(
 <dl>
 <dd>
 
-**client_id:** `typing.Optional[str]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**client_secret:** `typing.Optional[str]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**issuer:** `typing.Optional[str]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**authorization_endpoint:** `typing.Optional[str]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**token_endpoint:** `typing.Optional[str]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**user_info_endpoint:** `typing.Optional[str]` 
+**config:** `typing.Optional[typing.Dict[str, typing.Any]]` — Provider configuration
     
 </dd>
 </dl>
@@ -6747,6 +8243,2031 @@ client.ss_os.update_an_sso(
 <dd>
 
 **active:** `typing.Optional[bool]` — Enable/disable provider
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**extended_data:** `typing.Optional[typing.Dict[str, typing.Any]]` — Custom extended data
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Provisioning
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">list</a>(...) -> AsyncHttpResponse[ListProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve all instances owned by the authenticated user. Use the `handle` query parameter to get a single instance with its API key.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.list(
+    provisioning_key="x-provisioning-key",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `typing.Optional[str]` — Optional handle to get a single instance
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">create</a>(...) -> AsyncHttpResponse[CreateProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new forum instance. Returns the instance details including the API key for accessing the forum API.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.create(
+    provisioning_key="x-provisioning-key",
+    name="name",
+    handle="handle",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `str` — Display name for the instance
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` — URL-friendly identifier (slug)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">update</a>(...) -> AsyncHttpResponse[UpdateProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an instance's name or handle. The `handle` field identifies which instance to update.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.update(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` — Current handle to identify the instance
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` — New display name
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**new_handle:** `typing.Optional[str]` — New URL-friendly identifier
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">delete</a>(...) -> AsyncHttpResponse[DeleteProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently delete an instance. This action cannot be undone.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.delete(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` — Handle of the instance to delete
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">get_billing</a>(...) -> AsyncHttpResponse[GetBillingProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve billing and subscription information for an instance.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.get_billing(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**handle:** `str` — Instance handle
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">change_plan</a>(...) -> AsyncHttpResponse[ChangePlanProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Change an instance's subscription plan. Returns a checkout URL for upgrades or a billing portal URL for downgrades.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.change_plan(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+    plan="FREE",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` — Instance handle
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**plan:** `UpgradeInstancePlan` — Target plan
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**is_annual:** `typing.Optional[bool]` — Use annual billing (default: true)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**return_url:** `typing.Optional[str]` — URL to return to after checkout/portal
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">regenerate_api_key</a>(...) -> AsyncHttpResponse[RegenerateApiKeyProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generate a new API key for the instance. The old key will be invalidated.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.regenerate_api_key(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">get_usage</a>(...) -> AsyncHttpResponse[GetUsageProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve usage statistics for an instance including API requests, storage, and content counts.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.get_usage(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**handle:** `str` — Instance handle
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">list_team</a>(...) -> AsyncHttpResponse[ListTeamProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve all team members for an instance.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.list_team(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**handle:** `str` — Instance handle
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">invite_team</a>(...) -> AsyncHttpResponse[InviteTeamProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Invite new team members to an instance.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+from foru_ms_sdk.provisioning import InviteTeamProvisioningRequestMembersItem
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.invite_team(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+    members=[
+        InviteTeamProvisioningRequestMembersItem(
+            email="email",
+        )
+    ],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**members:** `typing.Sequence[InviteTeamProvisioningRequestMembersItem]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">remove_team_member</a>(...) -> AsyncHttpResponse[RemoveTeamMemberProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Remove a team member from an instance.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.remove_team_member(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+    email="email",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**email:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">list_domains</a>(...) -> AsyncHttpResponse[ListDomainsProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve all custom domains for an instance.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.list_domains(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**handle:** `str` — Instance handle
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">add_domain</a>(...) -> AsyncHttpResponse[AddDomainProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Add a custom domain to an instance.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.add_domain(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+    name="name",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `str` — Domain name (e.g., forum.example.com)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**subdomain:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">remove_domain</a>(...) -> AsyncHttpResponse[RemoveDomainProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Remove a custom domain from an instance.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.remove_domain(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+    name="name",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">export_data</a>(...) -> AsyncHttpResponse[ExportDataProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Export all data from an instance including threads, posts, users, tags, etc.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.export_data(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">list_webhooks</a>(...) -> AsyncHttpResponse[ListWebhooksProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve all webhooks configured for an instance.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.list_webhooks(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**handle:** `str` — Instance handle
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">create_webhook</a>(...) -> AsyncHttpResponse[CreateWebhookProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new webhook for an instance.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.create_webhook(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+    url="url",
+    events=["events"],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**url:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**events:** `typing.Sequence[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**secret:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**active:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">update_webhook</a>(...) -> AsyncHttpResponse[UpdateWebhookProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update an existing webhook.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.update_webhook(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+    webhook_id="webhookId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**webhook_id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**url:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**events:** `typing.Optional[typing.Sequence[str]]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**secret:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**active:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">delete_webhook</a>(...) -> AsyncHttpResponse[DeleteWebhookProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Delete a webhook from an instance.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.delete_webhook(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+    webhook_id="webhookId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**webhook_id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">get_ownership</a>(...) -> AsyncHttpResponse[GetOwnershipProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve owner and creator information for an instance.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.get_ownership(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**handle:** `str` — Instance handle
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">transfer_ownership</a>(...) -> AsyncHttpResponse[TransferOwnershipProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Transfer instance ownership to another user. Only the current owner can transfer ownership.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.transfer_ownership(
+    provisioning_key="x-provisioning-key",
+    handle="handle",
+    new_owner_email="newOwnerEmail",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**provisioning_key:** `str` — User provisioning key for platform-level instance management
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**handle:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**new_owner_email:** `str` — Email of the new owner
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">register</a>(...) -> AsyncHttpResponse[RegisterProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new account and receive a provisioning key for API access. Use this key to create and manage instances.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.register(
+    email="email",
+    password="password",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**email:** `str` — Email address for the account
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**password:** `str` — Password (minimum 8 characters)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` — Display name (optional)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.provisioning.<a href="src/foru_ms_sdk/provisioning/client.py">login</a>(...) -> AsyncHttpResponse[LoginProvisioningResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Login with email and password to retrieve your provisioning key.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from foru_ms_sdk import ForumClient
+
+client = ForumClient(
+    api_key="YOUR_API_KEY",
+)
+client.provisioning.login(
+    email="email",
+    password="password",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**email:** `str` — Account email
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**password:** `str` — Account password
     
 </dd>
 </dl>

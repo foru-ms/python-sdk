@@ -14,6 +14,11 @@ class ReportCreate(UniversalBaseModel):
     Report type (e.g. spam, abuse)
     """
 
+    status: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Report status (default: pending)
+    """
+
     description: typing.Optional[str] = pydantic.Field(default=None)
     """
     Reason for reporting
@@ -52,6 +57,13 @@ class ReportCreate(UniversalBaseModel):
     )
     """
     ID of private message being reported
+    """
+
+    extended_data: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Any]], FieldMetadata(alias="extendedData")
+    ] = pydantic.Field(alias="extendedData", default=None)
+    """
+    Custom extended data
     """
 
     if IS_PYDANTIC_V2:

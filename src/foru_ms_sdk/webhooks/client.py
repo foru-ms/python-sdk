@@ -4,14 +4,13 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.success_response import SuccessResponse
+from ..types.webhook_delivery_list_response import WebhookDeliveryListResponse
+from ..types.webhook_list_response import WebhookListResponse
+from ..types.webhook_response import WebhookResponse
 from .raw_client import AsyncRawWebhooksClient, RawWebhooksClient
-from .types.delete_webhooks_id_deliveries_sub_id_response import DeleteWebhooksIdDeliveriesSubIdResponse
-from .types.delete_webhooks_id_response import DeleteWebhooksIdResponse
-from .types.get_webhooks_id_deliveries_response import GetWebhooksIdDeliveriesResponse
-from .types.get_webhooks_id_deliveries_sub_id_response import GetWebhooksIdDeliveriesSubIdResponse
-from .types.get_webhooks_id_response import GetWebhooksIdResponse
-from .types.get_webhooks_response import GetWebhooksResponse
-from .types.post_webhooks_response import PostWebhooksResponse
+from .types.retrieve_delivery_webhooks_response import RetrieveDeliveryWebhooksResponse
+from .types.update_webhooks_response import UpdateWebhooksResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -32,29 +31,32 @@ class WebhooksClient:
         """
         return self._raw_client
 
-    def list_all_webhooks(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetWebhooksResponse:
+    ) -> WebhookListResponse:
         """
+        Retrieve a paginated list of webhooks. Use cursor for pagination.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetWebhooksResponse
+        WebhookListResponse
             Success
 
         Examples
@@ -64,23 +66,27 @@ class WebhooksClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.webhooks.list_all_webhooks()
+        client.webhooks.list()
         """
-        _response = self._raw_client.list_all_webhooks(
-            page=page, limit=limit, search=search, request_options=request_options
-        )
+        _response = self._raw_client.list(limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
-    def create_a_webhook(
+    def create(
         self,
         *,
         name: str,
         url: str,
         events: typing.Sequence[str],
         secret: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostWebhooksResponse:
+    ) -> WebhookResponse:
         """
+        Create a new webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         name : str
@@ -95,12 +101,18 @@ class WebhooksClient:
         secret : typing.Optional[str]
             Secret for signature verification (auto-generated if missing)
 
+        active : typing.Optional[bool]
+            Whether webhook is active
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PostWebhooksResponse
+        WebhookResponse
             Created
 
         Examples
@@ -110,31 +122,40 @@ class WebhooksClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.webhooks.create_a_webhook(
+        client.webhooks.create(
             name="name",
             url="url",
             events=["events"],
         )
         """
-        _response = self._raw_client.create_a_webhook(
-            name=name, url=url, events=events, secret=secret, request_options=request_options
+        _response = self._raw_client.create(
+            name=name,
+            url=url,
+            events=events,
+            secret=secret,
+            active=active,
+            extended_data=extended_data,
+            request_options=request_options,
         )
         return _response.data
 
-    def get_a_webhook(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetWebhooksIdResponse:
+    def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> WebhookResponse:
         """
+        Retrieve a webhook by ID or slug (if supported).
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
+            Webhook ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetWebhooksIdResponse
+        WebhookResponse
             Success
 
         Examples
@@ -144,27 +165,30 @@ class WebhooksClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.webhooks.get_a_webhook(
+        client.webhooks.retrieve(
             id="id",
         )
         """
-        _response = self._raw_client.get_a_webhook(id, request_options=request_options)
+        _response = self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    def delete_a_webhook(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteWebhooksIdResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
+            Webhook ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteWebhooksIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -174,22 +198,97 @@ class WebhooksClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.webhooks.delete_a_webhook(
+        client.webhooks.delete(
             id="id",
         )
         """
-        _response = self._raw_client.delete_a_webhook(id, request_options=request_options)
+        _response = self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    def list_webhook_deliveries(
+    def update(
+        self,
+        id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        url: typing.Optional[str] = OMIT,
+        events: typing.Optional[typing.Sequence[str]] = OMIT,
+        secret: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UpdateWebhooksResponse:
+        """
+        Update an existing webhook. Only provided fields will be modified.
+
+        **Requires feature: webhooks**
+
+        Parameters
+        ----------
+        id : str
+            Webhook ID
+
+        name : typing.Optional[str]
+            Webhook name
+
+        url : typing.Optional[str]
+            Target URL
+
+        events : typing.Optional[typing.Sequence[str]]
+            Event types to trigger on
+
+        secret : typing.Optional[str]
+            New secret
+
+        active : typing.Optional[bool]
+            Enable/disable webhook
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdateWebhooksResponse
+            Updated
+
+        Examples
+        --------
+        from foru_ms_sdk import ForumClient
+
+        client = ForumClient(
+            api_key="YOUR_API_KEY",
+        )
+        client.webhooks.update(
+            id="id",
+        )
+        """
+        _response = self._raw_client.update(
+            id,
+            name=name,
+            url=url,
+            events=events,
+            secret=secret,
+            active=active,
+            extended_data=extended_data,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def list_deliveries(
         self,
         id: str,
         *,
         cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetWebhooksIdDeliveriesResponse:
+    ) -> WebhookDeliveryListResponse:
         """
+        Retrieve a paginated list of deliveries for Webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
@@ -199,14 +298,14 @@ class WebhooksClient:
             Pagination cursor
 
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetWebhooksIdDeliveriesResponse
+        WebhookDeliveryListResponse
             Success
 
         Examples
@@ -216,18 +315,16 @@ class WebhooksClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.webhooks.list_webhook_deliveries(
+        client.webhooks.list_deliveries(
             id="id",
         )
         """
-        _response = self._raw_client.list_webhook_deliveries(
-            id, cursor=cursor, limit=limit, request_options=request_options
-        )
+        _response = self._raw_client.list_deliveries(id, cursor=cursor, limit=limit, request_options=request_options)
         return _response.data
 
-    def get_a_delivery_from_webhook(
+    def retrieve_delivery(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetWebhooksIdDeliveriesSubIdResponse:
+    ) -> RetrieveDeliveryWebhooksResponse:
         """
         Parameters
         ----------
@@ -242,7 +339,7 @@ class WebhooksClient:
 
         Returns
         -------
-        GetWebhooksIdDeliveriesSubIdResponse
+        RetrieveDeliveryWebhooksResponse
             Success
 
         Examples
@@ -252,17 +349,17 @@ class WebhooksClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.webhooks.get_a_delivery_from_webhook(
+        client.webhooks.retrieve_delivery(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.get_a_delivery_from_webhook(id, sub_id, request_options=request_options)
+        _response = self._raw_client.retrieve_delivery(id, sub_id, request_options=request_options)
         return _response.data
 
-    def delete_a_delivery_from_webhook(
+    def delete_delivery(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteWebhooksIdDeliveriesSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -277,7 +374,7 @@ class WebhooksClient:
 
         Returns
         -------
-        DeleteWebhooksIdDeliveriesSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -287,12 +384,12 @@ class WebhooksClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.webhooks.delete_a_delivery_from_webhook(
+        client.webhooks.delete_delivery(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.delete_a_delivery_from_webhook(id, sub_id, request_options=request_options)
+        _response = self._raw_client.delete_delivery(id, sub_id, request_options=request_options)
         return _response.data
 
 
@@ -311,29 +408,32 @@ class AsyncWebhooksClient:
         """
         return self._raw_client
 
-    async def list_all_webhooks(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetWebhooksResponse:
+    ) -> WebhookListResponse:
         """
+        Retrieve a paginated list of webhooks. Use cursor for pagination.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetWebhooksResponse
+        WebhookListResponse
             Success
 
         Examples
@@ -348,26 +448,30 @@ class AsyncWebhooksClient:
 
 
         async def main() -> None:
-            await client.webhooks.list_all_webhooks()
+            await client.webhooks.list()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_all_webhooks(
-            page=page, limit=limit, search=search, request_options=request_options
-        )
+        _response = await self._raw_client.list(limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
-    async def create_a_webhook(
+    async def create(
         self,
         *,
         name: str,
         url: str,
         events: typing.Sequence[str],
         secret: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostWebhooksResponse:
+    ) -> WebhookResponse:
         """
+        Create a new webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         name : str
@@ -382,12 +486,18 @@ class AsyncWebhooksClient:
         secret : typing.Optional[str]
             Secret for signature verification (auto-generated if missing)
 
+        active : typing.Optional[bool]
+            Whether webhook is active
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        PostWebhooksResponse
+        WebhookResponse
             Created
 
         Examples
@@ -402,7 +512,7 @@ class AsyncWebhooksClient:
 
 
         async def main() -> None:
-            await client.webhooks.create_a_webhook(
+            await client.webhooks.create(
                 name="name",
                 url="url",
                 events=["events"],
@@ -411,25 +521,34 @@ class AsyncWebhooksClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_webhook(
-            name=name, url=url, events=events, secret=secret, request_options=request_options
+        _response = await self._raw_client.create(
+            name=name,
+            url=url,
+            events=events,
+            secret=secret,
+            active=active,
+            extended_data=extended_data,
+            request_options=request_options,
         )
         return _response.data
 
-    async def get_a_webhook(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetWebhooksIdResponse:
+    async def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> WebhookResponse:
         """
+        Retrieve a webhook by ID or slug (if supported).
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
+            Webhook ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetWebhooksIdResponse
+        WebhookResponse
             Success
 
         Examples
@@ -444,30 +563,33 @@ class AsyncWebhooksClient:
 
 
         async def main() -> None:
-            await client.webhooks.get_a_webhook(
+            await client.webhooks.retrieve(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_webhook(id, request_options=request_options)
+        _response = await self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    async def delete_a_webhook(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteWebhooksIdResponse:
+    async def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
+            Webhook ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeleteWebhooksIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -482,25 +604,108 @@ class AsyncWebhooksClient:
 
 
         async def main() -> None:
-            await client.webhooks.delete_a_webhook(
+            await client.webhooks.delete(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_webhook(id, request_options=request_options)
+        _response = await self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    async def list_webhook_deliveries(
+    async def update(
+        self,
+        id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        url: typing.Optional[str] = OMIT,
+        events: typing.Optional[typing.Sequence[str]] = OMIT,
+        secret: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UpdateWebhooksResponse:
+        """
+        Update an existing webhook. Only provided fields will be modified.
+
+        **Requires feature: webhooks**
+
+        Parameters
+        ----------
+        id : str
+            Webhook ID
+
+        name : typing.Optional[str]
+            Webhook name
+
+        url : typing.Optional[str]
+            Target URL
+
+        events : typing.Optional[typing.Sequence[str]]
+            Event types to trigger on
+
+        secret : typing.Optional[str]
+            New secret
+
+        active : typing.Optional[bool]
+            Enable/disable webhook
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdateWebhooksResponse
+            Updated
+
+        Examples
+        --------
+        import asyncio
+
+        from foru_ms_sdk import AsyncForumClient
+
+        client = AsyncForumClient(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.webhooks.update(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.update(
+            id,
+            name=name,
+            url=url,
+            events=events,
+            secret=secret,
+            active=active,
+            extended_data=extended_data,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def list_deliveries(
         self,
         id: str,
         *,
         cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetWebhooksIdDeliveriesResponse:
+    ) -> WebhookDeliveryListResponse:
         """
+        Retrieve a paginated list of deliveries for Webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
@@ -510,14 +715,14 @@ class AsyncWebhooksClient:
             Pagination cursor
 
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetWebhooksIdDeliveriesResponse
+        WebhookDeliveryListResponse
             Success
 
         Examples
@@ -532,21 +737,21 @@ class AsyncWebhooksClient:
 
 
         async def main() -> None:
-            await client.webhooks.list_webhook_deliveries(
+            await client.webhooks.list_deliveries(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_webhook_deliveries(
+        _response = await self._raw_client.list_deliveries(
             id, cursor=cursor, limit=limit, request_options=request_options
         )
         return _response.data
 
-    async def get_a_delivery_from_webhook(
+    async def retrieve_delivery(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetWebhooksIdDeliveriesSubIdResponse:
+    ) -> RetrieveDeliveryWebhooksResponse:
         """
         Parameters
         ----------
@@ -561,7 +766,7 @@ class AsyncWebhooksClient:
 
         Returns
         -------
-        GetWebhooksIdDeliveriesSubIdResponse
+        RetrieveDeliveryWebhooksResponse
             Success
 
         Examples
@@ -576,7 +781,7 @@ class AsyncWebhooksClient:
 
 
         async def main() -> None:
-            await client.webhooks.get_a_delivery_from_webhook(
+            await client.webhooks.retrieve_delivery(
                 id="id",
                 sub_id="subId",
             )
@@ -584,12 +789,12 @@ class AsyncWebhooksClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_delivery_from_webhook(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.retrieve_delivery(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def delete_a_delivery_from_webhook(
+    async def delete_delivery(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteWebhooksIdDeliveriesSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -604,7 +809,7 @@ class AsyncWebhooksClient:
 
         Returns
         -------
-        DeleteWebhooksIdDeliveriesSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -619,7 +824,7 @@ class AsyncWebhooksClient:
 
 
         async def main() -> None:
-            await client.webhooks.delete_a_delivery_from_webhook(
+            await client.webhooks.delete_delivery(
                 id="id",
                 sub_id="subId",
             )
@@ -627,5 +832,5 @@ class AsyncWebhooksClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_delivery_from_webhook(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.delete_delivery(id, sub_id, request_options=request_options)
         return _response.data

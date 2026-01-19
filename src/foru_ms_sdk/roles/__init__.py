@@ -6,29 +6,11 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .types import (
-        DeleteRolesIdResponse,
-        GetRolesIdResponse,
-        GetRolesIdResponseData,
-        GetRolesResponse,
-        GetRolesResponseDataItem,
-        GetRolesResponseMeta,
-        PatchRolesIdResponse,
-        PatchRolesIdResponseData,
-        PostRolesResponse,
-        PostRolesResponseData,
-    )
+    from .types import ListRolesRequestSort, UpdateRolesResponse, UpdateRolesResponseData
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteRolesIdResponse": ".types",
-    "GetRolesIdResponse": ".types",
-    "GetRolesIdResponseData": ".types",
-    "GetRolesResponse": ".types",
-    "GetRolesResponseDataItem": ".types",
-    "GetRolesResponseMeta": ".types",
-    "PatchRolesIdResponse": ".types",
-    "PatchRolesIdResponseData": ".types",
-    "PostRolesResponse": ".types",
-    "PostRolesResponseData": ".types",
+    "ListRolesRequestSort": ".types",
+    "UpdateRolesResponse": ".types",
+    "UpdateRolesResponseData": ".types",
 }
 
 
@@ -53,15 +35,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = [
-    "DeleteRolesIdResponse",
-    "GetRolesIdResponse",
-    "GetRolesIdResponseData",
-    "GetRolesResponse",
-    "GetRolesResponseDataItem",
-    "GetRolesResponseMeta",
-    "PatchRolesIdResponse",
-    "PatchRolesIdResponseData",
-    "PostRolesResponse",
-    "PostRolesResponseData",
-]
+__all__ = ["ListRolesRequestSort", "UpdateRolesResponse", "UpdateRolesResponseData"]

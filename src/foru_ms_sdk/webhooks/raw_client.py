@@ -16,13 +16,12 @@ from ..errors.payment_required_error import PaymentRequiredError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error_response import ErrorResponse
-from .types.delete_webhooks_id_deliveries_sub_id_response import DeleteWebhooksIdDeliveriesSubIdResponse
-from .types.delete_webhooks_id_response import DeleteWebhooksIdResponse
-from .types.get_webhooks_id_deliveries_response import GetWebhooksIdDeliveriesResponse
-from .types.get_webhooks_id_deliveries_sub_id_response import GetWebhooksIdDeliveriesSubIdResponse
-from .types.get_webhooks_id_response import GetWebhooksIdResponse
-from .types.get_webhooks_response import GetWebhooksResponse
-from .types.post_webhooks_response import PostWebhooksResponse
+from ..types.success_response import SuccessResponse
+from ..types.webhook_delivery_list_response import WebhookDeliveryListResponse
+from ..types.webhook_list_response import WebhookListResponse
+from ..types.webhook_response import WebhookResponse
+from .types.retrieve_delivery_webhooks_response import RetrieveDeliveryWebhooksResponse
+from .types.update_webhooks_response import UpdateWebhooksResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -32,47 +31,49 @@ class RawWebhooksClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_all_webhooks(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetWebhooksResponse]:
+    ) -> HttpResponse[WebhookListResponse]:
         """
+        Retrieve a paginated list of webhooks. Use cursor for pagination.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetWebhooksResponse]
+        HttpResponse[WebhookListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             "webhooks",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetWebhooksResponse,
+                    WebhookListResponse,
                     parse_obj_as(
-                        type_=GetWebhooksResponse,  # type: ignore
+                        type_=WebhookListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -126,16 +127,22 @@ class RawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_webhook(
+    def create(
         self,
         *,
         name: str,
         url: str,
         events: typing.Sequence[str],
         secret: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostWebhooksResponse]:
+    ) -> HttpResponse[WebhookResponse]:
         """
+        Create a new webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         name : str
@@ -150,12 +157,18 @@ class RawWebhooksClient:
         secret : typing.Optional[str]
             Secret for signature verification (auto-generated if missing)
 
+        active : typing.Optional[bool]
+            Whether webhook is active
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[PostWebhooksResponse]
+        HttpResponse[WebhookResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -166,6 +179,8 @@ class RawWebhooksClient:
                 "url": url,
                 "events": events,
                 "secret": secret,
+                "active": active,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -176,9 +191,9 @@ class RawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostWebhooksResponse,
+                    WebhookResponse,
                     parse_obj_as(
-                        type_=PostWebhooksResponse,  # type: ignore
+                        type_=WebhookResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -243,20 +258,25 @@ class RawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_webhook(
+    def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetWebhooksIdResponse]:
+    ) -> HttpResponse[WebhookResponse]:
         """
+        Retrieve a webhook by ID or slug (if supported).
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
+            Webhook ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetWebhooksIdResponse]
+        HttpResponse[WebhookResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -267,9 +287,9 @@ class RawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetWebhooksIdResponse,
+                    WebhookResponse,
                     parse_obj_as(
-                        type_=GetWebhooksIdResponse,  # type: ignore
+                        type_=WebhookResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -334,20 +354,25 @@ class RawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_webhook(
+    def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteWebhooksIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
+        Permanently delete a webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
+            Webhook ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeleteWebhooksIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -358,9 +383,9 @@ class RawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteWebhooksIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteWebhooksIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -425,15 +450,165 @@ class RawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def list_webhook_deliveries(
+    def update(
+        self,
+        id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        url: typing.Optional[str] = OMIT,
+        events: typing.Optional[typing.Sequence[str]] = OMIT,
+        secret: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[UpdateWebhooksResponse]:
+        """
+        Update an existing webhook. Only provided fields will be modified.
+
+        **Requires feature: webhooks**
+
+        Parameters
+        ----------
+        id : str
+            Webhook ID
+
+        name : typing.Optional[str]
+            Webhook name
+
+        url : typing.Optional[str]
+            Target URL
+
+        events : typing.Optional[typing.Sequence[str]]
+            Event types to trigger on
+
+        secret : typing.Optional[str]
+            New secret
+
+        active : typing.Optional[bool]
+            Enable/disable webhook
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[UpdateWebhooksResponse]
+            Updated
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"webhooks/{jsonable_encoder(id)}",
+            method="PATCH",
+            json={
+                "name": name,
+                "url": url,
+                "events": events,
+                "secret": secret,
+                "active": active,
+                "extendedData": extended_data,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UpdateWebhooksResponse,
+                    parse_obj_as(
+                        type_=UpdateWebhooksResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 402:
+                raise PaymentRequiredError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def list_deliveries(
         self,
         id: str,
         *,
         cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetWebhooksIdDeliveriesResponse]:
+    ) -> HttpResponse[WebhookDeliveryListResponse]:
         """
+        Retrieve a paginated list of deliveries for Webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
@@ -443,14 +618,14 @@ class RawWebhooksClient:
             Pagination cursor
 
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetWebhooksIdDeliveriesResponse]
+        HttpResponse[WebhookDeliveryListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -465,9 +640,9 @@ class RawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetWebhooksIdDeliveriesResponse,
+                    WebhookDeliveryListResponse,
                     parse_obj_as(
-                        type_=GetWebhooksIdDeliveriesResponse,  # type: ignore
+                        type_=WebhookDeliveryListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -521,9 +696,9 @@ class RawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_delivery_from_webhook(
+    def retrieve_delivery(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetWebhooksIdDeliveriesSubIdResponse]:
+    ) -> HttpResponse[RetrieveDeliveryWebhooksResponse]:
         """
         Parameters
         ----------
@@ -538,7 +713,7 @@ class RawWebhooksClient:
 
         Returns
         -------
-        HttpResponse[GetWebhooksIdDeliveriesSubIdResponse]
+        HttpResponse[RetrieveDeliveryWebhooksResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -549,9 +724,9 @@ class RawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetWebhooksIdDeliveriesSubIdResponse,
+                    RetrieveDeliveryWebhooksResponse,
                     parse_obj_as(
-                        type_=GetWebhooksIdDeliveriesSubIdResponse,  # type: ignore
+                        type_=RetrieveDeliveryWebhooksResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -605,9 +780,9 @@ class RawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_delivery_from_webhook(
+    def delete_delivery(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteWebhooksIdDeliveriesSubIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -622,7 +797,7 @@ class RawWebhooksClient:
 
         Returns
         -------
-        HttpResponse[DeleteWebhooksIdDeliveriesSubIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -633,9 +808,9 @@ class RawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteWebhooksIdDeliveriesSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteWebhooksIdDeliveriesSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -694,47 +869,49 @@ class AsyncRawWebhooksClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_all_webhooks(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetWebhooksResponse]:
+    ) -> AsyncHttpResponse[WebhookListResponse]:
         """
+        Retrieve a paginated list of webhooks. Use cursor for pagination.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetWebhooksResponse]
+        AsyncHttpResponse[WebhookListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             "webhooks",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetWebhooksResponse,
+                    WebhookListResponse,
                     parse_obj_as(
-                        type_=GetWebhooksResponse,  # type: ignore
+                        type_=WebhookListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -788,16 +965,22 @@ class AsyncRawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_webhook(
+    async def create(
         self,
         *,
         name: str,
         url: str,
         events: typing.Sequence[str],
         secret: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostWebhooksResponse]:
+    ) -> AsyncHttpResponse[WebhookResponse]:
         """
+        Create a new webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         name : str
@@ -812,12 +995,18 @@ class AsyncRawWebhooksClient:
         secret : typing.Optional[str]
             Secret for signature verification (auto-generated if missing)
 
+        active : typing.Optional[bool]
+            Whether webhook is active
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[PostWebhooksResponse]
+        AsyncHttpResponse[WebhookResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -828,6 +1017,8 @@ class AsyncRawWebhooksClient:
                 "url": url,
                 "events": events,
                 "secret": secret,
+                "active": active,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -838,9 +1029,9 @@ class AsyncRawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostWebhooksResponse,
+                    WebhookResponse,
                     parse_obj_as(
-                        type_=PostWebhooksResponse,  # type: ignore
+                        type_=WebhookResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -905,20 +1096,25 @@ class AsyncRawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_webhook(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetWebhooksIdResponse]:
+    ) -> AsyncHttpResponse[WebhookResponse]:
         """
+        Retrieve a webhook by ID or slug (if supported).
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
+            Webhook ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetWebhooksIdResponse]
+        AsyncHttpResponse[WebhookResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -929,9 +1125,9 @@ class AsyncRawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetWebhooksIdResponse,
+                    WebhookResponse,
                     parse_obj_as(
-                        type_=GetWebhooksIdResponse,  # type: ignore
+                        type_=WebhookResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -996,20 +1192,25 @@ class AsyncRawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_webhook(
+    async def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteWebhooksIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
+        Permanently delete a webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
+            Webhook ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeleteWebhooksIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1020,9 +1221,9 @@ class AsyncRawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteWebhooksIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteWebhooksIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1087,15 +1288,165 @@ class AsyncRawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def list_webhook_deliveries(
+    async def update(
+        self,
+        id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        url: typing.Optional[str] = OMIT,
+        events: typing.Optional[typing.Sequence[str]] = OMIT,
+        secret: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[UpdateWebhooksResponse]:
+        """
+        Update an existing webhook. Only provided fields will be modified.
+
+        **Requires feature: webhooks**
+
+        Parameters
+        ----------
+        id : str
+            Webhook ID
+
+        name : typing.Optional[str]
+            Webhook name
+
+        url : typing.Optional[str]
+            Target URL
+
+        events : typing.Optional[typing.Sequence[str]]
+            Event types to trigger on
+
+        secret : typing.Optional[str]
+            New secret
+
+        active : typing.Optional[bool]
+            Enable/disable webhook
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[UpdateWebhooksResponse]
+            Updated
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"webhooks/{jsonable_encoder(id)}",
+            method="PATCH",
+            json={
+                "name": name,
+                "url": url,
+                "events": events,
+                "secret": secret,
+                "active": active,
+                "extendedData": extended_data,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UpdateWebhooksResponse,
+                    parse_obj_as(
+                        type_=UpdateWebhooksResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 402:
+                raise PaymentRequiredError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def list_deliveries(
         self,
         id: str,
         *,
         cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetWebhooksIdDeliveriesResponse]:
+    ) -> AsyncHttpResponse[WebhookDeliveryListResponse]:
         """
+        Retrieve a paginated list of deliveries for Webhook.
+
+        **Requires feature: webhooks**
+
         Parameters
         ----------
         id : str
@@ -1105,14 +1456,14 @@ class AsyncRawWebhooksClient:
             Pagination cursor
 
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetWebhooksIdDeliveriesResponse]
+        AsyncHttpResponse[WebhookDeliveryListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1127,9 +1478,9 @@ class AsyncRawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetWebhooksIdDeliveriesResponse,
+                    WebhookDeliveryListResponse,
                     parse_obj_as(
-                        type_=GetWebhooksIdDeliveriesResponse,  # type: ignore
+                        type_=WebhookDeliveryListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1183,9 +1534,9 @@ class AsyncRawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_delivery_from_webhook(
+    async def retrieve_delivery(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetWebhooksIdDeliveriesSubIdResponse]:
+    ) -> AsyncHttpResponse[RetrieveDeliveryWebhooksResponse]:
         """
         Parameters
         ----------
@@ -1200,7 +1551,7 @@ class AsyncRawWebhooksClient:
 
         Returns
         -------
-        AsyncHttpResponse[GetWebhooksIdDeliveriesSubIdResponse]
+        AsyncHttpResponse[RetrieveDeliveryWebhooksResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1211,9 +1562,9 @@ class AsyncRawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetWebhooksIdDeliveriesSubIdResponse,
+                    RetrieveDeliveryWebhooksResponse,
                     parse_obj_as(
-                        type_=GetWebhooksIdDeliveriesSubIdResponse,  # type: ignore
+                        type_=RetrieveDeliveryWebhooksResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1267,9 +1618,9 @@ class AsyncRawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_delivery_from_webhook(
+    async def delete_delivery(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteWebhooksIdDeliveriesSubIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -1284,7 +1635,7 @@ class AsyncRawWebhooksClient:
 
         Returns
         -------
-        AsyncHttpResponse[DeleteWebhooksIdDeliveriesSubIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1295,9 +1646,9 @@ class AsyncRawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteWebhooksIdDeliveriesSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteWebhooksIdDeliveriesSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

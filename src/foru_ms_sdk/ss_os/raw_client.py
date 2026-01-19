@@ -16,11 +16,12 @@ from ..errors.payment_required_error import PaymentRequiredError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error_response import ErrorResponse
-from .types.delete_sso_id_response import DeleteSsoIdResponse
-from .types.get_sso_id_response import GetSsoIdResponse
-from .types.get_sso_response import GetSsoResponse
-from .types.patch_sso_id_response import PatchSsoIdResponse
-from .types.post_sso_response import PostSsoResponse
+from ..types.sso_list_response import SsoListResponse
+from ..types.sso_response import SsoResponse
+from ..types.success_response import SuccessResponse
+from .types.create_ss_os_request_provider import CreateSsOsRequestProvider
+from .types.update_ss_os_request_provider import UpdateSsOsRequestProvider
+from .types.update_ss_os_response import UpdateSsOsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -30,47 +31,49 @@ class RawSsOsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_all_ss_os(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetSsoResponse]:
+    ) -> HttpResponse[SsoListResponse]:
         """
+        Retrieve a paginated list of ssos. Use cursor for pagination.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetSsoResponse]
+        HttpResponse[SsoListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             "sso",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetSsoResponse,
+                    SsoListResponse,
                     parse_obj_as(
-                        type_=GetSsoResponse,  # type: ignore
+                        type_=SsoListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -124,55 +127,55 @@ class RawSsOsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_an_sso(
+    def create(
         self,
         *,
-        name: str,
-        client_id: str,
-        client_secret: str,
-        issuer: str,
-        authorization_endpoint: str,
-        token_endpoint: str,
-        user_info_endpoint: str,
+        provider: CreateSsOsRequestProvider,
+        domain: str,
+        config: typing.Dict[str, typing.Any],
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostSsoResponse]:
+    ) -> HttpResponse[SsoResponse]:
         """
+        Create an new sso.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
-        name : str
-            Provider name (e.g. Google)
+        provider : CreateSsOsRequestProvider
+            SSO provider type
 
-        client_id : str
+        domain : str
+            Email domain to match (e.g. 'acme.com')
 
-        client_secret : str
+        config : typing.Dict[str, typing.Any]
+            Provider configuration (clientId, issuer, etc.)
 
-        issuer : str
+        active : typing.Optional[bool]
+            Whether SSO is active
 
-        authorization_endpoint : str
-
-        token_endpoint : str
-
-        user_info_endpoint : str
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[PostSsoResponse]
+        HttpResponse[SsoResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
             "sso",
             method="POST",
             json={
-                "name": name,
-                "clientId": client_id,
-                "clientSecret": client_secret,
-                "issuer": issuer,
-                "authorizationEndpoint": authorization_endpoint,
-                "tokenEndpoint": token_endpoint,
-                "userInfoEndpoint": user_info_endpoint,
+                "provider": provider,
+                "domain": domain,
+                "config": config,
+                "active": active,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -183,9 +186,9 @@ class RawSsOsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostSsoResponse,
+                    SsoResponse,
                     parse_obj_as(
-                        type_=PostSsoResponse,  # type: ignore
+                        type_=SsoResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -250,20 +253,25 @@ class RawSsOsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_an_sso(
+    def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetSsoIdResponse]:
+    ) -> HttpResponse[SsoResponse]:
         """
+        Retrieve an sso by ID or slug (if supported).
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetSsoIdResponse]
+        HttpResponse[SsoResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -274,9 +282,9 @@ class RawSsOsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetSsoIdResponse,
+                    SsoResponse,
                     parse_obj_as(
-                        type_=GetSsoIdResponse,  # type: ignore
+                        type_=SsoResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -341,20 +349,25 @@ class RawSsOsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_an_sso(
+    def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteSsoIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
+        Permanently delete an sso.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeleteSsoIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -365,9 +378,9 @@ class RawSsOsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteSsoIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteSsoIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -432,68 +445,59 @@ class RawSsOsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_an_sso(
+    def update(
         self,
         id: str,
         *,
-        name: typing.Optional[str] = OMIT,
+        provider: typing.Optional[UpdateSsOsRequestProvider] = OMIT,
         domain: typing.Optional[str] = OMIT,
-        client_id: typing.Optional[str] = OMIT,
-        client_secret: typing.Optional[str] = OMIT,
-        issuer: typing.Optional[str] = OMIT,
-        authorization_endpoint: typing.Optional[str] = OMIT,
-        token_endpoint: typing.Optional[str] = OMIT,
-        user_info_endpoint: typing.Optional[str] = OMIT,
+        config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PatchSsoIdResponse]:
+    ) -> HttpResponse[UpdateSsOsResponse]:
         """
+        Update an existing sso. Only provided fields will be modified.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
-        name : typing.Optional[str]
-            Provider name
+        provider : typing.Optional[UpdateSsOsRequestProvider]
+            SSO provider type
 
         domain : typing.Optional[str]
             Email domain to match
 
-        client_id : typing.Optional[str]
-
-        client_secret : typing.Optional[str]
-
-        issuer : typing.Optional[str]
-
-        authorization_endpoint : typing.Optional[str]
-
-        token_endpoint : typing.Optional[str]
-
-        user_info_endpoint : typing.Optional[str]
+        config : typing.Optional[typing.Dict[str, typing.Any]]
+            Provider configuration
 
         active : typing.Optional[bool]
             Enable/disable provider
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[PatchSsoIdResponse]
+        HttpResponse[UpdateSsOsResponse]
             Updated
         """
         _response = self._client_wrapper.httpx_client.request(
             f"sso/{jsonable_encoder(id)}",
             method="PATCH",
             json={
-                "name": name,
+                "provider": provider,
                 "domain": domain,
-                "clientId": client_id,
-                "clientSecret": client_secret,
-                "issuer": issuer,
-                "authorizationEndpoint": authorization_endpoint,
-                "tokenEndpoint": token_endpoint,
-                "userInfoEndpoint": user_info_endpoint,
+                "config": config,
                 "active": active,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -504,9 +508,9 @@ class RawSsOsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchSsoIdResponse,
+                    UpdateSsOsResponse,
                     parse_obj_as(
-                        type_=PatchSsoIdResponse,  # type: ignore
+                        type_=UpdateSsOsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -587,47 +591,49 @@ class AsyncRawSsOsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_all_ss_os(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetSsoResponse]:
+    ) -> AsyncHttpResponse[SsoListResponse]:
         """
+        Retrieve a paginated list of ssos. Use cursor for pagination.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetSsoResponse]
+        AsyncHttpResponse[SsoListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             "sso",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetSsoResponse,
+                    SsoListResponse,
                     parse_obj_as(
-                        type_=GetSsoResponse,  # type: ignore
+                        type_=SsoListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -681,55 +687,55 @@ class AsyncRawSsOsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_an_sso(
+    async def create(
         self,
         *,
-        name: str,
-        client_id: str,
-        client_secret: str,
-        issuer: str,
-        authorization_endpoint: str,
-        token_endpoint: str,
-        user_info_endpoint: str,
+        provider: CreateSsOsRequestProvider,
+        domain: str,
+        config: typing.Dict[str, typing.Any],
+        active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostSsoResponse]:
+    ) -> AsyncHttpResponse[SsoResponse]:
         """
+        Create an new sso.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
-        name : str
-            Provider name (e.g. Google)
+        provider : CreateSsOsRequestProvider
+            SSO provider type
 
-        client_id : str
+        domain : str
+            Email domain to match (e.g. 'acme.com')
 
-        client_secret : str
+        config : typing.Dict[str, typing.Any]
+            Provider configuration (clientId, issuer, etc.)
 
-        issuer : str
+        active : typing.Optional[bool]
+            Whether SSO is active
 
-        authorization_endpoint : str
-
-        token_endpoint : str
-
-        user_info_endpoint : str
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[PostSsoResponse]
+        AsyncHttpResponse[SsoResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
             "sso",
             method="POST",
             json={
-                "name": name,
-                "clientId": client_id,
-                "clientSecret": client_secret,
-                "issuer": issuer,
-                "authorizationEndpoint": authorization_endpoint,
-                "tokenEndpoint": token_endpoint,
-                "userInfoEndpoint": user_info_endpoint,
+                "provider": provider,
+                "domain": domain,
+                "config": config,
+                "active": active,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -740,9 +746,9 @@ class AsyncRawSsOsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostSsoResponse,
+                    SsoResponse,
                     parse_obj_as(
-                        type_=PostSsoResponse,  # type: ignore
+                        type_=SsoResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -807,20 +813,25 @@ class AsyncRawSsOsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_an_sso(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetSsoIdResponse]:
+    ) -> AsyncHttpResponse[SsoResponse]:
         """
+        Retrieve an sso by ID or slug (if supported).
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetSsoIdResponse]
+        AsyncHttpResponse[SsoResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -831,9 +842,9 @@ class AsyncRawSsOsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetSsoIdResponse,
+                    SsoResponse,
                     parse_obj_as(
-                        type_=GetSsoIdResponse,  # type: ignore
+                        type_=SsoResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -898,20 +909,25 @@ class AsyncRawSsOsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_an_sso(
+    async def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteSsoIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
+        Permanently delete an sso.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeleteSsoIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -922,9 +938,9 @@ class AsyncRawSsOsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteSsoIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteSsoIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -989,68 +1005,59 @@ class AsyncRawSsOsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_an_sso(
+    async def update(
         self,
         id: str,
         *,
-        name: typing.Optional[str] = OMIT,
+        provider: typing.Optional[UpdateSsOsRequestProvider] = OMIT,
         domain: typing.Optional[str] = OMIT,
-        client_id: typing.Optional[str] = OMIT,
-        client_secret: typing.Optional[str] = OMIT,
-        issuer: typing.Optional[str] = OMIT,
-        authorization_endpoint: typing.Optional[str] = OMIT,
-        token_endpoint: typing.Optional[str] = OMIT,
-        user_info_endpoint: typing.Optional[str] = OMIT,
+        config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PatchSsoIdResponse]:
+    ) -> AsyncHttpResponse[UpdateSsOsResponse]:
         """
+        Update an existing sso. Only provided fields will be modified.
+
+        **Requires feature: sso**
+
         Parameters
         ----------
         id : str
+            SSO ID
 
-        name : typing.Optional[str]
-            Provider name
+        provider : typing.Optional[UpdateSsOsRequestProvider]
+            SSO provider type
 
         domain : typing.Optional[str]
             Email domain to match
 
-        client_id : typing.Optional[str]
-
-        client_secret : typing.Optional[str]
-
-        issuer : typing.Optional[str]
-
-        authorization_endpoint : typing.Optional[str]
-
-        token_endpoint : typing.Optional[str]
-
-        user_info_endpoint : typing.Optional[str]
+        config : typing.Optional[typing.Dict[str, typing.Any]]
+            Provider configuration
 
         active : typing.Optional[bool]
             Enable/disable provider
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Custom extended data
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[PatchSsoIdResponse]
+        AsyncHttpResponse[UpdateSsOsResponse]
             Updated
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"sso/{jsonable_encoder(id)}",
             method="PATCH",
             json={
-                "name": name,
+                "provider": provider,
                 "domain": domain,
-                "clientId": client_id,
-                "clientSecret": client_secret,
-                "issuer": issuer,
-                "authorizationEndpoint": authorization_endpoint,
-                "tokenEndpoint": token_endpoint,
-                "userInfoEndpoint": user_info_endpoint,
+                "config": config,
                 "active": active,
+                "extendedData": extended_data,
             },
             headers={
                 "content-type": "application/json",
@@ -1061,9 +1068,9 @@ class AsyncRawSsOsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchSsoIdResponse,
+                    UpdateSsOsResponse,
                     parse_obj_as(
-                        type_=PatchSsoIdResponse,  # type: ignore
+                        type_=UpdateSsOsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

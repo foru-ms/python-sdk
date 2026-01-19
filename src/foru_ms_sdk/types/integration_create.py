@@ -3,13 +3,20 @@
 import typing
 
 import pydantic
+import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.serialization import FieldMetadata
 
 
 class IntegrationCreate(UniversalBaseModel):
     type: str = pydantic.Field()
     """
-    Integration type (e.g. slack, discord)
+    Integration type (e.g. SLACK, DISCORD)
+    """
+
+    name: str = pydantic.Field()
+    """
+    Integration name
     """
 
     config: typing.Dict[str, typing.Any] = pydantic.Field()
@@ -17,7 +24,17 @@ class IntegrationCreate(UniversalBaseModel):
     JSON configuration
     """
 
-    enabled: typing.Optional[bool] = None
+    active: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Whether integration is active
+    """
+
+    extended_data: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Any]], FieldMetadata(alias="extendedData")
+    ] = pydantic.Field(alias="extendedData", default=None)
+    """
+    Custom extended data
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

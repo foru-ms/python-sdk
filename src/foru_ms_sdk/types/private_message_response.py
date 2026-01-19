@@ -3,65 +3,12 @@
 import typing
 
 import pydantic
-import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from ..core.serialization import FieldMetadata
+from .private_message_response_data import PrivateMessageResponseData
 
 
 class PrivateMessageResponse(UniversalBaseModel):
-    recipient_id: typing_extensions.Annotated[str, FieldMetadata(alias="recipientId")] = pydantic.Field(
-        alias="recipientId"
-    )
-    """
-    Recipient User ID
-    """
-
-    sender_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="senderId")] = pydantic.Field(
-        alias="senderId", default=None
-    )
-    """
-    Sender user ID (required for API key auth, ignored for JWT auth)
-    """
-
-    title: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Message title (optional for replies)
-    """
-
-    body: str = pydantic.Field()
-    """
-    Message content
-    """
-
-    parent_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="parentId")] = pydantic.Field(
-        alias="parentId", default=None
-    )
-    """
-    Parent Message ID (for replies)
-    """
-
-    extended_data: typing_extensions.Annotated[
-        typing.Optional[typing.Dict[str, typing.Any]], FieldMetadata(alias="extendedData")
-    ] = pydantic.Field(alias="extendedData", default=None)
-    """
-    Extended data
-    """
-
-    id: str
-    status: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Message status (sent, delivered, read, archived)
-    """
-
-    created_at: typing_extensions.Annotated[str, FieldMetadata(alias="createdAt")] = pydantic.Field(alias="createdAt")
-    """
-    Message sent timestamp
-    """
-
-    updated_at: typing_extensions.Annotated[str, FieldMetadata(alias="updatedAt")] = pydantic.Field(alias="updatedAt")
-    """
-    Message last update timestamp
-    """
+    data: typing.Optional[PrivateMessageResponseData] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

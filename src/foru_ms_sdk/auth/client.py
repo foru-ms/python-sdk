@@ -4,12 +4,12 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.forgot_password_response import ForgotPasswordResponse
+from ..types.login_response import LoginResponse
+from ..types.me_response import MeResponse
+from ..types.register_response import RegisterResponse
+from ..types.reset_password_response import ResetPasswordResponse
 from .raw_client import AsyncRawAuthClient, RawAuthClient
-from .types.get_auth_me_response import GetAuthMeResponse
-from .types.post_auth_forgot_password_response import PostAuthForgotPasswordResponse
-from .types.post_auth_login_response import PostAuthLoginResponse
-from .types.post_auth_register_response import PostAuthRegisterResponse
-from .types.post_auth_reset_password_response import PostAuthResetPasswordResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -41,8 +41,10 @@ class AuthClient:
         bio: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostAuthRegisterResponse:
+    ) -> RegisterResponse:
         """
+        Register a new user in your forum instance. Requires API key for instance identification. Returns a JWT token for subsequent authenticated requests.
+
         Parameters
         ----------
         username : str
@@ -71,7 +73,7 @@ class AuthClient:
 
         Returns
         -------
-        PostAuthRegisterResponse
+        RegisterResponse
             Success
 
         Examples
@@ -101,8 +103,10 @@ class AuthClient:
 
     def login(
         self, *, login: str, password: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> PostAuthLoginResponse:
+    ) -> LoginResponse:
         """
+        Authenticate an existing user. Requires API key for instance identification. Returns a JWT token for subsequent authenticated requests.
+
         Parameters
         ----------
         login : str
@@ -116,7 +120,7 @@ class AuthClient:
 
         Returns
         -------
-        PostAuthLoginResponse
+        LoginResponse
             Success
 
         Examples
@@ -134,7 +138,7 @@ class AuthClient:
         _response = self._raw_client.login(login=login, password=password, request_options=request_options)
         return _response.data
 
-    def get_current_user(self, *, request_options: typing.Optional[RequestOptions] = None) -> GetAuthMeResponse:
+    def me(self, *, request_options: typing.Optional[RequestOptions] = None) -> MeResponse:
         """
         Parameters
         ----------
@@ -143,7 +147,7 @@ class AuthClient:
 
         Returns
         -------
-        GetAuthMeResponse
+        MeResponse
             Success
 
         Examples
@@ -153,15 +157,17 @@ class AuthClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.auth.get_current_user()
+        client.auth.me()
         """
-        _response = self._raw_client.get_current_user(request_options=request_options)
+        _response = self._raw_client.me(request_options=request_options)
         return _response.data
 
-    def request_password_reset(
+    def forgot_password(
         self, *, email: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> PostAuthForgotPasswordResponse:
+    ) -> ForgotPasswordResponse:
         """
+        Request a password reset email. Requires API key for instance identification.
+
         Parameters
         ----------
         email : str
@@ -172,7 +178,7 @@ class AuthClient:
 
         Returns
         -------
-        PostAuthForgotPasswordResponse
+        ForgotPasswordResponse
             Success
 
         Examples
@@ -182,11 +188,11 @@ class AuthClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.auth.request_password_reset(
+        client.auth.forgot_password(
             email="email",
         )
         """
-        _response = self._raw_client.request_password_reset(email=email, request_options=request_options)
+        _response = self._raw_client.forgot_password(email=email, request_options=request_options)
         return _response.data
 
     def reset_password(
@@ -197,8 +203,10 @@ class AuthClient:
         email: typing.Optional[str] = OMIT,
         token: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostAuthResetPasswordResponse:
+    ) -> ResetPasswordResponse:
         """
+        Reset password using a reset token. Requires API key for instance identification.
+
         Parameters
         ----------
         password : str
@@ -218,7 +226,7 @@ class AuthClient:
 
         Returns
         -------
-        PostAuthResetPasswordResponse
+        ResetPasswordResponse
             Success
 
         Examples
@@ -264,8 +272,10 @@ class AsyncAuthClient:
         bio: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostAuthRegisterResponse:
+    ) -> RegisterResponse:
         """
+        Register a new user in your forum instance. Requires API key for instance identification. Returns a JWT token for subsequent authenticated requests.
+
         Parameters
         ----------
         username : str
@@ -294,7 +304,7 @@ class AsyncAuthClient:
 
         Returns
         -------
-        PostAuthRegisterResponse
+        RegisterResponse
             Success
 
         Examples
@@ -332,8 +342,10 @@ class AsyncAuthClient:
 
     async def login(
         self, *, login: str, password: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> PostAuthLoginResponse:
+    ) -> LoginResponse:
         """
+        Authenticate an existing user. Requires API key for instance identification. Returns a JWT token for subsequent authenticated requests.
+
         Parameters
         ----------
         login : str
@@ -347,7 +359,7 @@ class AsyncAuthClient:
 
         Returns
         -------
-        PostAuthLoginResponse
+        LoginResponse
             Success
 
         Examples
@@ -373,7 +385,7 @@ class AsyncAuthClient:
         _response = await self._raw_client.login(login=login, password=password, request_options=request_options)
         return _response.data
 
-    async def get_current_user(self, *, request_options: typing.Optional[RequestOptions] = None) -> GetAuthMeResponse:
+    async def me(self, *, request_options: typing.Optional[RequestOptions] = None) -> MeResponse:
         """
         Parameters
         ----------
@@ -382,7 +394,7 @@ class AsyncAuthClient:
 
         Returns
         -------
-        GetAuthMeResponse
+        MeResponse
             Success
 
         Examples
@@ -397,18 +409,20 @@ class AsyncAuthClient:
 
 
         async def main() -> None:
-            await client.auth.get_current_user()
+            await client.auth.me()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_current_user(request_options=request_options)
+        _response = await self._raw_client.me(request_options=request_options)
         return _response.data
 
-    async def request_password_reset(
+    async def forgot_password(
         self, *, email: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> PostAuthForgotPasswordResponse:
+    ) -> ForgotPasswordResponse:
         """
+        Request a password reset email. Requires API key for instance identification.
+
         Parameters
         ----------
         email : str
@@ -419,7 +433,7 @@ class AsyncAuthClient:
 
         Returns
         -------
-        PostAuthForgotPasswordResponse
+        ForgotPasswordResponse
             Success
 
         Examples
@@ -434,14 +448,14 @@ class AsyncAuthClient:
 
 
         async def main() -> None:
-            await client.auth.request_password_reset(
+            await client.auth.forgot_password(
                 email="email",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.request_password_reset(email=email, request_options=request_options)
+        _response = await self._raw_client.forgot_password(email=email, request_options=request_options)
         return _response.data
 
     async def reset_password(
@@ -452,8 +466,10 @@ class AsyncAuthClient:
         email: typing.Optional[str] = OMIT,
         token: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostAuthResetPasswordResponse:
+    ) -> ResetPasswordResponse:
         """
+        Reset password using a reset token. Requires API key for instance identification.
+
         Parameters
         ----------
         password : str
@@ -473,7 +489,7 @@ class AsyncAuthClient:
 
         Returns
         -------
-        PostAuthResetPasswordResponse
+        ResetPasswordResponse
             Success
 
         Examples

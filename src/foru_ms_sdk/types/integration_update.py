@@ -3,7 +3,9 @@
 import typing
 
 import pydantic
+import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.serialization import FieldMetadata
 
 
 class IntegrationUpdate(UniversalBaseModel):
@@ -20,6 +22,13 @@ class IntegrationUpdate(UniversalBaseModel):
     active: typing.Optional[bool] = pydantic.Field(default=None)
     """
     Enable/disable integration
+    """
+
+    extended_data: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Any]], FieldMetadata(alias="extendedData")
+    ] = pydantic.Field(alias="extendedData", default=None)
+    """
+    Custom extended data
     """
 
     if IS_PYDANTIC_V2:

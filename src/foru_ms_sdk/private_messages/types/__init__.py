@@ -6,41 +6,15 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .delete_private_messages_id_replies_sub_id_response import DeletePrivateMessagesIdRepliesSubIdResponse
-    from .delete_private_messages_id_response import DeletePrivateMessagesIdResponse
-    from .get_private_messages_id_replies_response import GetPrivateMessagesIdRepliesResponse
-    from .get_private_messages_id_replies_response_data import GetPrivateMessagesIdRepliesResponseData
-    from .get_private_messages_id_replies_response_data_items_item import (
-        GetPrivateMessagesIdRepliesResponseDataItemsItem,
-    )
-    from .get_private_messages_id_replies_sub_id_response import GetPrivateMessagesIdRepliesSubIdResponse
-    from .get_private_messages_id_replies_sub_id_response_data import GetPrivateMessagesIdRepliesSubIdResponseData
-    from .get_private_messages_id_response import GetPrivateMessagesIdResponse
-    from .get_private_messages_id_response_data import GetPrivateMessagesIdResponseData
-    from .get_private_messages_response import GetPrivateMessagesResponse
-    from .get_private_messages_response_data_item import GetPrivateMessagesResponseDataItem
-    from .get_private_messages_response_meta import GetPrivateMessagesResponseMeta
-    from .post_private_messages_id_replies_response import PostPrivateMessagesIdRepliesResponse
-    from .post_private_messages_id_replies_response_data import PostPrivateMessagesIdRepliesResponseData
-    from .post_private_messages_response import PostPrivateMessagesResponse
-    from .post_private_messages_response_data import PostPrivateMessagesResponseData
+    from .retrieve_reply_private_messages_response import RetrieveReplyPrivateMessagesResponse
+    from .retrieve_reply_private_messages_response_data import RetrieveReplyPrivateMessagesResponseData
+    from .update_private_messages_response import UpdatePrivateMessagesResponse
+    from .update_private_messages_response_data import UpdatePrivateMessagesResponseData
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeletePrivateMessagesIdRepliesSubIdResponse": ".delete_private_messages_id_replies_sub_id_response",
-    "DeletePrivateMessagesIdResponse": ".delete_private_messages_id_response",
-    "GetPrivateMessagesIdRepliesResponse": ".get_private_messages_id_replies_response",
-    "GetPrivateMessagesIdRepliesResponseData": ".get_private_messages_id_replies_response_data",
-    "GetPrivateMessagesIdRepliesResponseDataItemsItem": ".get_private_messages_id_replies_response_data_items_item",
-    "GetPrivateMessagesIdRepliesSubIdResponse": ".get_private_messages_id_replies_sub_id_response",
-    "GetPrivateMessagesIdRepliesSubIdResponseData": ".get_private_messages_id_replies_sub_id_response_data",
-    "GetPrivateMessagesIdResponse": ".get_private_messages_id_response",
-    "GetPrivateMessagesIdResponseData": ".get_private_messages_id_response_data",
-    "GetPrivateMessagesResponse": ".get_private_messages_response",
-    "GetPrivateMessagesResponseDataItem": ".get_private_messages_response_data_item",
-    "GetPrivateMessagesResponseMeta": ".get_private_messages_response_meta",
-    "PostPrivateMessagesIdRepliesResponse": ".post_private_messages_id_replies_response",
-    "PostPrivateMessagesIdRepliesResponseData": ".post_private_messages_id_replies_response_data",
-    "PostPrivateMessagesResponse": ".post_private_messages_response",
-    "PostPrivateMessagesResponseData": ".post_private_messages_response_data",
+    "RetrieveReplyPrivateMessagesResponse": ".retrieve_reply_private_messages_response",
+    "RetrieveReplyPrivateMessagesResponseData": ".retrieve_reply_private_messages_response_data",
+    "UpdatePrivateMessagesResponse": ".update_private_messages_response",
+    "UpdatePrivateMessagesResponseData": ".update_private_messages_response_data",
 }
 
 
@@ -66,20 +40,8 @@ def __dir__():
 
 
 __all__ = [
-    "DeletePrivateMessagesIdRepliesSubIdResponse",
-    "DeletePrivateMessagesIdResponse",
-    "GetPrivateMessagesIdRepliesResponse",
-    "GetPrivateMessagesIdRepliesResponseData",
-    "GetPrivateMessagesIdRepliesResponseDataItemsItem",
-    "GetPrivateMessagesIdRepliesSubIdResponse",
-    "GetPrivateMessagesIdRepliesSubIdResponseData",
-    "GetPrivateMessagesIdResponse",
-    "GetPrivateMessagesIdResponseData",
-    "GetPrivateMessagesResponse",
-    "GetPrivateMessagesResponseDataItem",
-    "GetPrivateMessagesResponseMeta",
-    "PostPrivateMessagesIdRepliesResponse",
-    "PostPrivateMessagesIdRepliesResponseData",
-    "PostPrivateMessagesResponse",
-    "PostPrivateMessagesResponseData",
+    "RetrieveReplyPrivateMessagesResponse",
+    "RetrieveReplyPrivateMessagesResponseData",
+    "UpdatePrivateMessagesResponse",
+    "UpdatePrivateMessagesResponseData",
 ]

@@ -16,14 +16,13 @@ from ..errors.payment_required_error import PaymentRequiredError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error_response import ErrorResponse
-from .types.delete_private_messages_id_replies_sub_id_response import DeletePrivateMessagesIdRepliesSubIdResponse
-from .types.delete_private_messages_id_response import DeletePrivateMessagesIdResponse
-from .types.get_private_messages_id_replies_response import GetPrivateMessagesIdRepliesResponse
-from .types.get_private_messages_id_replies_sub_id_response import GetPrivateMessagesIdRepliesSubIdResponse
-from .types.get_private_messages_id_response import GetPrivateMessagesIdResponse
-from .types.get_private_messages_response import GetPrivateMessagesResponse
-from .types.post_private_messages_id_replies_response import PostPrivateMessagesIdRepliesResponse
-from .types.post_private_messages_response import PostPrivateMessagesResponse
+from ..types.private_message_list_response import PrivateMessageListResponse
+from ..types.private_message_reply_list_response import PrivateMessageReplyListResponse
+from ..types.private_message_reply_response import PrivateMessageReplyResponse
+from ..types.private_message_response import PrivateMessageResponse
+from ..types.success_response import SuccessResponse
+from .types.retrieve_reply_private_messages_response import RetrieveReplyPrivateMessagesResponse
+from .types.update_private_messages_response import UpdatePrivateMessagesResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -33,47 +32,52 @@ class RawPrivateMessagesClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_all_private_messages(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        query: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetPrivateMessagesResponse]:
+    ) -> HttpResponse[PrivateMessageListResponse]:
         """
+        Retrieve a paginated list of private messages. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        query : typing.Optional[str]
+            Search query (title or body)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetPrivateMessagesResponse]
+        HttpResponse[PrivateMessageListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             "private-messages",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
+                "query": query,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPrivateMessagesResponse,
+                    PrivateMessageListResponse,
                     parse_obj_as(
-                        type_=GetPrivateMessagesResponse,  # type: ignore
+                        type_=PrivateMessageListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -127,7 +131,7 @@ class RawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_private_message(
+    def create(
         self,
         *,
         recipient_id: str,
@@ -137,8 +141,10 @@ class RawPrivateMessagesClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostPrivateMessagesResponse]:
+    ) -> HttpResponse[PrivateMessageResponse]:
         """
+        Create a new private message.
+
         Parameters
         ----------
         recipient_id : str
@@ -164,7 +170,7 @@ class RawPrivateMessagesClient:
 
         Returns
         -------
-        HttpResponse[PostPrivateMessagesResponse]
+        HttpResponse[PrivateMessageResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -187,9 +193,9 @@ class RawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostPrivateMessagesResponse,
+                    PrivateMessageResponse,
                     parse_obj_as(
-                        type_=PostPrivateMessagesResponse,  # type: ignore
+                        type_=PrivateMessageResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -254,20 +260,23 @@ class RawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_private_message(
+    def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetPrivateMessagesIdResponse]:
+    ) -> HttpResponse[PrivateMessageResponse]:
         """
+        Retrieve a private message by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Private Message ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetPrivateMessagesIdResponse]
+        HttpResponse[PrivateMessageResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -278,9 +287,9 @@ class RawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPrivateMessagesIdResponse,
+                    PrivateMessageResponse,
                     parse_obj_as(
-                        type_=GetPrivateMessagesIdResponse,  # type: ignore
+                        type_=PrivateMessageResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -345,20 +354,23 @@ class RawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_private_message(
+    def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeletePrivateMessagesIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
+        Permanently delete a private message.
+
         Parameters
         ----------
         id : str
+            Private Message ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeletePrivateMessagesIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -369,9 +381,9 @@ class RawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeletePrivateMessagesIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeletePrivateMessagesIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -436,15 +448,146 @@ class RawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def list_private_message_replies(
+    def update(
+        self,
+        id: str,
+        *,
+        body: typing.Optional[str] = OMIT,
+        status: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[UpdatePrivateMessagesResponse]:
+        """
+        Update an existing private message. Only provided fields will be modified.
+
+        Parameters
+        ----------
+        id : str
+            Private Message ID
+
+        body : typing.Optional[str]
+            Message content
+
+        status : typing.Optional[str]
+            Message status (read, unread, archived)
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[UpdatePrivateMessagesResponse]
+            Updated
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"private-messages/{jsonable_encoder(id)}",
+            method="PATCH",
+            json={
+                "body": body,
+                "status": status,
+                "extendedData": extended_data,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UpdatePrivateMessagesResponse,
+                    parse_obj_as(
+                        type_=UpdatePrivateMessagesResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 402:
+                raise PaymentRequiredError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def list_replies(
         self,
         id: str,
         *,
         cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetPrivateMessagesIdRepliesResponse]:
+    ) -> HttpResponse[PrivateMessageReplyListResponse]:
         """
+        Retrieve a paginated list of replies for Private Message.
+
         Parameters
         ----------
         id : str
@@ -454,14 +597,14 @@ class RawPrivateMessagesClient:
             Pagination cursor
 
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetPrivateMessagesIdRepliesResponse]
+        HttpResponse[PrivateMessageReplyListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -476,9 +619,9 @@ class RawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPrivateMessagesIdRepliesResponse,
+                    PrivateMessageReplyListResponse,
                     parse_obj_as(
-                        type_=GetPrivateMessagesIdRepliesResponse,  # type: ignore
+                        type_=PrivateMessageReplyListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -532,7 +675,7 @@ class RawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_reply_in_private_message(
+    def create_reply(
         self,
         id: str,
         *,
@@ -543,8 +686,10 @@ class RawPrivateMessagesClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostPrivateMessagesIdRepliesResponse]:
+    ) -> HttpResponse[PrivateMessageReplyResponse]:
         """
+        Create a Reply in Private Message.
+
         Parameters
         ----------
         id : str
@@ -573,7 +718,7 @@ class RawPrivateMessagesClient:
 
         Returns
         -------
-        HttpResponse[PostPrivateMessagesIdRepliesResponse]
+        HttpResponse[PrivateMessageReplyResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -596,9 +741,9 @@ class RawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostPrivateMessagesIdRepliesResponse,
+                    PrivateMessageReplyResponse,
                     parse_obj_as(
-                        type_=PostPrivateMessagesIdRepliesResponse,  # type: ignore
+                        type_=PrivateMessageReplyResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -663,9 +808,9 @@ class RawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_reply_from_private_message(
+    def retrieve_reply(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetPrivateMessagesIdRepliesSubIdResponse]:
+    ) -> HttpResponse[RetrieveReplyPrivateMessagesResponse]:
         """
         Parameters
         ----------
@@ -680,7 +825,7 @@ class RawPrivateMessagesClient:
 
         Returns
         -------
-        HttpResponse[GetPrivateMessagesIdRepliesSubIdResponse]
+        HttpResponse[RetrieveReplyPrivateMessagesResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -691,9 +836,9 @@ class RawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPrivateMessagesIdRepliesSubIdResponse,
+                    RetrieveReplyPrivateMessagesResponse,
                     parse_obj_as(
-                        type_=GetPrivateMessagesIdRepliesSubIdResponse,  # type: ignore
+                        type_=RetrieveReplyPrivateMessagesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -747,9 +892,9 @@ class RawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_reply_from_private_message(
+    def delete_reply(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeletePrivateMessagesIdRepliesSubIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -764,7 +909,7 @@ class RawPrivateMessagesClient:
 
         Returns
         -------
-        HttpResponse[DeletePrivateMessagesIdRepliesSubIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -775,9 +920,9 @@ class RawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeletePrivateMessagesIdRepliesSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeletePrivateMessagesIdRepliesSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -836,47 +981,52 @@ class AsyncRawPrivateMessagesClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_all_private_messages(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        query: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetPrivateMessagesResponse]:
+    ) -> AsyncHttpResponse[PrivateMessageListResponse]:
         """
+        Retrieve a paginated list of private messages. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        query : typing.Optional[str]
+            Search query (title or body)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetPrivateMessagesResponse]
+        AsyncHttpResponse[PrivateMessageListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             "private-messages",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
+                "query": query,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPrivateMessagesResponse,
+                    PrivateMessageListResponse,
                     parse_obj_as(
-                        type_=GetPrivateMessagesResponse,  # type: ignore
+                        type_=PrivateMessageListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -930,7 +1080,7 @@ class AsyncRawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_private_message(
+    async def create(
         self,
         *,
         recipient_id: str,
@@ -940,8 +1090,10 @@ class AsyncRawPrivateMessagesClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostPrivateMessagesResponse]:
+    ) -> AsyncHttpResponse[PrivateMessageResponse]:
         """
+        Create a new private message.
+
         Parameters
         ----------
         recipient_id : str
@@ -967,7 +1119,7 @@ class AsyncRawPrivateMessagesClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostPrivateMessagesResponse]
+        AsyncHttpResponse[PrivateMessageResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -990,9 +1142,9 @@ class AsyncRawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostPrivateMessagesResponse,
+                    PrivateMessageResponse,
                     parse_obj_as(
-                        type_=PostPrivateMessagesResponse,  # type: ignore
+                        type_=PrivateMessageResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1057,20 +1209,23 @@ class AsyncRawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_private_message(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetPrivateMessagesIdResponse]:
+    ) -> AsyncHttpResponse[PrivateMessageResponse]:
         """
+        Retrieve a private message by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Private Message ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetPrivateMessagesIdResponse]
+        AsyncHttpResponse[PrivateMessageResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1081,9 +1236,9 @@ class AsyncRawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPrivateMessagesIdResponse,
+                    PrivateMessageResponse,
                     parse_obj_as(
-                        type_=GetPrivateMessagesIdResponse,  # type: ignore
+                        type_=PrivateMessageResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1148,20 +1303,23 @@ class AsyncRawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_private_message(
+    async def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeletePrivateMessagesIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
+        Permanently delete a private message.
+
         Parameters
         ----------
         id : str
+            Private Message ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeletePrivateMessagesIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1172,9 +1330,9 @@ class AsyncRawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeletePrivateMessagesIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeletePrivateMessagesIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1239,15 +1397,146 @@ class AsyncRawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def list_private_message_replies(
+    async def update(
+        self,
+        id: str,
+        *,
+        body: typing.Optional[str] = OMIT,
+        status: typing.Optional[str] = OMIT,
+        extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[UpdatePrivateMessagesResponse]:
+        """
+        Update an existing private message. Only provided fields will be modified.
+
+        Parameters
+        ----------
+        id : str
+            Private Message ID
+
+        body : typing.Optional[str]
+            Message content
+
+        status : typing.Optional[str]
+            Message status (read, unread, archived)
+
+        extended_data : typing.Optional[typing.Dict[str, typing.Any]]
+            Extended data
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[UpdatePrivateMessagesResponse]
+            Updated
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"private-messages/{jsonable_encoder(id)}",
+            method="PATCH",
+            json={
+                "body": body,
+                "status": status,
+                "extendedData": extended_data,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UpdatePrivateMessagesResponse,
+                    parse_obj_as(
+                        type_=UpdatePrivateMessagesResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 402:
+                raise PaymentRequiredError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def list_replies(
         self,
         id: str,
         *,
         cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetPrivateMessagesIdRepliesResponse]:
+    ) -> AsyncHttpResponse[PrivateMessageReplyListResponse]:
         """
+        Retrieve a paginated list of replies for Private Message.
+
         Parameters
         ----------
         id : str
@@ -1257,14 +1546,14 @@ class AsyncRawPrivateMessagesClient:
             Pagination cursor
 
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetPrivateMessagesIdRepliesResponse]
+        AsyncHttpResponse[PrivateMessageReplyListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1279,9 +1568,9 @@ class AsyncRawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPrivateMessagesIdRepliesResponse,
+                    PrivateMessageReplyListResponse,
                     parse_obj_as(
-                        type_=GetPrivateMessagesIdRepliesResponse,  # type: ignore
+                        type_=PrivateMessageReplyListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1335,7 +1624,7 @@ class AsyncRawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_reply_in_private_message(
+    async def create_reply(
         self,
         id: str,
         *,
@@ -1346,8 +1635,10 @@ class AsyncRawPrivateMessagesClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostPrivateMessagesIdRepliesResponse]:
+    ) -> AsyncHttpResponse[PrivateMessageReplyResponse]:
         """
+        Create a Reply in Private Message.
+
         Parameters
         ----------
         id : str
@@ -1376,7 +1667,7 @@ class AsyncRawPrivateMessagesClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostPrivateMessagesIdRepliesResponse]
+        AsyncHttpResponse[PrivateMessageReplyResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1399,9 +1690,9 @@ class AsyncRawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostPrivateMessagesIdRepliesResponse,
+                    PrivateMessageReplyResponse,
                     parse_obj_as(
-                        type_=PostPrivateMessagesIdRepliesResponse,  # type: ignore
+                        type_=PrivateMessageReplyResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1466,9 +1757,9 @@ class AsyncRawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_reply_from_private_message(
+    async def retrieve_reply(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetPrivateMessagesIdRepliesSubIdResponse]:
+    ) -> AsyncHttpResponse[RetrieveReplyPrivateMessagesResponse]:
         """
         Parameters
         ----------
@@ -1483,7 +1774,7 @@ class AsyncRawPrivateMessagesClient:
 
         Returns
         -------
-        AsyncHttpResponse[GetPrivateMessagesIdRepliesSubIdResponse]
+        AsyncHttpResponse[RetrieveReplyPrivateMessagesResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1494,9 +1785,9 @@ class AsyncRawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetPrivateMessagesIdRepliesSubIdResponse,
+                    RetrieveReplyPrivateMessagesResponse,
                     parse_obj_as(
-                        type_=GetPrivateMessagesIdRepliesSubIdResponse,  # type: ignore
+                        type_=RetrieveReplyPrivateMessagesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1550,9 +1841,9 @@ class AsyncRawPrivateMessagesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_reply_from_private_message(
+    async def delete_reply(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeletePrivateMessagesIdRepliesSubIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
         Parameters
         ----------
@@ -1567,7 +1858,7 @@ class AsyncRawPrivateMessagesClient:
 
         Returns
         -------
-        AsyncHttpResponse[DeletePrivateMessagesIdRepliesSubIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1578,9 +1869,9 @@ class AsyncRawPrivateMessagesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeletePrivateMessagesIdRepliesSubIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeletePrivateMessagesIdRepliesSubIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

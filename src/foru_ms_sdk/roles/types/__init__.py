@@ -6,27 +6,13 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .delete_roles_id_response import DeleteRolesIdResponse
-    from .get_roles_id_response import GetRolesIdResponse
-    from .get_roles_id_response_data import GetRolesIdResponseData
-    from .get_roles_response import GetRolesResponse
-    from .get_roles_response_data_item import GetRolesResponseDataItem
-    from .get_roles_response_meta import GetRolesResponseMeta
-    from .patch_roles_id_response import PatchRolesIdResponse
-    from .patch_roles_id_response_data import PatchRolesIdResponseData
-    from .post_roles_response import PostRolesResponse
-    from .post_roles_response_data import PostRolesResponseData
+    from .list_roles_request_sort import ListRolesRequestSort
+    from .update_roles_response import UpdateRolesResponse
+    from .update_roles_response_data import UpdateRolesResponseData
 _dynamic_imports: typing.Dict[str, str] = {
-    "DeleteRolesIdResponse": ".delete_roles_id_response",
-    "GetRolesIdResponse": ".get_roles_id_response",
-    "GetRolesIdResponseData": ".get_roles_id_response_data",
-    "GetRolesResponse": ".get_roles_response",
-    "GetRolesResponseDataItem": ".get_roles_response_data_item",
-    "GetRolesResponseMeta": ".get_roles_response_meta",
-    "PatchRolesIdResponse": ".patch_roles_id_response",
-    "PatchRolesIdResponseData": ".patch_roles_id_response_data",
-    "PostRolesResponse": ".post_roles_response",
-    "PostRolesResponseData": ".post_roles_response_data",
+    "ListRolesRequestSort": ".list_roles_request_sort",
+    "UpdateRolesResponse": ".update_roles_response",
+    "UpdateRolesResponseData": ".update_roles_response_data",
 }
 
 
@@ -51,15 +37,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = [
-    "DeleteRolesIdResponse",
-    "GetRolesIdResponse",
-    "GetRolesIdResponseData",
-    "GetRolesResponse",
-    "GetRolesResponseDataItem",
-    "GetRolesResponseMeta",
-    "PatchRolesIdResponse",
-    "PatchRolesIdResponseData",
-    "PostRolesResponse",
-    "PostRolesResponseData",
-]
+__all__ = ["ListRolesRequestSort", "UpdateRolesResponse", "UpdateRolesResponseData"]

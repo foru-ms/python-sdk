@@ -4,21 +4,22 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.post_list_response import PostListResponse
+from ..types.post_post_list_response import PostPostListResponse
+from ..types.post_reaction_list_response import PostReactionListResponse
+from ..types.post_reaction_response import PostReactionResponse
+from ..types.post_response import PostResponse
+from ..types.success_response import SuccessResponse
 from .raw_client import AsyncRawPostsClient, RawPostsClient
-from .types.delete_posts_id_posts_sub_id_response import DeletePostsIdPostsSubIdResponse
-from .types.delete_posts_id_reactions_response import DeletePostsIdReactionsResponse
-from .types.delete_posts_id_reactions_sub_id_response import DeletePostsIdReactionsSubIdResponse
-from .types.delete_posts_id_response import DeletePostsIdResponse
-from .types.get_posts_id_posts_response import GetPostsIdPostsResponse
-from .types.get_posts_id_posts_sub_id_response import GetPostsIdPostsSubIdResponse
-from .types.get_posts_id_reactions_response import GetPostsIdReactionsResponse
-from .types.get_posts_id_reactions_sub_id_response import GetPostsIdReactionsSubIdResponse
-from .types.get_posts_id_response import GetPostsIdResponse
-from .types.get_posts_response import GetPostsResponse
-from .types.patch_posts_id_response import PatchPostsIdResponse
-from .types.post_posts_id_reactions_request_type import PostPostsIdReactionsRequestType
-from .types.post_posts_id_reactions_response import PostPostsIdReactionsResponse
-from .types.post_posts_response import PostPostsResponse
+from .types.create_reaction_posts_request_type import CreateReactionPostsRequestType
+from .types.list_posts_posts_request_sort import ListPostsPostsRequestSort
+from .types.list_posts_posts_request_type import ListPostsPostsRequestType
+from .types.list_posts_request_sort import ListPostsRequestSort
+from .types.list_posts_request_type import ListPostsRequestType
+from .types.list_reactions_posts_request_type import ListReactionsPostsRequestType
+from .types.retrieve_post_posts_response import RetrievePostPostsResponse
+from .types.retrieve_reaction_posts_response import RetrieveReactionPostsResponse
+from .types.update_posts_response import UpdatePostsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -39,29 +40,46 @@ class PostsClient:
         """
         return self._raw_client
 
-    def list_all_posts(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsRequestSort] = None,
         search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetPostsResponse:
+    ) -> PostListResponse:
         """
+        Retrieve a paginated list of posts. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsRequestSort]
+            Sort posts by creation time
 
         search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPostsResponse
+        PostListResponse
             Success
 
         Examples
@@ -71,14 +89,20 @@ class PostsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.posts.list_all_posts()
+        client.posts.list()
         """
-        _response = self._raw_client.list_all_posts(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = self._raw_client.list(
+            limit=limit,
+            cursor=cursor,
+            user_id=user_id,
+            sort=sort,
+            search=search,
+            type=type,
+            request_options=request_options,
         )
         return _response.data
 
-    def create_a_post(
+    def create(
         self,
         *,
         thread_id: str,
@@ -87,8 +111,10 @@ class PostsClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostPostsResponse:
+    ) -> PostResponse:
         """
+        Create a new post.
+
         Parameters
         ----------
         thread_id : str
@@ -110,7 +136,7 @@ class PostsClient:
 
         Returns
         -------
-        PostPostsResponse
+        PostResponse
             Created
 
         Examples
@@ -120,12 +146,12 @@ class PostsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.posts.create_a_post(
+        client.posts.create(
             thread_id="threadId",
             body="body",
         )
         """
-        _response = self._raw_client.create_a_post(
+        _response = self._raw_client.create(
             thread_id=thread_id,
             body=body,
             user_id=user_id,
@@ -135,18 +161,21 @@ class PostsClient:
         )
         return _response.data
 
-    def get_a_post(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetPostsIdResponse:
+    def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> PostResponse:
         """
+        Retrieve a post by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Post ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPostsIdResponse
+        PostResponse
             Success
 
         Examples
@@ -156,27 +185,28 @@ class PostsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.posts.get_a_post(
+        client.posts.retrieve(
             id="id",
         )
         """
-        _response = self._raw_client.get_a_post(id, request_options=request_options)
+        _response = self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    def delete_a_post(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePostsIdResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a post.
+
         Parameters
         ----------
         id : str
+            Post ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeletePostsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -186,14 +216,14 @@ class PostsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.posts.delete_a_post(
+        client.posts.delete(
             id="id",
         )
         """
-        _response = self._raw_client.delete_a_post(id, request_options=request_options)
+        _response = self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    def update_a_post(
+    def update(
         self,
         id: str,
         *,
@@ -202,11 +232,14 @@ class PostsClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchPostsIdResponse:
+    ) -> UpdatePostsResponse:
         """
+        Update an existing post. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Post ID
 
         body : typing.Optional[str]
             Updated post content
@@ -225,7 +258,7 @@ class PostsClient:
 
         Returns
         -------
-        PatchPostsIdResponse
+        UpdatePostsResponse
             Updated
 
         Examples
@@ -235,11 +268,11 @@ class PostsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.posts.update_a_post(
+        client.posts.update(
             id="id",
         )
         """
-        _response = self._raw_client.update_a_post(
+        _response = self._raw_client.update(
             id,
             body=body,
             thread_id=thread_id,
@@ -249,32 +282,38 @@ class PostsClient:
         )
         return _response.data
 
-    def list_post_reactions(
+    def list_reactions(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        type: typing.Optional[ListReactionsPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetPostsIdReactionsResponse:
+    ) -> PostReactionListResponse:
         """
+        Retrieve a paginated list of reactions for Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        type : typing.Optional[ListReactionsPostsRequestType]
+            Filter by reaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPostsIdReactionsResponse
+        PostReactionListResponse
             Success
 
         Examples
@@ -284,31 +323,33 @@ class PostsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.posts.list_post_reactions(
+        client.posts.list_reactions(
             id="id",
         )
         """
-        _response = self._raw_client.list_post_reactions(
-            id, cursor=cursor, limit=limit, request_options=request_options
+        _response = self._raw_client.list_reactions(
+            id, limit=limit, cursor=cursor, type=type, request_options=request_options
         )
         return _response.data
 
-    def create_a_reaction_in_post(
+    def create_reaction(
         self,
         id: str,
         *,
-        type: PostPostsIdReactionsRequestType,
+        type: CreateReactionPostsRequestType,
         user_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostPostsIdReactionsResponse:
+    ) -> PostReactionResponse:
         """
+        Create a Reaction in Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        type : PostPostsIdReactionsRequestType
+        type : CreateReactionPostsRequestType
             Type of reaction
 
         user_id : typing.Optional[str]
@@ -322,7 +363,7 @@ class PostsClient:
 
         Returns
         -------
-        PostPostsIdReactionsResponse
+        PostReactionResponse
             Created
 
         Examples
@@ -332,52 +373,19 @@ class PostsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.posts.create_a_reaction_in_post(
+        client.posts.create_reaction(
             id="id",
             type="LIKE",
         )
         """
-        _response = self._raw_client.create_a_reaction_in_post(
+        _response = self._raw_client.create_reaction(
             id, type=type, user_id=user_id, extended_data=extended_data, request_options=request_options
         )
         return _response.data
 
-    def remove_your_reaction_from_post(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePostsIdReactionsResponse:
-        """
-        Removes the authenticated user's reaction. No subId needed.
-
-        Parameters
-        ----------
-        id : str
-            Post ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DeletePostsIdReactionsResponse
-            Deleted
-
-        Examples
-        --------
-        from foru_ms_sdk import ForumClient
-
-        client = ForumClient(
-            api_key="YOUR_API_KEY",
-        )
-        client.posts.remove_your_reaction_from_post(
-            id="id",
-        )
-        """
-        _response = self._raw_client.remove_your_reaction_from_post(id, request_options=request_options)
-        return _response.data
-
-    def get_a_reaction_from_post(
+    def delete_reaction(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetPostsIdReactionsSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -392,7 +400,42 @@ class PostsClient:
 
         Returns
         -------
-        GetPostsIdReactionsSubIdResponse
+        SuccessResponse
+            Deleted
+
+        Examples
+        --------
+        from foru_ms_sdk import ForumClient
+
+        client = ForumClient(
+            api_key="YOUR_API_KEY",
+        )
+        client.posts.delete_reaction(
+            id="id",
+            sub_id="subId",
+        )
+        """
+        _response = self._raw_client.delete_reaction(id, sub_id, request_options=request_options)
+        return _response.data
+
+    def retrieve_reaction(
+        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> RetrieveReactionPostsResponse:
+        """
+        Parameters
+        ----------
+        id : str
+            Post ID
+
+        sub_id : str
+            Reaction ID
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        RetrieveReactionPostsResponse
             Success
 
         Examples
@@ -402,75 +445,58 @@ class PostsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.posts.get_a_reaction_from_post(
+        client.posts.retrieve_reaction(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.get_a_reaction_from_post(id, sub_id, request_options=request_options)
+        _response = self._raw_client.retrieve_reaction(id, sub_id, request_options=request_options)
         return _response.data
 
-    def delete_a_reaction_from_post(
-        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePostsIdReactionsSubIdResponse:
-        """
-        Parameters
-        ----------
-        id : str
-            Post ID
-
-        sub_id : str
-            Reaction ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DeletePostsIdReactionsSubIdResponse
-            Deleted
-
-        Examples
-        --------
-        from foru_ms_sdk import ForumClient
-
-        client = ForumClient(
-            api_key="YOUR_API_KEY",
-        )
-        client.posts.delete_a_reaction_from_post(
-            id="id",
-            sub_id="subId",
-        )
-        """
-        _response = self._raw_client.delete_a_reaction_from_post(id, sub_id, request_options=request_options)
-        return _response.data
-
-    def list_post_posts(
+    def list_posts(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsPostsRequestSort] = None,
+        search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetPostsIdPostsResponse:
+    ) -> PostPostListResponse:
         """
+        Retrieve a paginated list of posts for Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsPostsRequestSort]
+            Sort posts by creation time
+
+        search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsPostsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPostsIdPostsResponse
+        PostPostListResponse
             Success
 
         Examples
@@ -480,16 +506,25 @@ class PostsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.posts.list_post_posts(
+        client.posts.list_posts(
             id="id",
         )
         """
-        _response = self._raw_client.list_post_posts(id, cursor=cursor, limit=limit, request_options=request_options)
+        _response = self._raw_client.list_posts(
+            id,
+            limit=limit,
+            cursor=cursor,
+            user_id=user_id,
+            sort=sort,
+            search=search,
+            type=type,
+            request_options=request_options,
+        )
         return _response.data
 
-    def get_a_post_from_post(
+    def retrieve_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetPostsIdPostsSubIdResponse:
+    ) -> RetrievePostPostsResponse:
         """
         Parameters
         ----------
@@ -504,7 +539,7 @@ class PostsClient:
 
         Returns
         -------
-        GetPostsIdPostsSubIdResponse
+        RetrievePostPostsResponse
             Success
 
         Examples
@@ -514,17 +549,17 @@ class PostsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.posts.get_a_post_from_post(
+        client.posts.retrieve_post(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.get_a_post_from_post(id, sub_id, request_options=request_options)
+        _response = self._raw_client.retrieve_post(id, sub_id, request_options=request_options)
         return _response.data
 
-    def delete_a_post_from_post(
+    def delete_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePostsIdPostsSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -539,7 +574,7 @@ class PostsClient:
 
         Returns
         -------
-        DeletePostsIdPostsSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -549,12 +584,12 @@ class PostsClient:
         client = ForumClient(
             api_key="YOUR_API_KEY",
         )
-        client.posts.delete_a_post_from_post(
+        client.posts.delete_post(
             id="id",
             sub_id="subId",
         )
         """
-        _response = self._raw_client.delete_a_post_from_post(id, sub_id, request_options=request_options)
+        _response = self._raw_client.delete_post(id, sub_id, request_options=request_options)
         return _response.data
 
 
@@ -573,29 +608,46 @@ class AsyncPostsClient:
         """
         return self._raw_client
 
-    async def list_all_posts(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsRequestSort] = None,
         search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetPostsResponse:
+    ) -> PostListResponse:
         """
+        Retrieve a paginated list of posts. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsRequestSort]
+            Sort posts by creation time
 
         search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPostsResponse
+        PostListResponse
             Success
 
         Examples
@@ -610,17 +662,23 @@ class AsyncPostsClient:
 
 
         async def main() -> None:
-            await client.posts.list_all_posts()
+            await client.posts.list()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_all_posts(
-            page=page, limit=limit, search=search, request_options=request_options
+        _response = await self._raw_client.list(
+            limit=limit,
+            cursor=cursor,
+            user_id=user_id,
+            sort=sort,
+            search=search,
+            type=type,
+            request_options=request_options,
         )
         return _response.data
 
-    async def create_a_post(
+    async def create(
         self,
         *,
         thread_id: str,
@@ -629,8 +687,10 @@ class AsyncPostsClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostPostsResponse:
+    ) -> PostResponse:
         """
+        Create a new post.
+
         Parameters
         ----------
         thread_id : str
@@ -652,7 +712,7 @@ class AsyncPostsClient:
 
         Returns
         -------
-        PostPostsResponse
+        PostResponse
             Created
 
         Examples
@@ -667,7 +727,7 @@ class AsyncPostsClient:
 
 
         async def main() -> None:
-            await client.posts.create_a_post(
+            await client.posts.create(
                 thread_id="threadId",
                 body="body",
             )
@@ -675,7 +735,7 @@ class AsyncPostsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_post(
+        _response = await self._raw_client.create(
             thread_id=thread_id,
             body=body,
             user_id=user_id,
@@ -685,20 +745,21 @@ class AsyncPostsClient:
         )
         return _response.data
 
-    async def get_a_post(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetPostsIdResponse:
+    async def retrieve(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> PostResponse:
         """
+        Retrieve a post by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Post ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPostsIdResponse
+        PostResponse
             Success
 
         Examples
@@ -713,30 +774,31 @@ class AsyncPostsClient:
 
 
         async def main() -> None:
-            await client.posts.get_a_post(
+            await client.posts.retrieve(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_post(id, request_options=request_options)
+        _response = await self._raw_client.retrieve(id, request_options=request_options)
         return _response.data
 
-    async def delete_a_post(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePostsIdResponse:
+    async def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SuccessResponse:
         """
+        Permanently delete a post.
+
         Parameters
         ----------
         id : str
+            Post ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        DeletePostsIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -751,17 +813,17 @@ class AsyncPostsClient:
 
 
         async def main() -> None:
-            await client.posts.delete_a_post(
+            await client.posts.delete(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_post(id, request_options=request_options)
+        _response = await self._raw_client.delete(id, request_options=request_options)
         return _response.data
 
-    async def update_a_post(
+    async def update(
         self,
         id: str,
         *,
@@ -770,11 +832,14 @@ class AsyncPostsClient:
         parent_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PatchPostsIdResponse:
+    ) -> UpdatePostsResponse:
         """
+        Update an existing post. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Post ID
 
         body : typing.Optional[str]
             Updated post content
@@ -793,7 +858,7 @@ class AsyncPostsClient:
 
         Returns
         -------
-        PatchPostsIdResponse
+        UpdatePostsResponse
             Updated
 
         Examples
@@ -808,14 +873,14 @@ class AsyncPostsClient:
 
 
         async def main() -> None:
-            await client.posts.update_a_post(
+            await client.posts.update(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_a_post(
+        _response = await self._raw_client.update(
             id,
             body=body,
             thread_id=thread_id,
@@ -825,32 +890,38 @@ class AsyncPostsClient:
         )
         return _response.data
 
-    async def list_post_reactions(
+    async def list_reactions(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        type: typing.Optional[ListReactionsPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetPostsIdReactionsResponse:
+    ) -> PostReactionListResponse:
         """
+        Retrieve a paginated list of reactions for Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        type : typing.Optional[ListReactionsPostsRequestType]
+            Filter by reaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPostsIdReactionsResponse
+        PostReactionListResponse
             Success
 
         Examples
@@ -865,34 +936,36 @@ class AsyncPostsClient:
 
 
         async def main() -> None:
-            await client.posts.list_post_reactions(
+            await client.posts.list_reactions(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_post_reactions(
-            id, cursor=cursor, limit=limit, request_options=request_options
+        _response = await self._raw_client.list_reactions(
+            id, limit=limit, cursor=cursor, type=type, request_options=request_options
         )
         return _response.data
 
-    async def create_a_reaction_in_post(
+    async def create_reaction(
         self,
         id: str,
         *,
-        type: PostPostsIdReactionsRequestType,
+        type: CreateReactionPostsRequestType,
         user_id: typing.Optional[str] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> PostPostsIdReactionsResponse:
+    ) -> PostReactionResponse:
         """
+        Create a Reaction in Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        type : PostPostsIdReactionsRequestType
+        type : CreateReactionPostsRequestType
             Type of reaction
 
         user_id : typing.Optional[str]
@@ -906,7 +979,7 @@ class AsyncPostsClient:
 
         Returns
         -------
-        PostPostsIdReactionsResponse
+        PostReactionResponse
             Created
 
         Examples
@@ -921,7 +994,7 @@ class AsyncPostsClient:
 
 
         async def main() -> None:
-            await client.posts.create_a_reaction_in_post(
+            await client.posts.create_reaction(
                 id="id",
                 type="LIKE",
             )
@@ -929,55 +1002,14 @@ class AsyncPostsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_reaction_in_post(
+        _response = await self._raw_client.create_reaction(
             id, type=type, user_id=user_id, extended_data=extended_data, request_options=request_options
         )
         return _response.data
 
-    async def remove_your_reaction_from_post(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePostsIdReactionsResponse:
-        """
-        Removes the authenticated user's reaction. No subId needed.
-
-        Parameters
-        ----------
-        id : str
-            Post ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DeletePostsIdReactionsResponse
-            Deleted
-
-        Examples
-        --------
-        import asyncio
-
-        from foru_ms_sdk import AsyncForumClient
-
-        client = AsyncForumClient(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.posts.remove_your_reaction_from_post(
-                id="id",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.remove_your_reaction_from_post(id, request_options=request_options)
-        return _response.data
-
-    async def get_a_reaction_from_post(
+    async def delete_reaction(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetPostsIdReactionsSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -992,7 +1024,50 @@ class AsyncPostsClient:
 
         Returns
         -------
-        GetPostsIdReactionsSubIdResponse
+        SuccessResponse
+            Deleted
+
+        Examples
+        --------
+        import asyncio
+
+        from foru_ms_sdk import AsyncForumClient
+
+        client = AsyncForumClient(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.posts.delete_reaction(
+                id="id",
+                sub_id="subId",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.delete_reaction(id, sub_id, request_options=request_options)
+        return _response.data
+
+    async def retrieve_reaction(
+        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> RetrieveReactionPostsResponse:
+        """
+        Parameters
+        ----------
+        id : str
+            Post ID
+
+        sub_id : str
+            Reaction ID
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        RetrieveReactionPostsResponse
             Success
 
         Examples
@@ -1007,7 +1082,7 @@ class AsyncPostsClient:
 
 
         async def main() -> None:
-            await client.posts.get_a_reaction_from_post(
+            await client.posts.retrieve_reaction(
                 id="id",
                 sub_id="subId",
             )
@@ -1015,78 +1090,53 @@ class AsyncPostsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_reaction_from_post(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.retrieve_reaction(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def delete_a_reaction_from_post(
-        self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePostsIdReactionsSubIdResponse:
-        """
-        Parameters
-        ----------
-        id : str
-            Post ID
-
-        sub_id : str
-            Reaction ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DeletePostsIdReactionsSubIdResponse
-            Deleted
-
-        Examples
-        --------
-        import asyncio
-
-        from foru_ms_sdk import AsyncForumClient
-
-        client = AsyncForumClient(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.posts.delete_a_reaction_from_post(
-                id="id",
-                sub_id="subId",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.delete_a_reaction_from_post(id, sub_id, request_options=request_options)
-        return _response.data
-
-    async def list_post_posts(
+    async def list_posts(
         self,
         id: str,
         *,
-        cursor: typing.Optional[str] = None,
         limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        user_id: typing.Optional[str] = None,
+        sort: typing.Optional[ListPostsPostsRequestSort] = None,
+        search: typing.Optional[str] = None,
+        type: typing.Optional[ListPostsPostsRequestType] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetPostsIdPostsResponse:
+    ) -> PostPostListResponse:
         """
+        Retrieve a paginated list of posts for Post.
+
         Parameters
         ----------
         id : str
             Post ID
 
-        cursor : typing.Optional[str]
-            Pagination cursor
-
         limit : typing.Optional[int]
-            Items per page
+            Items per page (max 75)
+
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        user_id : typing.Optional[str]
+            Filter posts by author ID
+
+        sort : typing.Optional[ListPostsPostsRequestSort]
+            Sort posts by creation time
+
+        search : typing.Optional[str]
+            Search within post body
+
+        type : typing.Optional[ListPostsPostsRequestType]
+            Filter by interaction type
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        GetPostsIdPostsResponse
+        PostPostListResponse
             Success
 
         Examples
@@ -1101,21 +1151,28 @@ class AsyncPostsClient:
 
 
         async def main() -> None:
-            await client.posts.list_post_posts(
+            await client.posts.list_posts(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_post_posts(
-            id, cursor=cursor, limit=limit, request_options=request_options
+        _response = await self._raw_client.list_posts(
+            id,
+            limit=limit,
+            cursor=cursor,
+            user_id=user_id,
+            sort=sort,
+            search=search,
+            type=type,
+            request_options=request_options,
         )
         return _response.data
 
-    async def get_a_post_from_post(
+    async def retrieve_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GetPostsIdPostsSubIdResponse:
+    ) -> RetrievePostPostsResponse:
         """
         Parameters
         ----------
@@ -1130,7 +1187,7 @@ class AsyncPostsClient:
 
         Returns
         -------
-        GetPostsIdPostsSubIdResponse
+        RetrievePostPostsResponse
             Success
 
         Examples
@@ -1145,7 +1202,7 @@ class AsyncPostsClient:
 
 
         async def main() -> None:
-            await client.posts.get_a_post_from_post(
+            await client.posts.retrieve_post(
                 id="id",
                 sub_id="subId",
             )
@@ -1153,12 +1210,12 @@ class AsyncPostsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_a_post_from_post(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.retrieve_post(id, sub_id, request_options=request_options)
         return _response.data
 
-    async def delete_a_post_from_post(
+    async def delete_post(
         self, id: str, sub_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeletePostsIdPostsSubIdResponse:
+    ) -> SuccessResponse:
         """
         Parameters
         ----------
@@ -1173,7 +1230,7 @@ class AsyncPostsClient:
 
         Returns
         -------
-        DeletePostsIdPostsSubIdResponse
+        SuccessResponse
             Deleted
 
         Examples
@@ -1188,7 +1245,7 @@ class AsyncPostsClient:
 
 
         async def main() -> None:
-            await client.posts.delete_a_post_from_post(
+            await client.posts.delete_post(
                 id="id",
                 sub_id="subId",
             )
@@ -1196,5 +1253,5 @@ class AsyncPostsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_a_post_from_post(id, sub_id, request_options=request_options)
+        _response = await self._raw_client.delete_post(id, sub_id, request_options=request_options)
         return _response.data

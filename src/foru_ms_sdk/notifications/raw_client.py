@@ -16,13 +16,13 @@ from ..errors.payment_required_error import PaymentRequiredError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error_response import ErrorResponse
-from .types.delete_notifications_id_response import DeleteNotificationsIdResponse
-from .types.get_notifications_id_response import GetNotificationsIdResponse
-from .types.get_notifications_response import GetNotificationsResponse
-from .types.patch_notifications_id_request_status import PatchNotificationsIdRequestStatus
-from .types.patch_notifications_id_response import PatchNotificationsIdResponse
-from .types.post_notifications_request_status import PostNotificationsRequestStatus
-from .types.post_notifications_response import PostNotificationsResponse
+from ..types.notification_list_response import NotificationListResponse
+from ..types.notification_response import NotificationResponse
+from ..types.success_response import SuccessResponse
+from .types.create_notifications_request_status import CreateNotificationsRequestStatus
+from .types.list_notifications_request_status import ListNotificationsRequestStatus
+from .types.update_notifications_request_status import UpdateNotificationsRequestStatus
+from .types.update_notifications_response import UpdateNotificationsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -32,47 +32,57 @@ class RawNotificationsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_all_notifications(
+    def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        status: typing.Optional[ListNotificationsRequestStatus] = None,
+        user_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GetNotificationsResponse]:
+    ) -> HttpResponse[NotificationListResponse]:
         """
+        Retrieve a paginated list of notifications. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        status : typing.Optional[ListNotificationsRequestStatus]
+            Filter by notification status
+
+        user_id : typing.Optional[str]
+            Filter by recipient user ID (admin only)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetNotificationsResponse]
+        HttpResponse[NotificationListResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
             "notifications",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
+                "status": status,
+                "userId": user_id,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetNotificationsResponse,
+                    NotificationListResponse,
                     parse_obj_as(
-                        type_=GetNotificationsResponse,  # type: ignore
+                        type_=NotificationListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -126,7 +136,7 @@ class RawNotificationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_notification(
+    def create(
         self,
         *,
         user_id: str,
@@ -136,11 +146,13 @@ class RawNotificationsClient:
         thread_id: typing.Optional[str] = OMIT,
         post_id: typing.Optional[str] = OMIT,
         private_message_id: typing.Optional[str] = OMIT,
-        status: typing.Optional[PostNotificationsRequestStatus] = OMIT,
+        status: typing.Optional[CreateNotificationsRequestStatus] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PostNotificationsResponse]:
+    ) -> HttpResponse[NotificationResponse]:
         """
+        Create a new notification.
+
         Parameters
         ----------
         user_id : str
@@ -164,7 +176,7 @@ class RawNotificationsClient:
         private_message_id : typing.Optional[str]
             Related private message ID
 
-        status : typing.Optional[PostNotificationsRequestStatus]
+        status : typing.Optional[CreateNotificationsRequestStatus]
             Initial notification status
 
         extended_data : typing.Optional[typing.Dict[str, typing.Any]]
@@ -175,7 +187,7 @@ class RawNotificationsClient:
 
         Returns
         -------
-        HttpResponse[PostNotificationsResponse]
+        HttpResponse[NotificationResponse]
             Created
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -201,9 +213,9 @@ class RawNotificationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostNotificationsResponse,
+                    NotificationResponse,
                     parse_obj_as(
-                        type_=PostNotificationsResponse,  # type: ignore
+                        type_=NotificationResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -268,20 +280,23 @@ class RawNotificationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_a_notification(
+    def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GetNotificationsIdResponse]:
+    ) -> HttpResponse[NotificationResponse]:
         """
+        Retrieve a notification by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Notification ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GetNotificationsIdResponse]
+        HttpResponse[NotificationResponse]
             Success
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -292,9 +307,9 @@ class RawNotificationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetNotificationsIdResponse,
+                    NotificationResponse,
                     parse_obj_as(
-                        type_=GetNotificationsIdResponse,  # type: ignore
+                        type_=NotificationResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -359,20 +374,23 @@ class RawNotificationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_a_notification(
+    def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteNotificationsIdResponse]:
+    ) -> HttpResponse[SuccessResponse]:
         """
+        Permanently delete a notification.
+
         Parameters
         ----------
         id : str
+            Notification ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeleteNotificationsIdResponse]
+        HttpResponse[SuccessResponse]
             Deleted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -383,9 +401,9 @@ class RawNotificationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteNotificationsIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteNotificationsIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -450,20 +468,23 @@ class RawNotificationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_a_notification(
+    def update(
         self,
         id: str,
         *,
-        status: typing.Optional[PatchNotificationsIdRequestStatus] = OMIT,
+        status: typing.Optional[UpdateNotificationsRequestStatus] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PatchNotificationsIdResponse]:
+    ) -> HttpResponse[UpdateNotificationsResponse]:
         """
+        Update an existing notification. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Notification ID
 
-        status : typing.Optional[PatchNotificationsIdRequestStatus]
+        status : typing.Optional[UpdateNotificationsRequestStatus]
             Notification status
 
         extended_data : typing.Optional[typing.Dict[str, typing.Any]]
@@ -474,7 +495,7 @@ class RawNotificationsClient:
 
         Returns
         -------
-        HttpResponse[PatchNotificationsIdResponse]
+        HttpResponse[UpdateNotificationsResponse]
             Updated
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -493,9 +514,9 @@ class RawNotificationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchNotificationsIdResponse,
+                    UpdateNotificationsResponse,
                     parse_obj_as(
-                        type_=PatchNotificationsIdResponse,  # type: ignore
+                        type_=UpdateNotificationsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -576,47 +597,57 @@ class AsyncRawNotificationsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_all_notifications(
+    async def list(
         self,
         *,
-        page: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
+        cursor: typing.Optional[str] = None,
+        status: typing.Optional[ListNotificationsRequestStatus] = None,
+        user_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GetNotificationsResponse]:
+    ) -> AsyncHttpResponse[NotificationListResponse]:
         """
+        Retrieve a paginated list of notifications. Use cursor for pagination.
+
         Parameters
         ----------
-        page : typing.Optional[int]
-
         limit : typing.Optional[int]
+            Items per page (max 75)
 
-        search : typing.Optional[str]
+        cursor : typing.Optional[str]
+            Cursor for pagination
+
+        status : typing.Optional[ListNotificationsRequestStatus]
+            Filter by notification status
+
+        user_id : typing.Optional[str]
+            Filter by recipient user ID (admin only)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetNotificationsResponse]
+        AsyncHttpResponse[NotificationListResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
             "notifications",
             method="GET",
             params={
-                "page": page,
                 "limit": limit,
-                "search": search,
+                "cursor": cursor,
+                "status": status,
+                "userId": user_id,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetNotificationsResponse,
+                    NotificationListResponse,
                     parse_obj_as(
-                        type_=GetNotificationsResponse,  # type: ignore
+                        type_=NotificationListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -670,7 +701,7 @@ class AsyncRawNotificationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_notification(
+    async def create(
         self,
         *,
         user_id: str,
@@ -680,11 +711,13 @@ class AsyncRawNotificationsClient:
         thread_id: typing.Optional[str] = OMIT,
         post_id: typing.Optional[str] = OMIT,
         private_message_id: typing.Optional[str] = OMIT,
-        status: typing.Optional[PostNotificationsRequestStatus] = OMIT,
+        status: typing.Optional[CreateNotificationsRequestStatus] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PostNotificationsResponse]:
+    ) -> AsyncHttpResponse[NotificationResponse]:
         """
+        Create a new notification.
+
         Parameters
         ----------
         user_id : str
@@ -708,7 +741,7 @@ class AsyncRawNotificationsClient:
         private_message_id : typing.Optional[str]
             Related private message ID
 
-        status : typing.Optional[PostNotificationsRequestStatus]
+        status : typing.Optional[CreateNotificationsRequestStatus]
             Initial notification status
 
         extended_data : typing.Optional[typing.Dict[str, typing.Any]]
@@ -719,7 +752,7 @@ class AsyncRawNotificationsClient:
 
         Returns
         -------
-        AsyncHttpResponse[PostNotificationsResponse]
+        AsyncHttpResponse[NotificationResponse]
             Created
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -745,9 +778,9 @@ class AsyncRawNotificationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PostNotificationsResponse,
+                    NotificationResponse,
                     parse_obj_as(
-                        type_=PostNotificationsResponse,  # type: ignore
+                        type_=NotificationResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -812,20 +845,23 @@ class AsyncRawNotificationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_a_notification(
+    async def retrieve(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GetNotificationsIdResponse]:
+    ) -> AsyncHttpResponse[NotificationResponse]:
         """
+        Retrieve a notification by ID or slug (if supported).
+
         Parameters
         ----------
         id : str
+            Notification ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GetNotificationsIdResponse]
+        AsyncHttpResponse[NotificationResponse]
             Success
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -836,9 +872,9 @@ class AsyncRawNotificationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GetNotificationsIdResponse,
+                    NotificationResponse,
                     parse_obj_as(
-                        type_=GetNotificationsIdResponse,  # type: ignore
+                        type_=NotificationResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -903,20 +939,23 @@ class AsyncRawNotificationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_a_notification(
+    async def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteNotificationsIdResponse]:
+    ) -> AsyncHttpResponse[SuccessResponse]:
         """
+        Permanently delete a notification.
+
         Parameters
         ----------
         id : str
+            Notification ID
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeleteNotificationsIdResponse]
+        AsyncHttpResponse[SuccessResponse]
             Deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -927,9 +966,9 @@ class AsyncRawNotificationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteNotificationsIdResponse,
+                    SuccessResponse,
                     parse_obj_as(
-                        type_=DeleteNotificationsIdResponse,  # type: ignore
+                        type_=SuccessResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -994,20 +1033,23 @@ class AsyncRawNotificationsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_a_notification(
+    async def update(
         self,
         id: str,
         *,
-        status: typing.Optional[PatchNotificationsIdRequestStatus] = OMIT,
+        status: typing.Optional[UpdateNotificationsRequestStatus] = OMIT,
         extended_data: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PatchNotificationsIdResponse]:
+    ) -> AsyncHttpResponse[UpdateNotificationsResponse]:
         """
+        Update an existing notification. Only provided fields will be modified.
+
         Parameters
         ----------
         id : str
+            Notification ID
 
-        status : typing.Optional[PatchNotificationsIdRequestStatus]
+        status : typing.Optional[UpdateNotificationsRequestStatus]
             Notification status
 
         extended_data : typing.Optional[typing.Dict[str, typing.Any]]
@@ -1018,7 +1060,7 @@ class AsyncRawNotificationsClient:
 
         Returns
         -------
-        AsyncHttpResponse[PatchNotificationsIdResponse]
+        AsyncHttpResponse[UpdateNotificationsResponse]
             Updated
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1037,9 +1079,9 @@ class AsyncRawNotificationsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    PatchNotificationsIdResponse,
+                    UpdateNotificationsResponse,
                     parse_obj_as(
-                        type_=PatchNotificationsIdResponse,  # type: ignore
+                        type_=UpdateNotificationsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
